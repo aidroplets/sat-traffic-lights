@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Section grouping · Score screen v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <style>
+    :root {
+      --bg-deep: #050509;
+      --bg: #0a0b12;
+      --surface: #0e1018;
+      --surface-2: #14171f;
+      --surface-3: #1c1f2c;
+      --hairline: #1c1f2c;
+      --hairline-hi: #262a39;
+      --text: #ecedef;
+      --text-muted: #a8b0c4;
+      --text-subtle: #6b7288;
+      --text-faint: #494f60;
+      --accent: #8b86ff;
+      --accent-2: #5d8dff;
+      --accent-soft: rgba(139, 134, 255, 0.12);
+      --accent-line: rgba(139, 134, 255, 0.4);
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 16px;
+      --r-pill: 999px;
+      --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px;
+      --font-body: "Geist", -apple-system, system-ui, sans-serif;
+      --font-display: "Space Grotesk", "Geist", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SF Mono, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100dvh;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page-head {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px 24px;
+    }
+    .page-head h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+    .page-head p {
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+      gap: 32px;
+      max-width: 1400px;
+      margin: 32px auto 96px;
+      padding: 0 24px;
+    }
+    .opt {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    .opt__head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--surface-2);
+    }
+    .opt__tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 4px;
+    }
+    .opt__name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .opt__notes {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 8px 0 0;
+    }
+    .opt__body {
+      padding: 24px;
+      background: linear-gradient(180deg, transparent, rgba(139, 134, 255, 0.025));
+    }
+
+    /* ========= Shared mockup primitives ========= */
+    .m-card {
+      background: var(--bg);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      padding: 28px;
+      position: relative;
+    }
+    .m-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .m-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--text-subtle);
+      margin: 0 0 12px;
+    }
+    .m-eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(139, 134, 255, 0.55);
+    }
+    .m-h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+      line-height: 1.15;
+    }
+    .m-h1 .grad {
+      background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .m-sub {
+      color: var(--text-muted);
+      margin: 0 0 24px;
+      font-size: 13.5px;
+    }
+    .m-label {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .m-cta {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--r-md);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: linear-gradient(140deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: var(--bg);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.005em;
+      margin-top: 20px;
+    }
+    .m-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px 7px 11px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--hairline);
+      background: var(--surface);
+      color: var(--text-subtle);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .m-pill.is-on {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+    .m-pill svg { width: 14px; height: 14px; }
+    .m-pill.is-on svg { color: var(--accent); filter: drop-shadow(0 0 4px rgba(139, 134, 255, 0.45)); }
+    .m-tier {
+      padding: 12px 14px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--hairline);
+      background: var(--surface);
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      color: var(--text-muted);
+    }
+    .m-tier .name {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .m-tier .range {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-subtle);
+      margin-top: 2px;
+    }
+    .m-tier.is-active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+    .m-switch {
+      display: inline-flex; align-items: center; gap: 10px;
+      font: inherit; color: var(--text);
+      cursor: pointer;
+      padding: 4px 10px 4px 4px;
+      border-radius: var(--r-pill);
+      background: transparent; border: 0;
+    }
+    .m-switch__track {
+      position: relative;
+      width: 38px; height: 22px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--hairline);
+    }
+    .m-switch__thumb {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+    .m-switch.is-on .m-switch__track {
+      background: rgba(139, 134, 255, 0.25);
+      border-color: rgba(139, 134, 255, 0.6);
+    }
+    .m-switch.is-on .m-switch__thumb {
+      background: var(--accent);
+      transform: translateX(16px);
+    }
+    .m-switch__lbl {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .m-hint { font-size: 12px; color: var(--text-subtle); margin: 4px 0 0; }
+    .m-link {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      cursor: pointer;
+      background: none; border: 0; padding: 0;
+    }
+    .m-tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .m-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .m-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); margin-bottom: 10px; }
+
+    /* ========= 0: Current (today) ========= */
+    .c0 .sec { padding: var(--s-3) 0 0; display: grid; gap: var(--s-3); }
+    .c0 .sec + .sec { margin-top: 6px; }
+    .c0 .toggle-row { display: grid; gap: 4px; padding: var(--s-2) 0; }
+
+    /* ========= 1 (USER): Nested bordered subsections ========= */
+    .c1 .sub-card {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      padding: 16px 18px;
+      background: var(--surface);
+      display: grid;
+      gap: 12px;
+    }
+    .c1 .sub-card + .sub-card { margin-top: 14px; }
+    .c1 .toggle-row { padding-top: 4px; border-top: 1px solid var(--hairline); margin-top: 4px; padding-top: 12px; }
+
+    /* ========= 2: Tinted blocks (no border) ========= */
+    .c2 .sub-card {
+      border-radius: var(--r-md);
+      padding: 16px 18px;
+      background: var(--surface-2);
+      display: grid;
+      gap: 12px;
+    }
+    .c2 .sub-card + .sub-card { margin-top: 12px; }
+    .c2 .toggle-row { padding-top: 8px; }
+
+    /* ========= 3: Hairline divider sections ========= */
+    .c3 .sec { padding: 18px 0; border-top: 1px solid var(--hairline); display: grid; gap: 12px; }
+    .c3 .sec:first-of-type { border-top: 0; padding-top: 6px; }
+    .c3 .sec:last-of-type { padding-bottom: 0; }
+
+    /* ========= 4: Two-column desktop layout ========= */
+    .c4 .col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .c4 .sub-card {
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      padding: 16px 18px;
+      background: var(--surface);
+      display: grid;
+      gap: 12px;
+    }
+    .c4 .sub-card--diff .m-tier-grid { grid-template-columns: 1fr 1fr; }
+    .c4 .toggle-row {
+      margin-top: 14px;
+      padding: 14px 18px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    /* ========= 5: Inline section headers ("rail" style) ========= */
+    .c5 .sec {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 24px;
+      padding: 18px 0;
+      border-top: 1px solid var(--hairline);
+      align-items: start;
+    }
+    .c5 .sec:first-of-type { border-top: 0; padding-top: 6px; }
+    .c5 .sec__lbl { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-subtle); padding-top: 4px; }
+    .c5 .sec__body { display: grid; gap: 10px; }
+
+    /* Comparison table */
+    .compare {
+      max-width: 1400px;
+      margin: 64px auto 96px;
+      padding: 0 24px;
+    }
+    .compare h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; margin: 0 0 16px; }
+    .compare table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+    }
+    .compare th, .compare td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 13px;
+      vertical-align: top;
+    }
+    .compare th {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      background: var(--surface-2);
+      font-weight: 500;
+    }
+    .compare tr:last-child td { border-bottom: 0; }
+    .compare td:first-child { font-weight: 600; color: var(--text); width: 18%; }
+    .compare td:nth-child(2) { color: var(--text-muted); width: 22%; }
+    .compare td:nth-child(3) { color: var(--text-muted); width: 30%; }
+    .compare td:nth-child(4) { color: var(--text-muted); width: 30%; }
+    .recommend {
+      background: rgba(74, 222, 128, 0.08);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #4ade80;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: var(--r-pill);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-head">
+    <h1>Section grouping · 6 layouts</h1>
+    <p>Same content (Subjects + Difficulty + include-lower toggle + CTA), six different ways to group them inside the card. Option 0 is what's live now (your screenshot). Option 1 is your idea — bordered subsections. Options 2–5 are alternatives I think are worth comparing.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- ============== Option 0 — Current ============== -->
+    <section class="opt c0">
+      <header class="opt__head">
+        <span class="opt__tag">Option 0 · Current</span>
+        <h2 class="opt__name">Flat sections, label + content</h2>
+        <p class="opt__notes">What's live today. Each section is just a label followed by its content, separated by white space. Reads as four loosely-related blocks rather than two grouped decisions.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="sec">
+            <span class="m-label">Subjects</span>
+            <div class="m-pills">
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+            </div>
+            <p class="m-hint">All subjects included.</p>
+          </div>
+
+          <div class="sec" style="margin-top: 18px;">
+            <div class="m-section-head">
+              <span class="m-label">Difficulty</span>
+              <button class="m-link">Set custom score</button>
+            </div>
+            <div class="m-tier-grid">
+              <button class="m-tier is-active"><span class="name">Easy</span><span class="range">≤500</span></button>
+              <button class="m-tier"><span class="name">Medium</span><span class="range">510–600</span></button>
+              <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+              <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+            </div>
+            <div class="toggle-row">
+              <button class="m-switch">
+                <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+                <span class="m-switch__lbl">Include lower difficulty questions</span>
+              </button>
+              <p class="m-hint">Test only includes questions at your target tier.</p>
+            </div>
+          </div>
+
+          <button class="m-cta">Start 30-question test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option 1 — USER's idea: nested bordered subsections ============== -->
+    <section class="opt c1">
+      <header class="opt__head">
+        <span class="opt__tag">Option 1 · Your idea</span>
+        <h2 class="opt__name">Nested bordered subsections</h2>
+        <p class="opt__notes">Each section sits in its own subtle bordered container. Visual hierarchy is unambiguous: outer card = the screen, inner cards = the two decisions. The toggle anchors INSIDE the difficulty card so it visually belongs.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="sub-card">
+            <div class="m-section-head"><span class="m-label">Subjects</span></div>
+            <div class="m-pills">
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+            </div>
+            <p class="m-hint">All subjects included.</p>
+          </div>
+
+          <div class="sub-card">
+            <div class="m-section-head">
+              <span class="m-label">Difficulty</span>
+              <button class="m-link">Set custom score</button>
+            </div>
+            <div class="m-tier-grid">
+              <button class="m-tier is-active"><span class="name">Easy</span><span class="range">≤500</span></button>
+              <button class="m-tier"><span class="name">Medium</span><span class="range">510–600</span></button>
+              <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+              <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+            </div>
+            <div class="toggle-row">
+              <button class="m-switch">
+                <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+                <span class="m-switch__lbl">Include lower difficulty questions</span>
+              </button>
+              <p class="m-hint" style="margin-top: 6px;">Test only includes questions at your target tier.</p>
+            </div>
+          </div>
+
+          <button class="m-cta">Start 30-question test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option 2 — Tinted blocks ============== -->
+    <section class="opt c2">
+      <header class="opt__head">
+        <span class="opt__tag">Option 2</span>
+        <h2 class="opt__name">Soft tinted blocks (no borders)</h2>
+        <p class="opt__notes">Same nesting concept as Option 1, but uses background fill instead of borders to define each subsection. Less visual noise, softer rhythm, no double-border problem against the outer card.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="sub-card">
+            <div class="m-section-head"><span class="m-label">Subjects</span></div>
+            <div class="m-pills">
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+            </div>
+            <p class="m-hint">All subjects included.</p>
+          </div>
+
+          <div class="sub-card">
+            <div class="m-section-head">
+              <span class="m-label">Difficulty</span>
+              <button class="m-link">Set custom score</button>
+            </div>
+            <div class="m-tier-grid">
+              <button class="m-tier is-active"><span class="name">Easy</span><span class="range">≤500</span></button>
+              <button class="m-tier"><span class="name">Medium</span><span class="range">510–600</span></button>
+              <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+              <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+            </div>
+            <div class="toggle-row">
+              <button class="m-switch">
+                <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+                <span class="m-switch__lbl">Include lower difficulty questions</span>
+              </button>
+            </div>
+          </div>
+
+          <button class="m-cta">Start 30-question test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option 3 — Hairline divider sections ============== -->
+    <section class="opt c3">
+      <header class="opt__head">
+        <span class="opt__tag">Option 3</span>
+        <h2 class="opt__name">Hairline dividers between sections</h2>
+        <p class="opt__notes">Stays flat (no nested containers) but adds horizontal hairlines between each section so they read as distinct rows. Lightest-weight separator. Same vibe as a settings panel.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="sec">
+            <div class="m-section-head"><span class="m-label">Subjects</span></div>
+            <div class="m-pills">
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+              <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+            </div>
+            <p class="m-hint">All subjects included.</p>
+          </div>
+
+          <div class="sec">
+            <div class="m-section-head">
+              <span class="m-label">Difficulty</span>
+              <button class="m-link">Set custom score</button>
+            </div>
+            <div class="m-tier-grid">
+              <button class="m-tier is-active"><span class="name">Easy</span><span class="range">≤500</span></button>
+              <button class="m-tier"><span class="name">Medium</span><span class="range">510–600</span></button>
+              <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+              <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <button class="m-switch">
+                <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+                <span class="m-switch__lbl">Include lower difficulty questions</span>
+              </button>
+              <p class="m-hint" style="margin: 0;">Easy tier only</p>
+            </div>
+          </div>
+
+          <button class="m-cta">Start 30-question test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option 4 — Two-column desktop ============== -->
+    <section class="opt c4">
+      <header class="opt__head">
+        <span class="opt__tag">Option 4</span>
+        <h2 class="opt__name">Two-column on desktop (subjects ‖ difficulty)</h2>
+        <p class="opt__notes">Both decisions side-by-side at desktop width — uses the horizontal real estate that's currently empty. Tier tiles drop to 2×2 to fit the narrower column. Toggle pulls below as a full-width row. Falls back to stacked on phones.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="col-grid">
+            <div class="sub-card">
+              <div class="m-section-head"><span class="m-label">Subjects</span></div>
+              <div class="m-pills">
+                <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+                <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+              </div>
+              <p class="m-hint">All subjects included.</p>
+            </div>
+            <div class="sub-card sub-card--diff">
+              <div class="m-section-head">
+                <span class="m-label">Difficulty</span>
+                <button class="m-link">Custom</button>
+              </div>
+              <div class="m-tier-grid">
+                <button class="m-tier is-active"><span class="name">Easy</span><span class="range">≤500</span></button>
+                <button class="m-tier"><span class="name">Medium</span><span class="range">510–600</span></button>
+                <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+                <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <button class="m-switch">
+              <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+              <span class="m-switch__lbl">Include lower difficulty questions</span>
+            </button>
+            <p class="m-hint" style="margin: 0;">Easy tier only</p>
+          </div>
+
+          <button class="m-cta">Start 30-question test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option 5 — Inline rail labels ============== -->
+    <section class="opt c5">
+      <header class="opt__head">
+        <span class="opt__tag">Option 5</span>
+        <h2 class="opt__name">Rail-style: labels in the left column</h2>
+        <p class="opt__notes">Section labels move to a left rail (like a settings page or the iOS share sheet). Content fills the right column. Compact, scannable, uses dividers — but no heavier-weight subsections. Best at desktop width.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="sec">
+            <span class="sec__lbl">Subjects</span>
+            <div class="sec__body">
+              <div class="m-pills">
+                <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+                <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+              </div>
+              <p class="m-hint" style="margin: 0;">All subjects included.</p>
+            </div>
+          </div>
+
+          <div class="sec">
+            <span class="sec__lbl">Difficulty</span>
+            <div class="sec__body">
+              <div class="m-tier-grid">
+                <button class="m-tier is-active"><span class="name">Easy</span><span class="range">≤500</span></button>
+                <button class="m-tier"><span class="name">Medium</span><span class="range">510–600</span></button>
+                <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+                <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+              </div>
+              <button class="m-link">Set custom score</button>
+            </div>
+          </div>
+
+          <div class="sec">
+            <span class="sec__lbl">Mix</span>
+            <div class="sec__body">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="m-switch">
+                  <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+                </button>
+                <span class="m-hint" style="margin: 0;">Include lower-difficulty questions in the pool</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="m-cta">Start 30-question test</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <section class="compare">
+    <h2>Tradeoffs at a glance</h2>
+    <table>
+      <thead>
+        <tr><th>Layout</th><th>Visual weight</th><th>Pros</th><th>Cons</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0 · Current</td>
+          <td>None — flat</td>
+          <td>Simplest markup. Nothing to maintain.</td>
+          <td>The "messy" feeling you flagged. Sections feel orphaned. Hint text floats.</td>
+        </tr>
+        <tr>
+          <td>1 · Bordered subsections (yours)</td>
+          <td>Heaviest — bordered cards</td>
+          <td>Unambiguous grouping. Toggle visibly belongs to Difficulty. Easy to spot the two decisions.</td>
+          <td>Double borders (outer card + inner cards). Can feel boxy / form-y. Adds visual chrome.</td>
+        </tr>
+        <tr>
+          <td>2 · Tinted blocks <span class="recommend">recommended</span></td>
+          <td>Medium — fill, no border</td>
+          <td>Same grouping clarity as Option 1, no border-on-border issue. Softer rhythm. Reads as "containers" without looking like nested forms.</td>
+          <td>Subtle gray-on-darker-gray contrast can feel washed if the body bg shifts.</td>
+        </tr>
+        <tr>
+          <td>3 · Hairline dividers</td>
+          <td>Lightest</td>
+          <td>Minimal chrome. Each section is its own row but no boxy feeling. Settings-page convention.</td>
+          <td>Less obvious that "the toggle belongs to Difficulty" — it could read as its own section.</td>
+        </tr>
+        <tr>
+          <td>4 · Two-column desktop</td>
+          <td>Medium</td>
+          <td>Halves the vertical space on desktop. Both decisions visible at once. Best for power use / repeat visits.</td>
+          <td>Tier tiles compress to 2×2 (less dominant). Falls back to stacked on phones — extra responsive complexity.</td>
+        </tr>
+        <tr>
+          <td>5 · Rail labels</td>
+          <td>Light</td>
+          <td>Labels never compete with content. Reads as "form rows." Compact.</td>
+          <td>Doesn't render as well on narrow viewports. The label rail eats horizontal space.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background: var(--surface); border: 1px solid var(--accent-line); border-radius: var(--r-md); padding: 16px 20px; margin-top: 24px;">
+      <p style="margin: 0 0 4px; font-family: var(--font-display); font-weight: 600; color: var(--text);">My pick: Option 2 — Tinted blocks</p>
+      <p style="margin: 0; color: var(--text-muted); font-size: 13.5px;">Solves the same problem as your idea (visible grouping, toggle belongs to Difficulty) without doubling up borders against the outer card. Reads as "containers" because of the fill, not "form fields." If you want stronger grouping, Option 1 (your idea) is the next step up. If you want lighter, Option 3 (dividers) gets you most of the way there.</p>
+    </div>
+  </section>
+
+</body>
+</html>

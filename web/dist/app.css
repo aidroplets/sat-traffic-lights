@@ -1,0 +1,2845 @@
+/* SAT Traffic Lights — aligned aesthetic (v2).
+ * Visual system mirrors homepage v4-refined (the shipping aidroplets.com look):
+ *   • Geist + Geist Mono
+ *   • Single calibrated lavender accent (no rainbow gradients)
+ *   • Dark canvas, restrained card chrome
+ *   • Status colors (green/yellow/red) reserved for the confidence signal only
+ *   • Tabular figures on numeric content
+ *
+ * HTML structure and class names are unchanged from the previous stylesheet so
+ * app.js continues to work without modification. Only the look-and-feel moves.
+ */
+
+:root {
+  /* surfaces — never pure black */
+  --stl-bg-deep:      #050509;
+  --stl-bg:           #0a0b12;
+  --stl-bg-2:         #0d0e18;
+  --stl-surface:      rgba(255, 255, 255, 0.035);
+  --stl-surface-2:    rgba(255, 255, 255, 0.055);
+  --stl-surface-3:    rgba(255, 255, 255, 0.075);
+  --stl-hairline:     rgba(255, 255, 255, 0.07);
+  --stl-hairline-hi:  rgba(255, 255, 255, 0.12);
+
+  /* text — never pure white */
+  --stl-text:         #f0f2f7;
+  --stl-text-muted:   #a8b0c4;
+  --stl-text-subtle:  #6b7288;
+  --stl-text-faint:   #494f60;
+
+  /* one accent per surface */
+  --stl-accent:       #8b86ff;
+  --stl-accent-2:     #5d8dff;
+  --stl-accent-soft:  rgba(139, 134, 255, 0.12);
+  --stl-accent-line:  rgba(139, 134, 255, 0.4);
+
+  /* functional status colors (signal only) — saturated mid-tones for
+   * dots, chips, borders, and gradient sweeps where saturation reads
+   * cleanly against the dark canvas. */
+  --stl-green:        #4ade80;
+  --stl-yellow:       #facc15;
+  --stl-red:          #fb7185;
+
+  /* Text-on-dark variants of the same hues — lighter pastels so big
+   * numerals and stat labels stay readable. The mid-tone signal
+   * colors above look fine as small marks but visibly recede when
+   * blown up to 40+px text against #050509. These are roughly the
+   * Tailwind 300-tier siblings of the values above. */
+  --stl-green-text:   #86efac;
+  --stl-yellow-text:  #fde047;
+  --stl-red-text:     #fda4af;
+
+  /* spacing */
+  --s-1:  4px;  --s-2:  8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px;  --s-6: 24px;  --s-7: 32px; --s-8: 40px;
+
+  /* radius */
+  --r-sm:  8px; --r-md: 10px; --r-lg: 14px; --r-xl: 18px; --r-pill: 9999px;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html {
+  scrollbar-gutter: stable;
+  /* clip horizontal overflow so the card-slide View Transition never
+   * paints a horizontal scrollbar mid-animation when the leaving card
+   * is at translateX(-110%) */
+  overflow-x: clip;
+  /* iOS: prevent text-size auto-bumping when rotating to landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Touch baseline. `manipulation` removes the 300ms double-tap-zoom
+ * delay on iOS Safari for these affordances; the tap-highlight reset
+ * kills the gray flash that fires on every tap. Hover states are
+ * scoped to hover-capable pointers below so they don't get "stuck"
+ * after a touch. */
+.stl-btn,
+.dc-btn,
+.stl-signal__btn,
+.stl-choice,
+.stl-choice--chart,
+.stl-stat,
+.stl-tier,
+.stl-skip,
+.stl-input,
+.stl-quiz__gridin-input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stl-app {
+  font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--stl-text);
+  background: var(--stl-bg-deep);
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* single soft ambient glow, top-right (matches homepage) */
+.stl-app::before {
+  content: "";
+  position: fixed;
+  top: -300px;
+  right: -200px;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(closest-side, rgba(139, 134, 255, 0.16), transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+.stl-app > * { position: relative; z-index: 1; }
+
+/* numeric content gets tabular figures by default */
+.stl-app input[type="number"],
+.stl-stat__num,
+.stl-quiz__counter,
+.stl-pill {
+  font-variant-numeric: tabular-nums;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* --- top bar --------------------------------------------------------- */
+.stl-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  /* Height grows by the iOS safe-area inset so the bar still measures
+   * 60px below the notch. The horizontal padding takes the larger of
+   * the design padding or the device-specific safe-area inset (left
+   * landscape on a notched phone), so content never tucks under the
+   * hardware. */
+  height: calc(60px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  padding-right: max(clamp(var(--s-4), 4vw, var(--s-7)), env(safe-area-inset-right));
+  padding-bottom: 0;
+  padding-left:  max(clamp(var(--s-4), 4vw, var(--s-7)), env(safe-area-inset-left));
+  background: rgba(10, 11, 18, 0.72);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--stl-hairline);
+}
+.stl-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.stl-header__titles {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1.1;
+}
+.stl-header__name {
+  font-weight: 600;
+  font-size: 14.5px;
+  letter-spacing: -0.02em;
+  color: var(--stl-text);
+}
+.stl-header__eyebrow {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-subtle);
+  text-transform: lowercase;
+}
+.stl-header__actions { display: flex; gap: var(--s-2); align-items: center; }
+
+/* Live elapsed-time pill — sits next to the Restart button in the
+ * sticky header, visible only while a test is in progress. Mono font
+ * with tabular numerals so the digits don't shift width on tick.
+ * The leading dot pulses subtly to telegraph "this is live, not a
+ * static label." */
+.stl-header__timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--stl-surface-2);
+  border: 1px solid var(--stl-hairline);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.stl-header__timer[hidden] { display: none; }
+.stl-header__timer::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--stl-accent);
+  box-shadow: 0 0 8px var(--stl-accent);
+  animation: stl-timer-pulse 2s ease-in-out infinite;
+}
+@keyframes stl-timer-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 1; }
+}
+@media (max-width: 560px) {
+  .stl-header__timer { font-size: 12px; padding: 4px 10px; }
+  /* On narrow phones the brand subtitle ("aidroplets") already hides;
+   * keep the timer visible because it's the most useful header item
+   * during a test. */
+}
+@media (prefers-reduced-motion: reduce) {
+  .stl-header__timer::before { animation: none; opacity: 0.85; }
+}
+
+/* traffic-light glyph — three functional dots in a glass pill */
+.stl-logo {
+  display: inline-flex;
+  gap: 4px;
+  padding: 5px 7px;
+  border-radius: var(--r-pill);
+  background: var(--stl-surface-2);
+  border: 1px solid var(--stl-hairline);
+}
+.stl-logo__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  display: block;
+}
+.stl-logo__dot--g {
+  background: var(--stl-green);
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+.stl-logo__dot--y {
+  background: var(--stl-yellow);
+  box-shadow: 0 0 6px rgba(250, 204, 21, 0.5);
+}
+.stl-logo__dot--r {
+  background: var(--stl-red);
+  box-shadow: 0 0 6px rgba(251, 113, 133, 0.5);
+}
+
+/* --- main / screens --------------------------------------------------- */
+.stl-main {
+  max-width: 760px;
+  margin: 0 auto;
+  /* Bottom padding takes the larger of the design value or the iOS
+   * home-indicator safe area, so the last row of buttons never sits
+   * under the indicator on a notched phone. Side padding takes the
+   * larger of the design value or the landscape safe-area insets. */
+  padding-top: clamp(var(--s-6), 5vw, var(--s-8));
+  padding-right: max(clamp(var(--s-4), 4vw, var(--s-7)), env(safe-area-inset-right));
+  padding-bottom: max(clamp(var(--s-7), 6vw, 64px), env(safe-area-inset-bottom));
+  padding-left:  max(clamp(var(--s-4), 4vw, var(--s-7)), env(safe-area-inset-left));
+  display: grid;
+  transition: max-width var(--dur-base) var(--ease-out);
+}
+/* Admin is a database view — it benefits from horizontal real estate
+ * the way reading-focused screens (quiz, results, review) don't. We
+ * widen .stl-main only when the admin screen is mounted, leaving the
+ * rest of the app at its tighter reading column. */
+.stl-main:has([data-screen="admin"]:not([hidden])) {
+  max-width: min(1280px, calc(100vw - 32px));
+}
+.stl-screen { display: grid; gap: var(--s-6); }
+.stl-screen[hidden] { display: none; }
+
+/* --- shared card ------------------------------------------------------ */
+.stl-card {
+  background: var(--stl-surface);
+  border: 1px solid var(--stl-hairline);
+  border-radius: var(--r-lg);
+  padding: clamp(var(--s-5), 3vw, var(--s-7));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.stl-card--hero {
+  /* the only "lift" surface in the app */
+  background:
+    linear-gradient(165deg, rgba(139, 134, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 50%, transparent 80%),
+    var(--stl-surface);
+  border-color: var(--stl-hairline-hi);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 0 rgba(0, 0, 0, 0.35),
+    0 18px 50px -12px rgba(0, 0, 0, 0.45);
+}
+
+/* --- score screen ----------------------------------------------------- */
+.stl-score { display: grid; gap: var(--s-5); }
+
+.stl-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-subtle);
+  margin: 0;
+}
+.stl-eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--stl-accent);
+  box-shadow: 0 0 8px rgba(139, 134, 255, 0.55);
+}
+
+.stl-h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 4.5vw, 2.75rem);
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--stl-text);
+  max-width: 18ch;
+}
+.stl-sub {
+  margin: 0;
+  color: var(--stl-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 56ch;
+}
+
+.stl-score__form { display: grid; gap: var(--s-4); margin-top: var(--s-2); }
+.stl-field { display: grid; gap: var(--s-2); }
+.stl-label {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--stl-text);
+  background: var(--stl-bg);
+  border: 1px solid var(--stl-hairline-hi);
+  border-radius: var(--r-md);
+  outline: none;
+  transition: border-color var(--dur-base) var(--ease-out),
+              background  var(--dur-base) var(--ease-out),
+              box-shadow  var(--dur-base) var(--ease-out);
+}
+.stl-input:hover { border-color: rgba(255, 255, 255, 0.18); }
+.stl-input:focus-visible,
+.stl-input:focus {
+  border-color: var(--stl-accent);
+  background: var(--stl-bg-2);
+  box-shadow: 0 0 0 4px var(--stl-accent-soft);
+}
+.stl-hint {
+  font-size: 13px;
+  color: var(--stl-text-subtle);
+}
+.stl-hint.is-error { color: var(--stl-red); }
+
+/* tier indicator — lavender soft when active.
+ * Tiers are <button>s now (clicking fills the score input with that
+ * tier's top-of-range value). The native button reset below removes
+ * default chrome so the tier still reads as a quiet pill until
+ * hovered/focused. */
+.stl-score__tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.stl-tier {
+  /* native button reset */
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  cursor: pointer;
+
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--stl-text-subtle);
+  transition: border-color var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.stl-tier:hover {
+  color: var(--stl-text-muted);
+  border-color: var(--stl-hairline-hi);
+}
+.stl-tier:focus-visible {
+  outline: 2px solid var(--stl-accent);
+  outline-offset: 2px;
+}
+.stl-tier:active {
+  background: var(--stl-surface-2);
+}
+.stl-tier.is-active {
+  color: var(--stl-text);
+  border-color: var(--stl-accent-line);
+  background: var(--stl-accent-soft);
+}
+/* When a tier is both active AND hovered/focused, keep the lavender
+ * identity rather than letting the generic hover override it. */
+.stl-tier.is-active:hover {
+  border-color: var(--stl-accent);
+}
+
+/* --- quiz top bar ----------------------------------------------------- */
+.stl-quiz__top { display: grid; gap: var(--s-3); }
+.stl-quiz__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+}
+.stl-quiz__counter {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-muted);
+}
+.stl-quiz__progress {
+  position: relative;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--stl-surface);
+  overflow: hidden;
+}
+.stl-quiz__progress-fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--stl-accent), var(--stl-accent-2));
+  transition: width 240ms var(--ease-out);
+}
+
+/* pills — semantic but quiet */
+.stl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  border: 1px solid var(--stl-hairline);
+  color: var(--stl-text-muted);
+  font-weight: 500;
+}
+.stl-pill::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--stl-text-faint);
+}
+.stl-pill[data-d="easy"]   { color: #bbf7d0; border-color: rgba(74, 222, 128, 0.28); }
+.stl-pill[data-d="easy"]::before   { background: var(--stl-green);  box-shadow: 0 0 6px var(--stl-green); }
+.stl-pill[data-d="medium"] { color: #fde68a; border-color: rgba(250, 204, 21, 0.28); }
+.stl-pill[data-d="medium"]::before { background: var(--stl-yellow); box-shadow: 0 0 6px var(--stl-yellow); }
+.stl-pill[data-d="hard"]   { color: #c7d2fe; border-color: rgba(139, 134, 255, 0.32); }
+.stl-pill[data-d="hard"]::before   { background: var(--stl-accent); box-shadow: 0 0 6px var(--stl-accent); }
+.stl-pill[data-d="insane"] { color: #fecaca; border-color: rgba(251, 113, 133, 0.32); }
+.stl-pill[data-d="insane"]::before { background: var(--stl-red);    box-shadow: 0 0 6px var(--stl-red); }
+
+/* Outcome states for the review-screen result pill. The pill color
+ * here describes what *happened* (mastered, lucky, missed, etc.) —
+ * not the question's difficulty. Difficulty info already lives on the
+ * quiz-screen pill via data-d; we deliberately don't repeat it on
+ * review where outcome is the relevant signal. */
+.stl-pill[data-result="mastery"] {
+  color: #bbf7d0;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+.stl-pill[data-result="mastery"]::before {
+  background: var(--stl-green);
+  box-shadow: 0 0 6px var(--stl-green);
+}
+.stl-pill[data-result="lucky"] {
+  color: #fde68a;
+  border-color: rgba(250, 204, 21, 0.45);
+}
+.stl-pill[data-result="lucky"]::before {
+  background: var(--stl-yellow);
+  box-shadow: 0 0 6px var(--stl-yellow);
+}
+.stl-pill[data-result="missed"] {
+  color: #fecaca;
+  border-color: rgba(251, 113, 133, 0.45);
+}
+.stl-pill[data-result="missed"]::before {
+  background: var(--stl-red);
+  box-shadow: 0 0 6px var(--stl-red);
+}
+/* "Confident miss" gets a stronger treatment — it's the most
+ * actionable miss type (you thought you knew it, you didn't). The
+ * subtle background tint emphasizes "review me carefully." */
+.stl-pill[data-result="missed-confident"] {
+  color: #fecaca;
+  border-color: rgba(251, 113, 133, 0.7);
+  background: rgba(251, 113, 133, 0.1);
+}
+.stl-pill[data-result="missed-confident"]::before {
+  background: var(--stl-red);
+  box-shadow: 0 0 8px var(--stl-red);
+}
+.stl-pill[data-result="skipped"] {
+  color: var(--stl-text-subtle);
+  border-color: var(--stl-hairline);
+}
+.stl-pill[data-result="skipped"]::before {
+  background: var(--stl-text-faint);
+}
+
+/* --- quiz card -------------------------------------------------------- */
+.stl-quiz__card { display: grid; gap: var(--s-5); }
+.stl-quiz__passage {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--stl-text-muted);
+  border-left: 2px solid var(--stl-hairline-hi);
+  padding: var(--s-2) var(--s-4);
+  white-space: pre-wrap;
+}
+.stl-quiz__stem {
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
+  line-height: 1.45;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--stl-text);
+}
+
+/* Variable letters in stems / passages / explanations — italicized and
+ * lavender-tinted so they read as math typography rather than narrative
+ * text. The renderer (formatStemHtml in app.js) wraps standalone single
+ * letters in this span at render time, so no per-question markup is
+ * needed. SAT print typesets all variables italic; this matches that
+ * convention while picking up the v2-aligned accent color so they pop. */
+.stl-quiz__var {
+  font-style: italic;
+  color: var(--stl-accent);
+  /* Slight reduction in font weight when bold-adjacent (e.g., next to
+   * the stem's medium-weight body text) keeps the variable from looking
+   * heavier than the surrounding text. */
+  font-weight: 500;
+}
+
+/* Math markup produced by renderMath in app.js. Two classes:
+ *   .stl-math-fracsup — a stacked-fraction superscript for `^(p/q)`
+ *     (e.g. a^(1/2) shows ½ as a proper fraction in superscript size)
+ *   .stl-math-sup — a parenthesized non-fraction exponent like ^(4+1)
+ * The fraction stacks numerator over denominator with a thin rule
+ * between, then sits at superscript baseline next to the base term. */
+.stl-math-fracsup {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  vertical-align: 0.55em;       /* superscript-ish baseline */
+  font-size: 0.65em;
+  line-height: 1;
+  margin: 0 1px 0 1px;
+  font-style: italic;            /* match math typography */
+}
+.stl-math-num,
+.stl-math-den {
+  text-align: center;
+  padding: 0 2px;
+}
+.stl-math-num {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+}
+.stl-math-den {
+  padding-top: 1px;
+}
+.stl-math-sup {
+  font-style: italic;
+}
+
+.stl-quiz__choices {
+  display: grid;
+  gap: var(--s-2);
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.stl-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 11px var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--stl-hairline);
+  background: var(--stl-surface);
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.stl-choice:hover {
+  border-color: var(--stl-hairline-hi);
+  background: var(--stl-surface-2);
+}
+.stl-choice input { position: absolute; opacity: 0; pointer-events: none; }
+.stl-choice__letter {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: var(--stl-surface-2);
+  border: 1px solid var(--stl-hairline-hi);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-weight: 500;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  color: var(--stl-text-muted);
+}
+.stl-choice__text { flex: 1; font-size: 0.97rem; line-height: 1.45; }
+.stl-choice.is-selected {
+  border-color: var(--stl-accent-line);
+  background: var(--stl-accent-soft);
+}
+.stl-choice.is-selected .stl-choice__letter {
+  background: var(--stl-accent);
+  color: var(--stl-bg-deep);
+  border-color: var(--stl-accent);
+}
+.stl-choice:focus-within {
+  outline: 2px solid var(--stl-accent-soft);
+  outline-offset: 2px;
+}
+
+/* --- figure (question images and tables) ----------------------------
+ * Figures come in two shapes:
+ *   data-kind="image" — screenshot; needs the canonical CSS dark-mode-
+ *     screenshot trick (invert + hue-rotate) so the white background
+ *     becomes a comfortable off-black instead of a blowout against the
+ *     canvas. A subtle brightness adjust matches the surface tone.
+ *   data-kind="table" — native HTML table; styled with the same hairline
+ *     borders, mono labels, and tabular numerals as the rest of the
+ *     dark theme. Doesn't need filter hackery, so the surface tile here
+ *     just frames the table without padding being load-bearing.
+ */
+.stl-quiz__figure {
+  display: block;
+  margin: 0 0 var(--s-4);
+  background: var(--stl-surface);
+  border: 1px solid var(--stl-hairline);
+  border-radius: var(--r-md);
+  padding: var(--s-3);
+  text-align: center;
+  overflow: hidden;
+}
+.stl-quiz__figure[hidden] { display: none; }
+.stl-quiz__figure[data-kind="image"] img {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--r-sm);
+  filter: invert(0.92) hue-rotate(180deg) brightness(0.95);
+  /* a tiny 0.05 short of full inversion keeps an off-black background
+   * after invert, which sits more comfortably against the card surface
+   * than absolute black would. */
+}
+.stl-quiz__figure[data-kind="table"] {
+  /* Tables already have their own structure — drop the outer surface
+   * tile so the table reads as part of the question card, not a panel
+   * inside it. */
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+}
+.stl-quiz__figure[data-kind="svg"] {
+  /* Inline SVG figures (geometric diagrams). Same surface tile as the
+   * default figure container, but the inner SVG uses currentColor so
+   * lines / text inherit the canvas text color. Variable labels inside
+   * the SVG (line names, function names) get the same italic-lavender
+   * treatment as stem variables. */
+  background: var(--stl-surface);
+  border: 1px solid var(--stl-hairline);
+  padding: var(--s-4);
+}
+.stl-quiz__figure[data-kind="svg"] svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  color: var(--stl-text);
+  font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 15px;
+}
+.stl-quiz__figure[data-kind="svg"] .stl-svg-var {
+  font-style: italic;
+  fill: var(--stl-accent);
+  font-weight: 500;
+}
+.stl-quiz__figure[data-kind="svg"] .stl-svg-num {
+  /* Angle / step numbers in figures (e.g., "∠1", "∠2") — slightly
+   * larger and the canvas text color so they read as labels, not
+   * variables. */
+  font-size: 16px;
+  fill: var(--stl-text);
+}
+
+.stl-quiz__figure[data-kind="chart"] {
+  /* Chart.js needs an explicitly-sized parent for responsive sizing.
+   * The aspect ratio here matches the rough shape of the SAT graph
+   * boxes so converted charts feel proportional to the original.
+   * Height accounts for the bumped tick / axis-title / chart-title
+   * font sizes (14 / 13 / 15 px) so the plot area itself stays
+   * readable. */
+  position: relative;
+  height: 380px;
+  padding: var(--s-3) var(--s-3) var(--s-2);
+}
+.stl-quiz__figure[data-kind="chart"] canvas {
+  display: block;
+  max-width: 100%;
+  height: 100% !important;
+  width: 100% !important;
+}
+@media (max-width: 560px) {
+  .stl-quiz__figure[data-kind="chart"] { height: 320px; }
+}
+
+/* --- HTML table inside a figure ------------------------------------- */
+.stl-quiz__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  background: var(--stl-surface);
+  border: 1px solid var(--stl-hairline);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.stl-quiz__table caption {
+  caption-side: top;
+  text-align: left;
+  padding: 0 0 var(--s-2);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-quiz__table th,
+.stl-quiz__table td {
+  padding: 10px var(--s-3);
+  border-bottom: 1px solid var(--stl-hairline);
+  text-align: right;          /* numeric columns want right-align */
+  color: var(--stl-text);
+  vertical-align: middle;
+}
+.stl-quiz__table th {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+  font-weight: 500;
+  background: var(--stl-surface-2);
+  border-bottom-color: var(--stl-hairline-hi);
+}
+/* First column tends to be a label (e.g., "Lion", "Washington"); left-align
+ * to match reading direction. */
+.stl-quiz__table th:first-child,
+.stl-quiz__table td:first-child {
+  text-align: left;
+  color: var(--stl-text);
+}
+/* Row-scope <th> (when firstColIsHeader is set on the question) gets
+ * lighter weight to match data cells but stay scannable. */
+.stl-quiz__table tbody th {
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--stl-text);
+  font-weight: 500;
+}
+.stl-quiz__table tbody tr:last-child th,
+.stl-quiz__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+/* Optional totals row: top-border emphasizes it as a sum/summary line */
+.stl-quiz__table tbody tr.stl-quiz__table-totals th,
+.stl-quiz__table tbody tr.stl-quiz__table-totals td {
+  border-top: 1px solid var(--stl-hairline-hi);
+  font-weight: 600;
+  background: var(--stl-surface);
+}
+@media (max-width: 560px) {
+  .stl-quiz__table { font-size: 0.9rem; }
+  .stl-quiz__table th,
+  .stl-quiz__table td { padding: 8px 10px; }
+}
+
+/* --- grid-in (free-response / student-produced answer) -------------- */
+/* --- chart-grid choices (multiple-choice with graph options) ---------
+ * Used when a question has 4 candidate graphs as options. Each option
+ * is a small Chart.js canvas in a card with the letter (A/B/C/D)
+ * pinned at top-left. 2-column grid on desktop, 1-column on phones
+ * (still readable; charts get a touch shorter). Selection / hover
+ * states mirror the regular .stl-choice text choices. */
+.stl-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+.stl-choice-grid[hidden] { display: none; }
+
+.stl-choice--chart {
+  position: relative;
+  display: block;
+  padding: var(--s-3);
+  padding-top: 36px;            /* room for letter chip */
+  border-radius: var(--r-md);
+  border: 1px solid var(--stl-hairline);
+  background: var(--stl-surface);
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease-out),
+              background   var(--dur-base) var(--ease-out);
+  height: 200px;
+}
+.stl-choice--chart:hover {
+  border-color: var(--stl-hairline-hi);
+  background: var(--stl-surface-2);
+}
+.stl-choice--chart.is-selected {
+  border-color: var(--stl-accent-line);
+  background: var(--stl-accent-soft);
+}
+.stl-choice--chart .stl-choice__letter {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 1;
+}
+.stl-choice--chart.is-selected .stl-choice__letter {
+  background: var(--stl-accent);
+  color: var(--stl-bg-deep);
+  border-color: var(--stl-accent);
+}
+.stl-choice--chart canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: calc(100% - 0px);
+}
+
+/* Review-mode marks on chart choices: green outline for correct, red
+ * for picked-wrong. Mirrors the .stl-review__choices li[data-state] CSS. */
+.stl-choice--chart[data-state="correct"] {
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.06);
+}
+.stl-choice--chart[data-state="picked-wrong"] {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.06);
+}
+
+@media (max-width: 560px) {
+  .stl-choice-grid { grid-template-columns: 1fr; }
+  .stl-choice--chart { height: 180px; }
+}
+
+.stl-quiz__gridin { display: grid; gap: var(--s-2); margin-top: var(--s-2); }
+.stl-quiz__gridin[hidden] { display: none; }
+.stl-quiz__gridin-label {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-quiz__gridin-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1.15rem;
+  font-weight: 500;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--stl-text);
+  background: var(--stl-bg);
+  border: 1px solid var(--stl-hairline-hi);
+  border-radius: var(--r-md);
+  outline: none;
+  transition: border-color var(--dur-base) var(--ease-out),
+              background  var(--dur-base) var(--ease-out),
+              box-shadow  var(--dur-base) var(--ease-out);
+}
+.stl-quiz__gridin-input:hover { border-color: rgba(255, 255, 255, 0.18); }
+.stl-quiz__gridin-input:focus,
+.stl-quiz__gridin-input:focus-visible {
+  border-color: var(--stl-accent);
+  background: var(--stl-bg-2);
+  box-shadow: 0 0 0 4px var(--stl-accent-soft);
+}
+.stl-quiz__gridin-input.is-locked {
+  background: var(--stl-accent-soft);
+  border-color: var(--stl-accent);
+  color: var(--stl-text);
+}
+/* Inline error state — fired when the user hits Green/Yellow without
+ * typing. Red border + soft red glow + a brief shake to draw the eye. */
+.stl-quiz__gridin-input.is-error,
+.stl-quiz__gridin-input.is-error:hover,
+.stl-quiz__gridin-input.is-error:focus,
+.stl-quiz__gridin-input.is-error:focus-visible {
+  border-color: var(--stl-red);
+  background: rgba(251, 113, 133, 0.05);
+  box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.18);
+  animation: stl-error-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.stl-quiz__gridin-hint {
+  font-size: 13px;
+  color: var(--stl-text-subtle);
+  margin: 0;
+}
+
+/* --- signal (the only place green/yellow/red appear in the UI) -------- */
+.stl-quiz__signal { display: grid; gap: var(--s-3); }
+.stl-quiz__signal-help {
+  margin: 0;
+  text-align: center;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+  /* Reserve room for the slightly longer error message so the layout
+   * doesn't reflow when the helper swaps to error text. */
+  min-height: 1.4em;
+  transition: color var(--dur-base) var(--ease-out);
+}
+/* Error voice for the signal help line. Sits in the same slot as the
+ * default help text but reads as an inline error rather than a modal. */
+.stl-quiz__signal-help.is-error {
+  color: var(--stl-red);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 12px;
+  font-weight: 500;
+  animation: stl-error-fadein 200ms var(--ease-out);
+}
+
+/* MC choices error halo — applies to both the radio fieldset and the
+ * choiceCharts grid (q-7029, q-7014). Soft red drop-shadow rather than
+ * a hard border so the individual choice rows still read as their own
+ * affordances; the halo just frames "you need to pick something." */
+.stl-quiz__choices.is-error,
+.stl-choice-grid.is-error {
+  border-radius: var(--r-md);
+  box-shadow: 0 0 0 2px rgba(251, 113, 133, 0.45),
+              0 12px 30px -12px rgba(251, 113, 133, 0.35);
+  animation: stl-error-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes stl-error-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX( 2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX( 3px); }
+}
+@keyframes stl-error-fadein {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stl-quiz__gridin-input.is-error,
+  .stl-quiz__choices.is-error,
+  .stl-choice-grid.is-error,
+  .stl-quiz__signal-help.is-error {
+    animation: none;
+  }
+}
+.stl-signal {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-2);
+}
+.stl-signal__btn {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  align-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  min-height: 92px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--stl-hairline-hi);
+  background: var(--stl-surface);
+  color: var(--stl-text);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: transform var(--dur-fast) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.stl-signal__btn:hover { transform: translateY(-1px); background: var(--stl-surface-2); }
+.stl-signal__btn:active { transform: translateY(0); }
+.stl-signal__btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.stl-signal__btn:focus-visible {
+  outline: 2px solid var(--stl-accent);
+  outline-offset: 2px;
+}
+.stl-signal__chip {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+.stl-signal__lbl {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: -0.005em;
+  color: var(--stl-text);
+}
+.stl-signal__sub {
+  font-size: 0.8rem;
+  color: var(--stl-text-muted);
+  line-height: 1.35;
+}
+.stl-signal__btn--green  { color: var(--stl-green); }
+.stl-signal__btn--yellow { color: var(--stl-yellow); }
+.stl-signal__btn--red    { color: var(--stl-red); }
+.stl-signal__btn--green:hover  { border-color: rgba(74, 222, 128, 0.45); }
+.stl-signal__btn--yellow:hover { border-color: rgba(250, 204, 21, 0.45); }
+.stl-signal__btn--red:hover    { border-color: rgba(251, 113, 133, 0.45); }
+
+.stl-skip {
+  justify-self: center;
+  margin-top: var(--s-1);
+  background: none;
+  border: 0;
+  padding: var(--s-2) var(--s-3);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--stl-text-subtle);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--stl-hairline-hi);
+  border-radius: var(--r-sm);
+  transition: color var(--dur-base) var(--ease-out),
+              text-decoration-color var(--dur-base) var(--ease-out);
+}
+.stl-skip:hover {
+  color: var(--stl-text);
+  text-decoration-color: var(--stl-text-muted);
+}
+.stl-skip:focus-visible {
+  outline: 2px solid var(--stl-accent);
+  outline-offset: 2px;
+}
+
+/* --- results bento --------------------------------------------------- */
+.stl-results { display: grid; gap: var(--s-5); }
+.stl-results__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-3);
+}
+.stl-stat {
+  /* Stat boxes are now buttons (clickable jump-to-bucket affordances).
+   * Reset native button styling so they look like cards, then layer
+   * back the original surface look + hover states + per-bucket accent
+   * coloring further down. */
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  text-align: left;
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-lg);
+  background: var(--stl-surface);
+  border: 1px solid var(--stl-hairline);
+  color: var(--stl-text);
+  display: grid;
+  gap: var(--s-2);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+/* Base hover only handles the lift; border-color comes from each
+ * variant's own rule so the box stays in its signal color. */
+.stl-stat:hover { transform: translateY(-1px); }
+.stl-stat:active { transform: translateY(0); }
+/* Focus outline reads from the variant's --stat-color custom prop, so
+ * keyboard focus reinforces the box's identity (green / yellow / red)
+ * instead of painting a lavender accent ring that fights the box's
+ * own coloring. Falls back to lavender for any non-variant stat. */
+.stl-stat:focus-visible {
+  outline: 2px solid var(--stat-color, var(--stl-accent));
+  outline-offset: 2px;
+}
+.stl-stat:disabled,
+.stl-stat[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+.stl-stat:disabled:hover,
+.stl-stat[aria-disabled="true"]:hover {
+  transform: none;
+  border-color: var(--stl-hairline);
+}
+
+/* Span both columns for the framing tiles — True Mastery up top
+ * ("you got these") and To Review down at the bottom ("drill these").
+ * Correct + Lucky split the middle row. The result reads as a
+ * three-row ledger: header (mastery), middle (nuance), footer (work). */
+.stl-stat--featured,
+.stl-stat--review {
+  grid-column: span 2;
+}
+
+/* Per-variant color via a CSS custom property. Each variant declares
+ * --stat-color (the saturated mark color) and --stat-tint (the rgb
+ * triplet for translucent fills). Border, hover glow, and focus
+ * outline all read from those — single source of truth, so the
+ * lavender accent never accidentally leaks into a stat tile. */
+.stl-stat--mastery,
+.stl-stat--correct {
+  --stat-color: var(--stl-green);
+  --stat-tint:  74, 222, 128;
+}
+.stl-stat--lucky {
+  --stat-color: var(--stl-yellow);
+  --stat-tint:  250, 204, 21;
+}
+.stl-stat--review {
+  --stat-color: var(--stl-red);
+  --stat-tint:  251, 113, 133;
+}
+
+/* Idle: subtle gradient sweep + visible colored border. Idle alphas
+ * are bumped from 0.25/0.45 to 0.45/0.6 so the tile's identity reads
+ * even before hover — the "barely-tinted" version was too subtle. */
+.stl-stat--mastery {
+  background:
+    linear-gradient(135deg, rgba(var(--stat-tint), 0.20), transparent 65%),
+    var(--stl-surface-2);
+  border-color: rgba(var(--stat-tint), 0.6);
+}
+.stl-stat--correct,
+.stl-stat--lucky,
+.stl-stat--review {
+  background:
+    linear-gradient(135deg, rgba(var(--stat-tint), 0.10), transparent 65%),
+    var(--stl-surface);
+  border-color: rgba(var(--stat-tint), 0.45);
+}
+
+/* Hover: brighter gradient, brighter border, colored outer halo. */
+.stl-stat--mastery:hover {
+  background:
+    linear-gradient(135deg, rgba(var(--stat-tint), 0.34), transparent 65%),
+    var(--stl-surface-2);
+  border-color: rgba(var(--stat-tint), 0.9);
+  box-shadow: 0 14px 44px -10px rgba(var(--stat-tint), 0.4);
+}
+.stl-stat--correct:hover,
+.stl-stat--lucky:hover,
+.stl-stat--review:hover {
+  background:
+    linear-gradient(135deg, rgba(var(--stat-tint), 0.20), transparent 65%),
+    var(--stl-surface);
+  border-color: rgba(var(--stat-tint), 0.8);
+  box-shadow: 0 12px 36px -10px rgba(var(--stat-tint), 0.32);
+}
+
+/* Big numerals — light pastel variants for dark-bg readability */
+.stl-stat--mastery .stl-stat__num,
+.stl-stat--correct .stl-stat__num { color: var(--stl-green-text); }
+.stl-stat--lucky   .stl-stat__num { color: var(--stl-yellow-text); }
+.stl-stat--review  .stl-stat__num { color: var(--stl-red-text); }
+
+/* Test pacing meta-line — sits between the results sub-paragraph and
+ * the bento grid. Gives time context (total + per-question avg) as
+ * metadata about *the attempt*, separate from the categorical tiles
+ * below which describe correctness outcomes. Mono numerals so the
+ * digits feel like a stopwatch reading; muted labels so it doesn't
+ * shout against the H1. */
+.stl-results__meta {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0 0 var(--s-2);
+  padding: 0;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 13px;
+  color: var(--stl-text-subtle);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.stl-results__meta-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--stl-text-faint);
+  display: inline-block;
+  align-self: center;
+  margin-right: 2px;
+}
+.stl-results__meta-num {
+  color: var(--stl-text);
+  font-weight: 500;
+  font-size: 14.5px;       /* the numeric values get slight emphasis */
+}
+.stl-results__meta-lbl {
+  color: var(--stl-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+}
+.stl-results__meta-sep {
+  color: var(--stl-text-faint);
+  margin: 0 2px;
+}
+.stl-stat__num {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--stl-text);
+  line-height: 1;
+}
+.stl-stat__lbl {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  color: var(--stl-text-subtle);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.stl-stat__lbl small {
+  display: inline;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: "Geist", system-ui, sans-serif;
+  color: var(--stl-text-faint);
+  margin-left: 4px;
+  font-size: 11.5px;
+}
+/* Three-tier action layout (Option A):
+ *   1. Hero CTA      → Walk through review, full-width primary
+ *   2. Share group   → eyebrow label + 3 buttons in a row
+ *   3. Take another  → eyebrow label + 2 buttons in a row
+ *
+ * Eyebrow labels echo the typography system used elsewhere on the
+ * results screen (Geist Mono, uppercase, subtle color), so the
+ * groups feel like an extension of the existing language rather
+ * than a new pattern. */
+.stl-results__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.stl-results__group {
+  display: grid;
+  gap: 10px;
+}
+.stl-results__group-label {
+  margin: 0;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-results__group-row {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+/* Each button in a group claims an even share of the row, with a
+ * minimum width that prevents very narrow flex children. On phones
+ * the rows stack to 1-col below the responsive breakpoint. */
+.stl-results__group-row > .stl-btn,
+.stl-results__group-row > .dc-btn {
+  flex: 1 1 calc(33% - var(--s-2));
+  min-width: 130px;
+  justify-content: center;
+}
+
+/* Hero variant of the primary button — full width, beefier padding,
+ * stamps the Walk-through CTA as the obvious next step. */
+.stl-btn--hero {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 15px;
+  min-height: 52px;
+}
+
+/* Subdued (N) count appended to the hero label. Sits with a tabular
+ * monospace voice so it reads as metadata, not part of the verb. */
+.stl-btn__count {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-weight: 500;
+  font-size: 0.9em;
+  margin-left: 4px;
+  opacity: 0.78;
+  letter-spacing: 0.02em;
+}
+
+/* --- review --------------------------------------------------------- */
+.stl-review__choices {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+.stl-review__choices li {
+  padding: 10px var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--stl-hairline);
+  background: var(--stl-surface);
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+  font-size: 0.95rem;
+}
+.stl-review__choices li[data-state="correct"] {
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.06);
+}
+.stl-review__choices li[data-state="picked-wrong"] {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.06);
+}
+.stl-review__choices li .stl-choice__letter { width: 22px; height: 22px; font-size: 11px; }
+.stl-review__explain {
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  background: var(--stl-bg);
+  border: 1px solid var(--stl-hairline);
+}
+.stl-review__explain p { margin: var(--s-2) 0 0; line-height: 1.6; color: var(--stl-text); }
+.stl-review__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+/* --- buttons -------------------------------------------------------- */
+.stl-btn,
+.dc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  border: 1px solid var(--stl-hairline-hi);
+  background: var(--stl-surface);
+  color: var(--stl-text);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: background var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              filter var(--dur-base) var(--ease-out);
+}
+.stl-btn:hover,
+.dc-btn:hover { background: var(--stl-surface-2); border-color: rgba(255, 255, 255, 0.2); }
+.stl-btn:active,
+.dc-btn:active { transform: translateY(0.5px); }
+.stl-btn:focus-visible,
+.dc-btn:focus-visible {
+  outline: 2px solid var(--stl-accent);
+  outline-offset: 2px;
+}
+.stl-btn:disabled,
+.dc-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; filter: none; }
+
+/* The author display rules above (inline-flex) win over the user-agent
+ * `[hidden] { display: none }`, so any .stl-btn carrying the hidden
+ * attribute would still render. Restore the expected behavior. */
+.stl-btn[hidden],
+.dc-btn[hidden] { display: none; }
+
+/* primary — single calibrated lavender, gentle gradient */
+.stl-btn--primary,
+.dc-btn--primary {
+  background: linear-gradient(140deg, var(--stl-accent) 0%, var(--stl-accent-2) 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--stl-bg);
+  font-weight: 600;
+  padding: 10px 18px;
+}
+.stl-btn--primary:hover,
+.dc-btn--primary:hover { filter: brightness(1.08); background: linear-gradient(140deg, var(--stl-accent) 0%, var(--stl-accent-2) 100%); }
+
+.stl-btn--ghost,
+.dc-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--stl-text-muted);
+  box-shadow: none;
+}
+.stl-btn--ghost:hover,
+.dc-btn--ghost:hover {
+  background: var(--stl-surface);
+  color: var(--stl-text);
+  border-color: transparent;
+}
+
+/* Dev-only button (the "Test" affordance in the header that fast-
+ * forwards to populated results). Visually marked as a developer
+ * tool — mono font, slight red tint, dashed border — so nobody
+ * mistakes it for production UI. JS hides it on non-local hostnames
+ * and the click handler also feature-checks before doing anything,
+ * so even if it leaks into production it no-ops. */
+.stl-btn--dev {
+  background: rgba(251, 113, 133, 0.06);
+  border: 1px dashed rgba(251, 113, 133, 0.4);
+  color: rgba(251, 113, 133, 0.85);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  box-shadow: none;
+}
+.stl-btn--dev:hover {
+  background: rgba(251, 113, 133, 0.12);
+  border-color: rgba(251, 113, 133, 0.7);
+  color: var(--stl-red);
+}
+
+/* small icon prefix used inside .stl-btn — currently the share button.
+ * Sits in front of the label with a subtle gap and slightly larger
+ * weight so it reads as part of the affordance, not decoration. */
+.stl-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+  font-weight: 600;
+  font-size: 1.1em;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* utility */
+.dc-sr-only,
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* ============== history screen =====================================
+ * Past attempts as a vertical ledger. Each row is a button (the body)
+ * with a trailing action cluster. Newest first; chronological cadence
+ * carried by the relative date label ("Just now", "12 min ago", etc.).
+ * The colored dot stripe in each row is a glance-able 4-bucket
+ * summary using the same green/yellow/red palette as the bento.
+ */
+.stl-history { display: grid; gap: var(--s-5); }
+.stl-history__head { display: grid; gap: var(--s-2); }
+.stl-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.stl-history__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+  gap: var(--s-2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--stl-hairline);
+  background: var(--stl-surface);
+  transition: border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.stl-history__row:hover { border-color: var(--stl-hairline-hi); background: var(--stl-surface-2); }
+.stl-history__row.is-synthetic { border-style: dashed; opacity: 0.85; }
+
+.stl-history__open {
+  appearance: none; -webkit-appearance: none;
+  font: inherit; color: inherit;
+  display: grid;
+  grid-template-columns: minmax(7em, 9em) minmax(5em, auto) auto 1fr auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 12px var(--s-4);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--r-md);
+  min-height: 56px;
+}
+.stl-history__open:focus-visible {
+  outline: 2px solid var(--stl-accent);
+  outline-offset: 2px;
+}
+
+.stl-history__date {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-muted);
+  white-space: nowrap;
+}
+.stl-history__synth {
+  font-style: normal;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  background: rgba(251, 113, 133, 0.08);
+  color: rgba(251, 113, 133, 0.9);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.stl-history__target {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-history__score {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--stl-text);
+  font-variant-numeric: tabular-nums;
+}
+.stl-history__score small {
+  font-weight: 500;
+  font-size: 0.85em;
+  color: var(--stl-text-subtle);
+}
+
+/* The 3-dot stripe is a flex row of weighted segments — true mastery
+ * (green), lucky (yellow), to-review (red). Width per segment scales
+ * with the count via the --w custom prop; min-width keeps zero counts
+ * as a thin pill instead of disappearing. */
+.stl-history__dots {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+  width: 100%;
+  min-width: 64px;
+  max-width: 180px;
+}
+.stl-history__dot {
+  flex: var(--w, 0) 0 0;
+  min-width: 6px;
+  height: 100%;
+  border-radius: var(--r-pill);
+  opacity: 0.85;
+}
+.stl-history__dot--g { background: var(--stl-green); }
+.stl-history__dot--y { background: var(--stl-yellow); }
+.stl-history__dot--r { background: var(--stl-red); }
+
+.stl-history__time {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-subtle);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stl-history__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px var(--s-3) 6px 0;
+}
+.stl-history__action {
+  appearance: none; -webkit-appearance: none;
+  font: inherit; cursor: pointer;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+  background: transparent;
+  border: 1px solid var(--stl-hairline);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  min-width: 36px;
+  transition: color var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+.stl-history__action:hover {
+  color: var(--stl-text);
+  border-color: var(--stl-hairline-hi);
+  background: var(--stl-surface-2);
+}
+.stl-history__action:focus-visible {
+  outline: 2px solid var(--stl-accent);
+  outline-offset: 2px;
+}
+.stl-history__action--danger {
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 8px;
+}
+.stl-history__action--danger:hover {
+  color: var(--stl-red);
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.06);
+}
+
+.stl-history__empty {
+  padding: var(--s-6) var(--s-4);
+  text-align: center;
+  border: 1px dashed var(--stl-hairline);
+  border-radius: var(--r-md);
+}
+
+.stl-history__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--stl-hairline);
+}
+.stl-history__bulk { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+/* Phone tweaks — collapse the 5-col row into 2 stacked rows so there's
+ * room for everything without horizontal squeeze. */
+@media (max-width: 560px) {
+  .stl-history__open {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      "date target time"
+      "score dots dots";
+    gap: 8px var(--s-3);
+    padding: 12px var(--s-3);
+  }
+  .stl-history__date   { grid-area: date; }
+  .stl-history__target { grid-area: target; }
+  .stl-history__time   { grid-area: time; }
+  .stl-history__score  { grid-area: score; }
+  .stl-history__dots   { grid-area: dots; min-width: 0; max-width: none; }
+  .stl-history__actions { padding: 8px var(--s-3) 8px 0; }
+  .stl-history__action  { padding: 6px 7px; min-width: 32px; }
+}
+
+/* ============== admin tool =====================================
+ * Database admin: page-shaped (no hero card), wider canvas. Three
+ * stacked sections — page head, KPI strip, filter+table panel —
+ * with their own treatment instead of being crammed into a single
+ * card like quiz/results. Role-gated (admin only).
+ */
+.stl-screen--admin {
+  /* Override the default grid gap for this screen — we want clear
+   * vertical sections rather than a uniform card-stack rhythm. */
+  display: grid;
+  gap: var(--s-5);
+}
+
+/* --- page head: title + back --- */
+.stl-admin__page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--stl-hairline);
+}
+.stl-admin__page-titles { display: grid; gap: 4px; }
+.stl-admin__h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--stl-text);
+}
+.stl-admin__page-actions { display: flex; gap: var(--s-2); }
+
+/* --- KPI strip: 6 squat tiles in a row --- */
+.stl-admin__kpis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--s-3);
+}
+.stl-admin__kpi {
+  padding: 14px var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--stl-hairline);
+  background: var(--stl-surface);
+  display: grid;
+  gap: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.stl-admin__kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(var(--kpi-tint, 139, 134, 255), 0.08), transparent 60%);
+  pointer-events: none;
+}
+.stl-admin__kpi-lbl {
+  margin: 0;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+  position: relative;
+}
+.stl-admin__kpi-num {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--stl-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  position: relative;
+}
+/* Per-tile tint via a custom property — green for live, amber for
+ * needs-review, red for unpublished, lavender for total/AI/human. */
+.stl-admin__kpi[data-kind="live"]         { --kpi-tint: 74, 222, 128; }
+.stl-admin__kpi[data-kind="needs-review"] { --kpi-tint: 250, 204, 21; }
+.stl-admin__kpi[data-kind="unpublished"]  { --kpi-tint: 251, 113, 133; }
+.stl-admin__kpi[data-kind="ai"]           { --kpi-tint: 139, 134, 255; }
+.stl-admin__kpi[data-kind="live"] .stl-admin__kpi-num         { color: var(--stl-green-text); }
+.stl-admin__kpi[data-kind="needs-review"] .stl-admin__kpi-num { color: var(--stl-yellow-text); }
+.stl-admin__kpi[data-kind="unpublished"] .stl-admin__kpi-num  { color: var(--stl-red-text); }
+.stl-admin__kpi[data-kind="ai"] .stl-admin__kpi-num           { color: var(--stl-accent); }
+
+/* --- main panel: filters + table + footer in one card --- */
+.stl-admin__panel {
+  background: var(--stl-surface);
+  border: 1px solid var(--stl-hairline);
+  border-radius: var(--r-lg);
+  display: grid;
+}
+
+.stl-admin__filter-summary {
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--stl-hairline);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--stl-text-subtle);
+}
+.stl-admin__footer {
+  padding: 12px var(--s-4);
+  border-top: 1px solid var(--stl-hairline);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10.5px;
+  color: var(--stl-text-faint);
+  letter-spacing: 0.04em;
+}
+
+.stl-admin__filters {
+  display: grid;
+  grid-template-columns: 2.6fr repeat(4, 1fr) auto;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--stl-hairline);
+  align-items: end;
+}
+.stl-admin__field--search { grid-column: span 1; }
+.stl-admin__field--actions { display: grid; gap: 4px; }
+.stl-admin__field--actions .stl-btn { width: 100%; padding: 9px 12px; }
+.stl-admin__field { display: grid; gap: 4px; }
+.stl-admin__field-lbl {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-admin__input,
+.stl-admin__select {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--stl-text);
+  background: var(--stl-bg);
+  border: 1px solid var(--stl-hairline-hi);
+  border-radius: var(--r-md);
+  outline: none;
+  transition: border-color var(--dur-base) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.stl-admin__input:focus-visible,
+.stl-admin__select:focus-visible {
+  border-color: var(--stl-accent);
+  box-shadow: 0 0 0 3px var(--stl-accent-soft);
+}
+.stl-admin__textarea {
+  resize: vertical;
+  min-height: 72px;
+  font-family: inherit;
+}
+
+.stl-admin__table-wrap {
+  overflow-x: auto;
+  /* Inside the panel — no own border/background; let the panel chrome
+   * be the frame. Bottom-rounded so the last row tucks under the panel
+   * radius cleanly. */
+  border-bottom-left-radius: var(--r-lg);
+  border-bottom-right-radius: var(--r-lg);
+  max-width: 100%;
+}
+.stl-admin__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.stl-admin__table thead {
+  background: var(--stl-surface-2);
+  position: sticky; top: 0; z-index: 1;
+}
+.stl-admin__table th {
+  text-align: left;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+  font-weight: 500;
+  padding: 11px var(--s-3);
+  border-bottom: 1px solid var(--stl-hairline);
+  white-space: nowrap;
+}
+.stl-admin__table td {
+  padding: 12px var(--s-3);
+  border-bottom: 1px solid var(--stl-hairline);
+  vertical-align: top;
+}
+.stl-admin__row:hover { background: var(--stl-surface-2); }
+.stl-admin__th-id      { min-width: 220px; }
+.stl-admin__th-stats   { min-width: 160px; }
+.stl-admin__th-actions { width: 1%; white-space: nowrap; }
+.stl-admin__td-id { min-width: 220px; }
+.stl-admin__id {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--stl-text);
+}
+.stl-admin__id-stem {
+  font-size: 12.5px;
+  color: var(--stl-text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.stl-admin__uploader {
+  font-size: 11px;
+  color: var(--stl-text-subtle);
+  margin-top: 2px;
+}
+
+/* Per-state badges. Live = green, Unpublished = subtle, Needs review = amber/red. */
+.stl-admin__badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--stl-hairline);
+  font-weight: 500;
+}
+.stl-admin__badge--live {
+  color: #bbf7d0;
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.08);
+}
+.stl-admin__badge--unpublished {
+  color: var(--stl-text-subtle);
+  border-color: var(--stl-hairline);
+}
+.stl-admin__badge--needs-review {
+  color: #fde68a;
+  border-color: rgba(250, 204, 21, 0.45);
+  background: rgba(250, 204, 21, 0.08);
+}
+
+/* Source pill — small, right-aligned next to uploader email. */
+.stl-admin__source {
+  display: inline-flex;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--stl-hairline);
+  font-weight: 500;
+}
+.stl-admin__source--human-curated { color: var(--stl-text-muted); }
+.stl-admin__source--ai-generated {
+  color: var(--stl-accent);
+  border-color: var(--stl-accent-line);
+  background: var(--stl-accent-soft);
+}
+
+/* Stat bar — three weighted segments per signal color, with a
+ * trailing percentage + attempt count. Empty when there are no
+ * recorded attempts for the question yet. */
+.stl-admin__stats {
+  display: inline-grid;
+  grid-template-columns: 100px auto;
+  align-items: center;
+  gap: var(--s-2);
+}
+.stl-admin__statbar {
+  display: inline-flex;
+  height: 6px;
+  width: 100px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  background: var(--stl-surface-3);
+}
+.stl-admin__statbar-seg { height: 100%; }
+.stl-admin__statbar-seg--g { background: var(--stl-green); }
+.stl-admin__statbar-seg--y { background: var(--stl-yellow); }
+.stl-admin__statbar-seg--r { background: var(--stl-red); }
+.stl-admin__stats-text {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  color: var(--stl-text-subtle);
+  white-space: nowrap;
+}
+.stl-admin__stats-empty {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  color: var(--stl-text-faint);
+}
+
+/* Action cluster mirrors the History row's actions. */
+.stl-admin__td-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.stl-admin__empty {
+  text-align: center;
+  padding: var(--s-6);
+  color: var(--stl-text-muted);
+  margin: 0;
+}
+.stl-admin__hint {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10.5px;
+  color: var(--stl-text-faint);
+}
+
+/* ============== edit modal ==============
+ * Centered drawer with a darkening backdrop. Form is a stack of
+ * labeled inputs; choices are a vertical list of letter+input rows. */
+.stl-admin-modal {
+  position: fixed; inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+}
+.stl-admin-modal[hidden] { display: none; }
+.stl-admin-modal__backdrop {
+  position: absolute; inset: 0;
+  background: rgba(5, 5, 9, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.stl-admin-modal__panel {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100dvh - var(--s-6));
+  overflow-y: auto;
+  background:
+    linear-gradient(165deg, rgba(139, 134, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 50%, transparent 80%),
+    var(--stl-bg);
+  border: 1px solid var(--stl-hairline-hi);
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6);
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  animation: stl-modal-in 220ms var(--ease-out);
+}
+@keyframes stl-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.stl-admin-modal__head {
+  display: grid;
+  gap: 4px;
+  padding-right: 36px;
+  position: relative;
+}
+.stl-admin-modal__title {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--stl-text);
+}
+.stl-admin-modal__close {
+  position: absolute;
+  top: 0; right: 0;
+  appearance: none; -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid var(--stl-hairline);
+  color: var(--stl-text-muted);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  width: 32px; height: 32px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease-out),
+              color var(--dur-base) var(--ease-out);
+}
+.stl-admin-modal__close:hover {
+  border-color: var(--stl-hairline-hi);
+  color: var(--stl-text);
+}
+
+.stl-admin-modal__form { display: grid; gap: var(--s-3); }
+.stl-admin__row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+.stl-admin__field-group {
+  border: 0; padding: 0; margin: 0;
+  display: grid; gap: 6px;
+}
+.stl-admin__choice-row {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: var(--s-2);
+  align-items: center;
+}
+.stl-admin__choice-letter {
+  display: grid; place-items: center;
+  width: 28px; height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--stl-surface-2);
+  border: 1px solid var(--stl-hairline-hi);
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11px;
+  color: var(--stl-text-muted);
+  font-weight: 500;
+}
+.stl-admin-modal__meta {
+  border-top: 1px solid var(--stl-hairline);
+  padding-top: var(--s-3);
+}
+.stl-admin__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--s-3);
+  margin: 0;
+}
+.stl-admin__meta dt {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stl-text-subtle);
+}
+.stl-admin__meta dd {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--stl-text);
+}
+.stl-admin-modal__actions {
+  display: flex;
+  gap: var(--s-2);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--stl-hairline);
+}
+
+/* Tablet — collapse KPI strip to 3 columns, filters to 2. */
+@media (max-width: 1024px) {
+  .stl-admin__kpis { grid-template-columns: repeat(3, 1fr); }
+  .stl-admin__filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stl-admin__field--search { grid-column: 1 / -1; }
+  .stl-admin__field--actions { grid-column: 1 / -1; }
+  .stl-admin__field--actions .stl-btn { width: auto; }
+}
+
+/* Phone — 2-col KPIs, single-col filters, modal fields stack */
+@media (max-width: 640px) {
+  .stl-admin__kpis { grid-template-columns: repeat(2, 1fr); }
+  .stl-admin__filters { grid-template-columns: 1fr; padding: var(--s-3); }
+  .stl-admin__row-2 { grid-template-columns: 1fr; }
+}
+
+/* ============== auth: header pill + login screen ==============
+ * Header right-side cluster gains a user pill (email + role badge +
+ * sign-out) when authenticated, or a Sign in button otherwise. The
+ * login screen reuses the standard hero card with a magic-link form. */
+.stl-header__auth { display: inline-flex; align-items: center; gap: var(--s-2); }
+.stl-header__auth[hidden] { display: none; }
+.stl-header__user {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 4px 4px 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--stl-hairline);
+  background: var(--stl-surface-2);
+}
+.stl-header__user[hidden] { display: none; }
+.stl-header__user-email {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: var(--stl-text-muted);
+  /* Truncate long emails on narrow screens. */
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stl-header__role {
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--stl-hairline);
+  color: var(--stl-text-subtle);
+}
+.stl-header__role[data-role="admin"] {
+  color: var(--stl-accent);
+  border-color: var(--stl-accent-line);
+  background: var(--stl-accent-soft);
+}
+.stl-header__signout { padding: 5px 10px; font-size: 12px; min-height: 0; }
+
+/* Login screen — reuses .stl-card--hero and stacks a single form */
+.stl-login { display: grid; gap: var(--s-5); max-width: 520px; }
+.stl-login__form { display: grid; gap: var(--s-4); }
+.stl-login__sent { display: grid; gap: var(--s-3); }
+.stl-login__sent[hidden] { display: none; }
+.stl-login__sent-h { margin: 0; font-size: 1.25rem; letter-spacing: -0.015em; }
+.stl-login__demo {
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px dashed rgba(250, 204, 21, 0.4);
+  background: rgba(250, 204, 21, 0.06);
+}
+.stl-login__demo[hidden] { display: none; }
+.stl-login__mode {
+  margin: 0;
+  font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--stl-text-faint);
+}
+
+/* When the hint is in error state, switch its color to red. */
+.stl-hint.is-error { color: var(--stl-red); }
+
+/* On phones the header gets crowded fast — hide the user email,
+ * keep the role badge + Sign in/out. */
+@media (max-width: 640px) {
+  .stl-header__user-email { display: none; }
+  .stl-header__user { padding-left: var(--s-2); }
+}
+
+/* ============== shared-attempt banner ==============
+ * Visible on the results screen when ?a= loaded a friend's payload.
+ * Lavender wash matches the accent so it reads as informational, not
+ * an error. Fits above the eyebrow without disturbing the bento. */
+.stl-shared-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  padding: 10px var(--s-4);
+  margin-bottom: var(--s-3);
+  border: 1px solid var(--stl-accent-line);
+  border-radius: var(--r-md);
+  background: var(--stl-accent-soft);
+}
+.stl-shared-banner[hidden] { display: none; }
+.stl-shared-banner__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--stl-accent);
+  box-shadow: 0 0 8px var(--stl-accent);
+}
+.stl-shared-banner__text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--stl-text);
+}
+.stl-shared-banner .stl-btn { padding: 7px 12px; font-size: 13px; }
+
+/* ============== toast =====================================
+ * Lightweight transient confirmation for "Link copied", "Downloaded",
+ * etc. Lives at the bottom-center, fades up + in. aria-live=polite
+ * announces it to screen readers without stealing focus. */
+.stl-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(var(--s-6), env(safe-area-inset-bottom));
+  transform: translate(-50%, 12px);
+  z-index: 100;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: rgba(20, 22, 36, 0.95);
+  border: 1px solid var(--stl-hairline-hi);
+  color: var(--stl-text);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out),
+              transform 200ms var(--ease-out);
+  pointer-events: none;
+}
+.stl-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.stl-toast[hidden] { display: none; }
+
+/* ============== responsive =========================================
+ * Strategy: the layout is fluid (clamp-based) by default, so most of
+ * the mobile work is done by the cards/inputs/typography downscaling
+ * naturally. These breakpoints fix the things fluid sizing can't —
+ * grid topology (columns → rows), tap-target minimums, hover-on-
+ * touch stickiness, and the iOS "input zooms when font-size < 16px"
+ * footgun.
+ *
+ * Three breakpoints:
+ *   ≤768px tablet       — small spacing tweaks, header shrinks
+ *   ≤560px phone        — buttons full-width, signal stacks 1-col,
+ *                         tap targets ≥44px, button rows collapse
+ *   ≤400px narrow phone — bento becomes 1-col so labels never wrap
+ *                         awkwardly; numerals scale down a notch
+ *
+ * Plus: hover-on-touch override, and a short-screen (landscape phone)
+ * vertical compaction.
+ *
+ * In-place mobile overrides for charts/tables/choice-grid live next
+ * to their subsystem rules above so subsystems stay self-contained;
+ * everything cross-cutting lives here.
+ * =================================================================== */
+
+/* Hover styles only fire on hover-capable pointers. On phones / tablets
+ * the same selectors leave hover styling stuck after a tap, which reads
+ * as a bug. This media query overrides hover to the resting state on
+ * touch devices. */
+@media (hover: none) {
+  .stl-btn:hover,
+  .dc-btn:hover {
+    background: var(--stl-surface);
+    border-color: var(--stl-hairline-hi);
+    filter: none;
+  }
+  .stl-btn--ghost:hover,
+  .dc-btn--ghost:hover {
+    background: transparent;
+    color: var(--stl-text-muted);
+  }
+  .stl-signal__btn:hover {
+    transform: none;
+    background: var(--stl-surface);
+  }
+  .stl-signal__btn--green:hover  { border-color: var(--stl-hairline-hi); }
+  .stl-signal__btn--yellow:hover { border-color: var(--stl-hairline-hi); }
+  .stl-signal__btn--red:hover    { border-color: var(--stl-hairline-hi); }
+  .stl-stat:hover { transform: none; }
+  .stl-stat--mastery:hover {
+    background:
+      linear-gradient(135deg, rgba(var(--stat-tint), 0.20), transparent 65%),
+      var(--stl-surface-2);
+    border-color: rgba(var(--stat-tint), 0.6);
+    box-shadow: none;
+  }
+  .stl-stat--correct:hover,
+  .stl-stat--lucky:hover,
+  .stl-stat--review:hover {
+    background:
+      linear-gradient(135deg, rgba(var(--stat-tint), 0.10), transparent 65%),
+      var(--stl-surface);
+    border-color: rgba(var(--stat-tint), 0.45);
+    box-shadow: none;
+  }
+  .stl-choice:hover,
+  .stl-choice--chart:hover {
+    background: var(--stl-surface);
+    border-color: var(--stl-hairline);
+  }
+  .stl-input:hover,
+  .stl-quiz__gridin-input:hover { border-color: var(--stl-hairline-hi); }
+}
+
+/* ---------- tablet (≤ 768px) ---------- */
+@media (max-width: 768px) {
+  .stl-header {
+    height: calc(54px + env(safe-area-inset-top));
+    gap: var(--s-3);
+  }
+  .stl-header__name { font-size: 13.5px; }
+  .stl-screen { gap: var(--s-5); }
+}
+
+/* ---------- phone (≤ 560px) ---------- */
+@media (max-width: 560px) {
+  /* Header — keep timer + actions visible, drop the eyebrow if it
+   * existed (already gone), and tighten gap so a long Restart label
+   * doesn't push the timer offscreen. */
+  .stl-header__eyebrow { display: none; }
+  .stl-header__actions { gap: 6px; }
+  .stl-header__name { font-size: 13px; }
+
+  /* Signal trio stacks vertically — reach is what matters most when
+   * you're answering the question, and the green/yellow/red labels
+   * read more clearly at full-width than crammed three-up. */
+  .stl-signal { grid-template-columns: 1fr; gap: 10px; }
+  .stl-signal__btn {
+    min-height: 64px;            /* still huge tap target, less vertical real estate */
+    padding: var(--s-3) var(--s-4);
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas: "chip lbl sub";
+    gap: var(--s-3);
+    align-items: center;
+    align-content: center;
+    justify-items: start;
+  }
+  .stl-signal__chip { grid-area: chip; }
+  .stl-signal__lbl  { grid-area: lbl; font-size: 1rem; }
+  .stl-signal__sub  {
+    grid-area: sub;
+    text-align: right;
+    justify-self: end;
+    color: var(--stl-text-subtle);
+  }
+
+  /* Quiz signal helper text — small all-caps mono is too small at
+   * mobile reading distance, bump a touch and loosen letter-spacing. */
+  .stl-quiz__signal-help { font-size: 11.5px; letter-spacing: 0.08em; }
+
+  /* Bigger touch targets on the small footprint buttons in the header
+   * and elsewhere. iOS HIG says 44pt; we hit that with 12px padding
+   * + ~14px text + line-height. */
+  .stl-btn,
+  .dc-btn {
+    padding: 11px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .stl-btn--primary,
+  .dc-btn--primary { padding: 13px 18px; min-height: 48px; }
+  .stl-btn--dev    { padding: 7px 11px; min-height: 0; }     /* dev stays compact */
+
+  /* On narrow phones the share row (3 buttons) and take-another
+   * row (2 buttons) collapse to single-column so labels never
+   * truncate. Each button takes the full row width. */
+  .stl-results__group-row > .stl-btn,
+  .stl-results__group-row > .dc-btn {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Card padding tightens — already clamps, but enforce a floor */
+  .stl-card { padding: var(--s-4); }
+  .stl-card--hero { padding: var(--s-5) var(--s-4); }
+
+  /* Score input + grid-in input — already ≥18px so no iOS zoom; but
+   * widen tap target a touch */
+  .stl-input,
+  .stl-quiz__gridin-input { padding: 14px 14px; }
+
+  /* Score-screen tier pills — they're informational, can shrink */
+  .stl-tier { font-size: 10.5px; padding: 5px 10px; }
+  .stl-score__tiers { gap: 6px; }
+
+  /* Review choices: bump to 44px tap height in case the user is
+   * tapping rather than scanning */
+  .stl-review__choices li { padding: 13px var(--s-4); font-size: 0.94rem; }
+
+  /* Review nav: split the row evenly */
+  .stl-review__nav { gap: var(--s-2); }
+  .stl-review__nav .stl-btn { flex: 1; }
+
+  /* Stem / passage typography — tighter line-height feels less letter-
+   * spacing-y on mobile narrow widths */
+  .stl-quiz__stem { font-size: 1.1rem; line-height: 1.4; }
+  .stl-quiz__passage { font-size: 0.92rem; padding: var(--s-2) var(--s-3); }
+
+  /* Backdrop blur is expensive on mid-range Android. Drop the radius
+   * by half — the bar still reads as glass. */
+  .stl-header {
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+  }
+
+  /* Ambient glow — shrink so it doesn't bleed across the whole canvas
+   * on small screens (it's a top-right halo, not a centered wash). */
+  .stl-app::before {
+    width: 480px;
+    height: 480px;
+    top: -180px;
+    right: -120px;
+  }
+}
+
+/* ---------- narrow phone (≤ 400px) ----------
+ * iPhone SE 1st gen (320px) and Galaxy Fold cover-screen sit here.
+ * The 2-col bento gets cramped at this width — labels like
+ * "True mastery green + correct" wrap weirdly — so flatten to 1-col. */
+@media (max-width: 400px) {
+  .stl-results__grid { grid-template-columns: 1fr; }
+  .stl-stat--featured,
+  .stl-stat--review,
+  .stl-stat--correct,
+  .stl-stat--lucky { grid-column: auto; }
+  .stl-stat__num { font-size: clamp(1.75rem, 9vw, 2.5rem); }
+  .stl-h1 { font-size: clamp(1.65rem, 7vw, 2rem); }
+  .stl-stat { padding: var(--s-3) var(--s-4); }
+}
+
+/* ---------- short screens (landscape phone) ----------
+ * Squish vertical breathing room so the score / signal screens still
+ * fit on screen without scrolling when a phone is rotated. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .stl-header { height: calc(48px + env(safe-area-inset-top)); }
+  .stl-main { padding-top: var(--s-5); padding-bottom: var(--s-5); }
+  .stl-card--hero { padding: var(--s-4); }
+  .stl-screen { gap: var(--s-3); }
+  .stl-quiz__card { gap: var(--s-3); }
+  .stl-h1 { font-size: clamp(1.5rem, 4vw, 2rem); }
+  .stl-quiz__figure[data-kind="chart"] { height: 220px; }
+  .stl-signal__btn { min-height: 56px; }
+}
+
+/* --- view transitions ------------------------------------------------
+ * Native View Transitions API powers the screen morphs (score → quiz →
+ * results → review → regen). The runtime snapshots before/after states
+ * and animates between them. These keyframes give the swap a soft drift
+ * so screens feel like *places* the user travels between, not panels
+ * that flicker.
+ *
+ * The shared-element morph (active tier pill → difficulty pill) is set
+ * up by giving both elements the same `view-transition-name`. Only one
+ * is ever on screen at a time, which is what the API needs to morph.
+ */
+@keyframes stl-vt-old {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes stl-vt-new {
+  from { opacity: 0; transform: translateY(10px); }
+}
+::view-transition-old(root) {
+  animation: stl-vt-old 200ms cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+::view-transition-new(root) {
+  animation: stl-vt-new 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* shared-element morph: the active tier pill on the score screen
+ * physically carries into the difficulty pill on the quiz screen */
+.stl-tier.is-active { view-transition-name: stl-active-pill; }
+#quiz-difficulty    { view-transition-name: stl-active-pill; }
+
+/* the morph itself gets a slightly slower, springier curve so the
+ * pill's flight reads as deliberate */
+::view-transition-group(stl-active-pill) {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* --- card slide (iOS-style page advance) -----------------------------
+ * Every screen's primary card (score, quiz, results, review, regen
+ * — they all share .stl-card--hero) participates in a horizontal
+ * slide motion. The View Transitions API hoists the named card out
+ * of the root snapshot, so its animation runs separately from the
+ * surrounding chrome (header, signal buttons, etc.) which still uses
+ * the gentler root drift-fade defined above.
+ *
+ * Direction:
+ *   default  (forward)        → old exits left,  new enters from right
+ *   html.stl-going-back        → old exits right, new enters from left
+ *
+ * The 110% overshoot makes each card fully clear the viewport before
+ * the other arrives — this is what gives it the iOS-page feel rather
+ * than a crossfade. Both directions also fade the opacity to 0 at the
+ * extremes so a card visibly dissolves as it leaves and resolves as
+ * it arrives, instead of just tracking off the side.
+ */
+.stl-card--hero {
+  view-transition-name: stl-card-hero;
+}
+
+@keyframes stl-card-out-left  { to   { transform: translateX(-110%); opacity: 0; } }
+@keyframes stl-card-in-right  { from { transform: translateX( 110%); opacity: 0; } }
+@keyframes stl-card-out-right { to   { transform: translateX( 110%); opacity: 0; } }
+@keyframes stl-card-in-left   { from { transform: translateX(-110%); opacity: 0; } }
+
+::view-transition-old(stl-card-hero) {
+  animation: stl-card-out-left 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+::view-transition-new(stl-card-hero) {
+  animation: stl-card-in-right 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+html.stl-going-back ::view-transition-old(stl-card-hero) {
+  animation-name: stl-card-out-right;
+}
+html.stl-going-back ::view-transition-new(stl-card-hero) {
+  animation-name: stl-card-in-left;
+}
+
+/* First paint: there's no prior state for the View Transition system
+ * to morph from, so the score card slides in from the right via a
+ * regular CSS animation. The mounting class is set on <body> in app.js
+ * and removed once this animation completes, so it only runs on
+ * initial load — subsequent visits to the score screen (regen → score,
+ * restart → score) go through the View Transition path with the back-
+ * direction class instead.
+ */
+.stl-app--mounting .stl-screen[data-screen="score"] .stl-card--hero {
+  animation: stl-card-in-right 520ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* --- micro-interactions --------------------------------------------- */
+
+/* signal-button press feels haptic-like — a soft scale + shadow drop.
+ * the existing :hover lift becomes a settle on press, before the
+ * answer is recorded. */
+.stl-signal__btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+  background: var(--stl-surface-3);
+}
+
+/* choice press — a subtle inward press matching button feel */
+.stl-choice:active {
+  transform: scale(0.995);
+}
+
+/* stat boxes lift on hover for a tiny bit of life on results screen */
+.stl-stat {
+  transition: transform var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-out);
+}
+/* (Stat hover styling lives further up the file under the per-variant
+ * --stat-color block. There used to be duplicate .stl-stat:hover and
+ * .stl-stat--featured:hover rules here that re-set border-color to
+ * --stl-hairline-hi and --stl-accent respectively, which is what was
+ * painting the lavender "weird purple border" on True Mastery on
+ * hover. Removing them lets the per-variant rules win. */
+
+/* --- print: trouble problems → PDF -----------------------------------
+ * The live app is dark-themed and uses a single-card-at-a-time view —
+ * neither of which works on paper. When the user clicks "Save trouble
+ * problems," app.js builds a #stl-print-root with all the problems
+ * inlined; this CSS hides everything else, flips to a light theme,
+ * and adds page-break rules so questions don't split across pages.
+ *
+ * On screen, #stl-print-root is hidden by default so it doesn't show
+ * up between print jobs. */
+.stl-print-root { display: none; }
+
+@media print {
+  @page { margin: 18mm 16mm; }
+
+  /* Force light theme — body's --stl-bg-deep would otherwise eat the
+   * paper. !important needed because the .stl-app rules use specific
+   * dark backgrounds that would otherwise cascade. */
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Hide the entire live app while printing; show only the print root.
+   * body > * doesn't work cleanly because the print root sits as a
+   * sibling — we use direct visibility/display so the print preview
+   * renders only the print content. */
+  body > .stl-app { display: none !important; }
+  body > .stl-print-root { display: block !important; }
+
+  .stl-print-root {
+    color: #000;
+    background: #fff;
+    font-family: Georgia, "Source Serif 4", "Iowan Old Style", serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    max-width: none;
+  }
+
+  /* Header: title + meta line (count, target, time, date). */
+  .stl-print-head {
+    border-bottom: 1px solid #999;
+    padding-bottom: 10pt;
+    margin-bottom: 14pt;
+  }
+  .stl-print-head h1 {
+    font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 19pt;
+    font-weight: 600;
+    margin: 0 0 4pt;
+    letter-spacing: -0.02em;
+    color: #000;
+  }
+  .stl-print-head__meta {
+    font-family: "Geist Mono", ui-monospace, "SF Mono", monospace;
+    font-size: 9pt;
+    color: #555;
+    margin: 0;
+    letter-spacing: 0.04em;
+  }
+
+  /* Each problem: keep on one page if at all possible. */
+  .stl-print-q {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin: 0 0 14pt;
+    padding: 0 0 10pt;
+    border-bottom: 1px solid #ddd;
+  }
+  .stl-print-q:last-child { border-bottom: 0; }
+
+  .stl-print-q__head {
+    font-family: "Geist Mono", ui-monospace, "SF Mono", monospace;
+    font-size: 9pt;
+    color: #666;
+    margin: 0 0 6pt;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .stl-print-q__num {
+    color: #000;
+    font-weight: 600;
+    margin-right: 8pt;
+    font-family: "Geist", -apple-system, system-ui, sans-serif;
+    font-size: 11pt;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .stl-print-q__stem {
+    margin: 0 0 8pt;
+    font-size: 11pt;
+    color: #000;
+  }
+
+  .stl-print-q__choices {
+    list-style: none;
+    margin: 0 0 8pt;
+    padding: 0 0 0 14pt;
+  }
+  .stl-print-q__choice {
+    margin: 0 0 3pt;
+    padding: 0;
+    color: #000;
+  }
+  .stl-print-q__letter {
+    font-weight: 600;
+    margin-right: 4pt;
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 10pt;
+  }
+  .stl-print-q__choice.is-correct {
+    color: #1a6b35;          /* dark green that prints crisply on paper */
+    font-weight: 600;
+  }
+  .stl-print-q__choice.is-picked {
+    color: #8b1f1f;          /* dark red */
+    text-decoration: line-through;
+  }
+  .stl-print-q__mark {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 9pt;
+    margin-left: 6pt;
+    text-decoration: none;
+  }
+
+  .stl-print-q__gridin {
+    margin: 0 0 6pt;
+    font-size: 11pt;
+    padding-left: 14pt;
+  }
+
+  .stl-print-q__expl {
+    margin: 6pt 0 0;
+    padding: 4pt 0 4pt 12pt;
+    border-left: 2pt solid #aaa;
+    font-style: italic;
+    color: #333;
+    font-size: 10pt;
+  }
+
+  /* Variable styling: italic, but no lavender on paper. */
+  .stl-print-root .stl-quiz__var {
+    font-style: italic;
+    color: #000;
+  }
+  /* Math fractions in superscripts (the stacked p/q renderer) print as-is */
+  .stl-print-root .stl-math-fracsup,
+  .stl-print-root .stl-math-sup {
+    color: #000;
+  }
+
+  /* Figures. Image figures invert back to light-theme since the source
+   * screenshots are white-bg-black-text screenshots that we display
+   * with an invert filter on screen. SVG figures use currentColor and
+   * print directly. Tables inherit the print color scheme. */
+  .stl-print-q__figure {
+    margin: 4pt 0 8pt;
+    text-align: left;
+  }
+  .stl-print-q__figure img {
+    max-width: 80%;
+    height: auto;
+    /* Source screenshots are white-on-dark already — print them as is */
+  }
+  .stl-print-q__figure[data-kind="svg"] svg {
+    max-width: 80%;
+    height: auto;
+    color: #000;
+  }
+  .stl-print-q__figure[data-kind="table"] table {
+    border-collapse: collapse;
+    margin: 4pt 0;
+    font-size: 10pt;
+    font-family: "Geist", system-ui, sans-serif;
+  }
+  .stl-print-q__figure[data-kind="table"] caption {
+    text-align: left;
+    font-weight: 600;
+    margin-bottom: 4pt;
+    font-size: 10pt;
+  }
+  .stl-print-q__figure[data-kind="table"] th,
+  .stl-print-q__figure[data-kind="table"] td {
+    border: 1px solid #999;
+    padding: 4pt 8pt;
+    text-align: right;
+  }
+  .stl-print-q__figure[data-kind="table"] th:first-child,
+  .stl-print-q__figure[data-kind="table"] td:first-child {
+    text-align: left;
+  }
+  .stl-print-q__figure[data-kind="table"] th {
+    background: #eee !important;
+    font-weight: 600;
+  }
+  .stl-print-q__figure--placeholder {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 9pt;
+    color: #888;
+    border: 1px dashed #bbb;
+    padding: 8pt;
+    text-align: center;
+  }
+}
+
+/* --- reduced motion ------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* explicitly suppress view-transition pseudo-elements too — the
+   * universal selector above doesn't reach them in every engine */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

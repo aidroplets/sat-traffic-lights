@@ -1,0 +1,14 @@
+{
+  "name": "Study Signal",
+  "short_name": "Study Signal",
+  "description": "SAT/ACT practice with a confidence signal on every question.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050509",
+  "theme_color": "#050509",
+  "icons": [
+    { "src": "/share/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/share/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/share/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

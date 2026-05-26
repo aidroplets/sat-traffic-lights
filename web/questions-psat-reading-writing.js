@@ -1,0 +1,623 @@
+/**
+ * PSAT/NMSQT Reading & Writing — Digital format. Same shape as
+ * SAT R&W but slightly easier vocabulary and shorter passages.
+ *
+ * testType: 'PSAT' (explicitly set per question)
+ * section:  'reading-writing'
+ *
+ * Concatenates onto window.STL_QUESTIONS_AI (uses AI defaults).
+ */
+'use strict';
+
+window.STL_QUESTIONS_AI = (window.STL_QUESTIONS_AI || []).concat([
+  // ===== words-in-context (8) =====
+  {
+    id: 'q-psatrw-001',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 380,
+    passage: 'When the school added a recycling program, students were at first ______ about sorting their trash. After a few weeks, however, sorting bottles and paper became a normal part of lunch.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['eager', 'thrilled', 'hesitant', 'angry'],
+    answer: 2,
+    explanation: '"Hesitant" fits because the contrast word "however" signals that initial uncertainty gave way to routine acceptance. "Eager" and "thrilled" both express enthusiasm and contradict the contrast. "Angry" is too strong; nothing in the passage suggests hostility, only slow adjustment.'
+  },
+  {
+    id: 'q-psatrw-002',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 490,
+    passage: 'The young pianist\'s performance was ______: she rarely missed a note, kept perfect time, and ended on the exact beat the conductor signaled.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['casual', 'flawed', 'predictable', 'precise'],
+    answer: 3,
+    explanation: '"Precise" matches the listed evidence — rarely missed notes, perfect timing, exact ending beat. "Flawed" is the opposite. "Casual" contradicts the strict timing. "Predictable" doesn\'t describe accuracy and is unsupported by the passage.'
+  },
+  {
+    id: 'q-psatrw-003',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 470,
+    passage: 'Although the documentary covered serious environmental problems, the filmmaker\'s ______ tone — full of quick jokes and bright music — kept younger viewers watching to the end.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['lighthearted', 'somber', 'neutral', 'hostile'],
+    answer: 0,
+    explanation: '"Lighthearted" matches "quick jokes and bright music." "Somber" contradicts the cheerful description. "Hostile" is unsupported. "Neutral" ignores the playful elements explicitly described.'
+  },
+  {
+    id: 'q-psatrw-004',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 540,
+    passage: 'The mayor\'s plan was widely seen as ______: it offered a tax break to homeowners while still funding the parks that renters relied on, satisfying both groups in the city council.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['divisive', 'reckless', 'vague', 'balanced'],
+    answer: 3,
+    explanation: '"Balanced" fits because the plan satisfied two opposing groups simultaneously. "Divisive" is the opposite. "Reckless" suggests carelessness, but the plan is described as carefully meeting two needs. "Vague" contradicts the specific provisions named.'
+  },
+  {
+    id: 'q-psatrw-005',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 580,
+    passage: 'Critics found the novel\'s ending ______: characters who had been complex and surprising for hundreds of pages suddenly behaved in ways readers could have guessed from chapter one.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['unsettling', 'ambiguous', 'formulaic', 'inventive'],
+    answer: 2,
+    explanation: '"Formulaic" captures behavior readers "could have guessed" — predictable and conventional. "Inventive" is the opposite. "Unsettling" implies unease, not predictability. "Ambiguous" means unclear, but the ending is described as too clear and expected.'
+  },
+  {
+    id: 'q-psatrw-006',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 610,
+    passage: 'Historian Aiko Tanaka argues that early radio shows were not merely entertainment but a ______ force, drawing scattered rural listeners into shared national conversations about politics, sports, and music.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['divisive', 'fleeting', 'commercial', 'unifying'],
+    answer: 3,
+    explanation: '"Unifying" matches the image of "drawing scattered…listeners into shared…conversations." "Divisive" is the opposite. "Fleeting" describes duration, not the social effect Tanaka emphasizes. "Commercial" is unsupported; the passage focuses on connection, not business.'
+  },
+  {
+    id: 'q-psatrw-007',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 580,
+    passage: 'The committee\'s report was praised for being ______: rather than burying its findings under jargon, it stated clearly what the school had done well, what it had not, and what it should change.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['tentative', 'candid', 'evasive', 'sentimental'],
+    answer: 1,
+    explanation: '"Candid" means frank and direct, matching "stated clearly." "Evasive" is the opposite. "Tentative" suggests uncertainty, but the report makes confident claims. "Sentimental" describes emotion, which the passage doesn\'t mention.'
+  },
+  {
+    id: 'q-psatrw-008',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'words-in-context',
+    difficulty: 650,
+    passage: 'Although the senator framed her speech as a defense of free debate, journalists noted its ______ effect: speakers on the opposing side described feeling pressured into silence whenever her supporters were present.',
+    stem: 'Which choice completes the text with the most logical and precise word or phrase?',
+    choices: ['fleeting', 'negligible', 'galvanizing', 'chilling'],
+    answer: 3,
+    explanation: '"Chilling" specifically describes speech being suppressed by fear, matching "pressured into silence." "Galvanizing" means rousing — the opposite. "Negligible" contradicts a noted, observed effect. "Fleeting" describes duration, not the silencing dynamic.'
+  },
+
+  // ===== text-structure (4) =====
+  {
+    id: 'q-psatrw-009',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'text-structure',
+    difficulty: 420,
+    passage: 'The blue jay is known for its bright color, but it has another talent. It can copy the calls of hawks. By doing this, it scares smaller birds away from feeders so it can eat in peace.',
+    stem: 'Which choice best describes the overall structure of the text?',
+    choices: ['It traces the history of a bird species.', 'It compares two species of birds.', 'It introduces a feature, then explains a clever behavior tied to it.', 'It argues that blue jays are dangerous to other birds.'],
+    answer: 2,
+    explanation: 'The text moves from a known feature (color) to a clever behavior (mimicking hawks to clear feeders). It does not compare species (only one is discussed), make an argument about danger, or give history.'
+  },
+  {
+    id: 'q-psatrw-010',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'text-structure',
+    difficulty: 510,
+    passage: 'Many people assume bamboo is a tree because it grows tall and woody. In fact, bamboo is a giant grass. Unlike trees, it grows from underground stems and can shoot up several feet in a single day.',
+    stem: 'Which choice best describes the overall structure of the text?',
+    choices: ['It defines a term and traces its history.', 'It corrects a common assumption and offers supporting details.', 'It introduces a problem and proposes a solution.', 'It compares two unrelated plants in equal depth.'],
+    answer: 1,
+    explanation: 'The text states an assumption ("bamboo is a tree"), corrects it ("In fact…a giant grass"), then supports the correction with details. No history, equal-depth comparison, or problem/solution structure appears.'
+  },
+  {
+    id: 'q-psatrw-011',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'text-structure',
+    difficulty: 580,
+    passage: 'For decades, scientists believed octopuses had no real social life. Recent underwater cameras, however, have recorded octopuses signaling each other with color changes and even throwing shells at neighbors. These observations are forcing biologists to rewrite textbooks.',
+    stem: 'Which choice best describes the overall structure of the text?',
+    choices: ['A scientific method is described step by step.', 'A long-held view is challenged by new evidence that prompts revision.', 'A personal anecdote is used to support a general claim.', 'Two competing theories are weighed and one is chosen.'],
+    answer: 1,
+    explanation: 'The text presents an old belief, then "however" introduces new camera evidence that is "forcing biologists to rewrite textbooks." It does not weigh two theories, describe a method, or use an anecdote.'
+  },
+  {
+    id: 'q-psatrw-012',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'text-structure',
+    difficulty: 660,
+    passage: 'Economist Dele Okafor first lays out the standard view: small businesses fail mostly because of poor management. He then introduces survey data showing that the top reason owners give is sudden loss of a key customer. He concludes that policy should focus on customer diversification, not training programs.',
+    stem: 'Which choice best describes the overall structure of the text?',
+    choices: ['A historical change is traced from cause to effect.', 'A standard view is summarized, contradicted by data, and replaced with a new policy recommendation.', 'Two researchers disagree, and the author sides with one.', 'A personal story is generalized into a universal claim.'],
+    answer: 1,
+    explanation: 'The structure is: state standard view, contrast with survey data, then derive a new recommendation ("focus on…not training"). No second researcher appears; no history is traced; no personal story is used.'
+  },
+
+  // ===== cross-text (4) =====
+  {
+    id: 'q-psatrw-013',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'cross-text',
+    difficulty: 500,
+    passage: 'Text 1: City planner Mei Lin argues that adding bike lanes always reduces car traffic, because more residents will switch to bikes once safe lanes exist.\n\nText 2: Traffic engineer Ravi Patel notes that in three nearby cities, new bike lanes did not reduce car counts during the first two years; only after a decade did driving fall noticeably.',
+    stem: 'How would Patel most likely respond to Lin\'s claim?',
+    choices: ['By saying her claim is correct only over a much longer time frame.', 'By insisting that bike lanes increase car traffic.', 'By arguing that bike lanes never affect traffic at all.', 'By agreeing fully and adding examples.'],
+    answer: 0,
+    explanation: 'Patel\'s data shows no short-term effect but a noticeable decline after a decade — partial agreement on a longer timeline. He doesn\'t agree fully (he challenges "always"), nor does he claim no effect or the opposite effect.'
+  },
+  {
+    id: 'q-psatrw-014',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'cross-text',
+    difficulty: 530,
+    passage: 'Text 1: Music critic Sara Bell writes that streaming has hurt new artists, since most earn pennies per song play.\n\nText 2: Industry analyst Tomas Rivera reports that, despite low per-stream payments, many new artists now reach global audiences they could never have built through CDs alone, and use that exposure to sell concert tickets and merchandise.',
+    stem: 'How would Rivera most likely respond to Bell\'s view?',
+    choices: ['By rejecting it as completely false.', 'By saying CDs were also bad for new artists.', 'By agreeing that pay is low but arguing the broader effects are still beneficial.', 'By claiming streaming pays new artists very well per play.'],
+    answer: 2,
+    explanation: 'Rivera concedes "low per-stream payments" (agreeing with Bell\'s evidence) but argues the global reach offsets it. He doesn\'t reject her view entirely, attack CDs, or contradict the per-stream pay numbers.'
+  },
+  {
+    id: 'q-psatrw-015',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'cross-text',
+    difficulty: 520,
+    passage: 'Text 1: Ecologist Hana Kim argues that planting trees is the cheapest, fastest way to pull carbon dioxide from the air.\n\nText 2: Forester Daniel Reyes agrees that trees absorb carbon, but warns that newly planted forests can take 20 to 40 years to capture meaningful amounts and that many die before reaching maturity.',
+    stem: 'Based on the texts, Kim and Reyes would most likely agree on which point?',
+    choices: ['Tree planting produces benefits within a few years.', 'Newly planted forests typically die before maturing.', 'Tree planting is the single best response to climate change.', 'Trees can absorb carbon dioxide from the atmosphere.'],
+    answer: 3,
+    explanation: 'Both authors accept that trees absorb CO2 — Kim builds her case on it, and Reyes "agrees that trees absorb carbon." The other choices are positions only one author holds, or that neither holds.'
+  },
+  {
+    id: 'q-psatrw-016',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'cross-text',
+    difficulty: 700,
+    passage: 'Text 1: Education researcher Wei Zhang argues that homework strongly improves student achievement, citing studies showing higher test scores in classrooms that assign nightly practice.\n\nText 2: Researcher Olu Adebayo replies that the same studies show the gain disappears for elementary students and shrinks sharply when family income is controlled for, suggesting homework mainly measures access to quiet study space and parental help.',
+    stem: 'How would Adebayo most likely respond to Zhang\'s claim?',
+    choices: [
+      'By accepting the claim only for older students and questioning what the test-score gains really measure.',
+      'By rejecting the existence of any link between homework and test scores.',
+      'By arguing that homework harms students of all ages.',
+      'By insisting that family income has no effect on achievement.'
+    ],
+    answer: 0,
+    explanation: 'Adebayo notes the gain "disappears for elementary students" (limited age range) and "shrinks sharply when family income is controlled" (questioning what is really measured). He doesn\'t deny any link, claim universal harm, or dismiss income\'s role — he emphasizes it.'
+  },
+
+  // ===== central-ideas (6) =====
+  {
+    id: 'q-psatrw-017',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'central-ideas',
+    difficulty: 360,
+    passage: 'Sea otters spend much of the day grooming their fur. Unlike whales, they have no thick fat layer to keep them warm. Their dense coats trap a thin layer of air against the skin, and that trapped air is what protects them from cold ocean water.',
+    stem: 'Which choice best states the main idea of the text?',
+    choices: ['Sea otters look very similar to whales.', 'Sea otters\' fur, not body fat, keeps them warm in cold water.', 'Sea otters cannot survive in cold ocean water.', 'Sea otters spend most of the day swimming.'],
+    answer: 1,
+    explanation: 'The text contrasts otters with whales (no fat layer) and explains that the dense coat\'s trapped air provides warmth. The other options misstate similarity to whales, daily activity, or survival capacity.'
+  },
+  {
+    id: 'q-psatrw-018',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'central-ideas',
+    difficulty: 440,
+    passage: 'When a coral reef is damaged by a storm, fish populations often drop sharply within weeks. But marine biologist Carla Mendes has found that, if surrounding reefs are healthy, fish from those reefs gradually move in and the damaged area can recover much of its former diversity within five years.',
+    stem: 'Which choice best states the main idea of the text?',
+    choices: ['Coral reefs do not support diverse fish populations.', 'Healthy nearby reefs help damaged reefs recover their fish diversity over time.', 'Storms permanently destroy coral reefs.', 'All marine biologists agree about reef recovery.'],
+    answer: 1,
+    explanation: 'Mendes\'s key finding is that healthy neighboring reefs supply fish that restore diversity within five years. The text doesn\'t claim permanent destruction, scientific consensus, or low diversity.'
+  },
+  {
+    id: 'q-psatrw-019',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'central-ideas',
+    difficulty: 510,
+    passage: 'The novelist Lucia Romano resisted being grouped with other "experimental" writers of her generation. While they often broke grammar rules and reordered chapters, Romano\'s sentences were standard and her plots moved in straight lines. Her experiments, she insisted, were in subject matter alone.',
+    stem: 'Which choice best states the main idea of the text?',
+    choices: ['Romano shared a writing style with most experimental novelists.', 'Romano considered herself experimental in topic, not in form.', 'Romano avoided difficult subjects in her novels.', 'Romano\'s grammar and plotting were unusual for her time.'],
+    answer: 1,
+    explanation: 'Romano kept conventional grammar and plotting but said her experiments were "in subject matter alone." The other choices invert her stance on style or wrongly claim she avoided difficult topics.'
+  },
+  {
+    id: 'q-psatrw-020',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'central-ideas',
+    difficulty: 550,
+    passage: 'Many fans assume that championship teams are built mainly through high-priced trades. A study of fifty title-winning rosters suggests otherwise: an average of seven of the twelve key players on each team were drafted or signed as unproven young talent and developed within the organization.',
+    stem: 'Which choice best states the main idea of the text?',
+    choices: ['Championship teams rely heavily on internally developed players, contrary to popular belief.', 'Fans rarely follow championship teams closely.', 'High-priced trades almost never help teams win.', 'All twelve key players on title teams come through the draft.'],
+    answer: 0,
+    explanation: 'The text contrasts the assumption (trades) with the data (seven of twelve developed in-house). It doesn\'t say trades never help, that all players come from the draft, or anything about fan attention.'
+  },
+  {
+    id: 'q-psatrw-021',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'central-ideas',
+    difficulty: 620,
+    passage: 'Architect Priya Shah argues that the most lasting public buildings are not the most striking ones. Buildings that try too hard to express the spirit of a single decade, she notes, often look dated within twenty years, while restrained designs continue to feel dignified long after their original style has gone out of fashion.',
+    stem: 'Which choice best states the main idea of the text?',
+    choices: ['Restrained public buildings tend to remain dignified longer than flashy, era-specific ones.', 'Bold, decade-defining designs age better than restrained ones.', 'Public buildings should always be replaced every twenty years.', 'Architects should never reflect the spirit of their time.'],
+    answer: 0,
+    explanation: 'Shah\'s claim is that restrained buildings outlast era-specific ones in dignity. The text doesn\'t praise bold designs, call for replacement, or forbid all reference to era — only warns against trying "too hard."'
+  },
+  {
+    id: 'q-psatrw-022',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'central-ideas',
+    difficulty: 655,
+    passage: 'Linguist Joon Park observes that "dead" languages are rarely as dead as casual readers assume. Latin, often given as the prime example, still shapes daily English vocabulary, scientific naming, and legal phrases — meaning its influence on the modern world remains active even though no community speaks it as a first language.',
+    stem: 'Which choice best states the main idea of the text?',
+    choices: ['Most modern languages will eventually become dead languages.', 'Latin is again being spoken as a first language in some communities.', 'English would not exist without Latin.', 'A "dead" language can continue to exert active influence even without first-language speakers.'],
+    answer: 3,
+    explanation: 'Park\'s claim is that "dead" is misleading — Latin still actively shapes vocabulary, science, and law without native speakers. The text doesn\'t claim Latin is being revived, that English depends entirely on Latin, or predict the fate of modern languages.'
+  },
+
+  // ===== inferences (6) =====
+  {
+    id: 'q-psatrw-023',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'inferences',
+    difficulty: 400,
+    passage: 'Polar bears rely on sea ice to hunt seals, their main food source. As Arctic ice melts earlier each spring, bears have less time to catch enough seals before the long ice-free summer. Some bears now reach autumn at much lower body weights than bears did fifty years ago. ______',
+    stem: 'Which choice most logically completes the text?',
+    choices: ['Consequently, Arctic summers are now shorter than ever.', 'In short, polar bears no longer eat seals at all.', 'As a result, polar bear cubs born today face a higher risk of going hungry than cubs born decades ago.', 'Therefore, seal populations have collapsed across the Arctic.'],
+    answer: 2,
+    explanation: 'Lower autumn weights for parents logically lead to higher hunger risk for cubs. The text doesn\'t claim seal collapse, give up seals as food, or reverse the trend toward longer ice-free summers.'
+  },
+  {
+    id: 'q-psatrw-024',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'inferences',
+    difficulty: 470,
+    passage: 'A new vending machine at a school sells only fruit and water. Sales records show that students buy from it most heavily on days the cafeteria serves dishes rated "very salty" in taste tests. ______',
+    stem: 'Which choice most logically completes the text?',
+    choices: ['This pattern indicates students avoid the vending machine on salty-meal days.', 'This pattern suggests students may be turning to the machine to balance salty meals with hydrating, lighter options.', 'This pattern proves the cafeteria food is unsafe to eat.', 'This pattern shows the vending machine has lowered overall school sales.'],
+    answer: 1,
+    explanation: 'Higher fruit-and-water sales on saltiest days reasonably suggest students seek hydration and lighter food. The data don\'t prove safety problems or sales declines, and choice D contradicts the trend described.'
+  },
+  {
+    id: 'q-psatrw-025',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'inferences',
+    difficulty: 540,
+    passage: 'A library tracks how often each book is borrowed. After moving the science section from a back corner to the front entrance, librarians noticed that science checkouts doubled within a month, even though the total number of library visitors stayed roughly the same. ______',
+    stem: 'Which choice most logically completes the text?',
+    choices: ['This suggests that the library needs more visitors to raise checkouts.', 'This suggests that the visibility of a section can strongly influence which books visitors borrow.', 'This suggests that other sections were closed during the experiment.', 'This suggests that science books became more interesting that month.'],
+    answer: 1,
+    explanation: 'Same visitors, doubled science checkouts after a placement change isolates visibility as the likely cause. The data rule out a visitor-count effect; nothing supports content changes or closures.'
+  },
+  {
+    id: 'q-psatrw-026',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'inferences',
+    difficulty: 555,
+    passage: 'Researchers gave two groups of volunteers the same crossword puzzle. Group A worked alone in silence; Group B worked alone but with quiet instrumental music playing. Group B finished the puzzle faster on average and reported feeling more focused, while accuracy rates were nearly identical. ______',
+    stem: 'Which choice most logically completes the text?',
+    choices: ['These results suggest that working in silence always slows people down.', 'These results suggest that quiet instrumental music can support faster puzzle solving without sacrificing accuracy.', 'These results suggest that any kind of music improves test performance.', 'These results suggest that volunteers in Group B were less accurate than those in Group A.'],
+    answer: 1,
+    explanation: 'The data show speed gains with equal accuracy under quiet instrumental music — exactly what choice A claims. The text doesn\'t test "any kind of music," support an absolute claim about silence, or show lower accuracy in Group B.'
+  },
+  {
+    id: 'q-psatrw-027',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'inferences',
+    difficulty: 640,
+    passage: 'Historians studying letters from a 19th-century textile town noticed that workers wrote far more often about factory whistles than about clocks. The whistles signaled shift starts, meal breaks, and the end of the workday, while pocket watches were rare and church-tower clocks were not visible from the factory floor. ______',
+    stem: 'Which choice most logically completes the text?',
+    choices: ['These workers most likely owned several pocket watches each.', 'For most of these workers, the whistle was likely the main way they organized the events of their day.', 'Workers in this town avoided talking about time altogether.', 'Church-tower clocks were the dominant timekeeping tool inside the factory.'],
+    answer: 1,
+    explanation: 'The whistle marked every key transition, while alternatives (watches, clocks) were rare or invisible — making the whistle the primary daily timekeeper. The other choices contradict the passage or its evidence about letter content.'
+  },
+  {
+    id: 'q-psatrw-028',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'inferences',
+    difficulty: 720,
+    passage: 'A study of online news commentary found that articles allowing reader comments received 30% more total page views than identical articles with comments disabled. However, average time spent reading the article itself was 25% lower when comments were enabled. ______',
+    stem: 'Which choice most logically completes the text?',
+    choices: ['These findings suggest that comment sections may attract additional traffic but pull attention away from the article\'s actual text.', 'These findings suggest that disabling comments reduces a site\'s overall traffic to zero.', 'These findings suggest that comment sections are read more carefully than the articles themselves are.', 'These findings suggest that page views and reading time always rise and fall together.'],
+    answer: 0,
+    explanation: 'More views but less per-article reading time is exactly the pattern in choice A: comments draw clicks while diverting attention. The passage doesn\'t measure whether comments are read carefully, claim total traffic loss, or support a fixed views-time correlation — in fact, the data show the opposite.'
+  },
+
+  // ===== command-of-evidence (5) =====
+  {
+    id: 'q-psatrw-029',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'command-of-evidence',
+    difficulty: 450,
+    passage: 'A school club claims that adding a 10-minute morning stretch to homeroom helps students focus better in their first-period class. To test this claim, the club wants the strongest possible evidence.',
+    stem: 'Which finding, if true, would most strongly support the club\'s claim?',
+    choices: ['Students who did the stretch reported feeling slightly more relaxed after homeroom.', 'Most students said they enjoyed the stretches.', 'First-period teachers, who did not know which classes had stretched, rated stretching classes as noticeably more focused than non-stretching classes on the same day.', 'The same school added the stretch program in two earlier years.'],
+    answer: 2,
+    explanation: 'A blinded comparison by teachers measures actual first-period focus — exactly the claim. Self-reports of relaxation or enjoyment don\'t measure focus. Past adoption of the program isn\'t evidence about its effect.'
+  },
+  {
+    id: 'q-psatrw-030',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'command-of-evidence',
+    difficulty: 510,
+    passage: 'Researcher Nia Brooks hypothesizes that giving city workers free bus passes will reduce the number of cars they drive to work each week.',
+    stem: 'Which finding, if true, would most strongly support Brooks\'s hypothesis?',
+    choices: ['Workers who received free bus passes drove an average of 1.8 fewer days per week than a similar group that did not receive them.', 'The bus system added several new routes during the study.', 'Workers said they liked having a free bus pass.', 'Most workers in the city already owned a car.'],
+    answer: 0,
+    explanation: 'The hypothesis is about driving fewer days per week, which choice A measures directly with a comparison group. Liking the pass doesn\'t prove behavior change; new routes or car ownership rates don\'t isolate the pass\'s effect.'
+  },
+  {
+    id: 'q-psatrw-031',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'command-of-evidence',
+    difficulty: 545,
+    passage: 'A team of biologists argues that adding artificial reefs to a bay increases the variety of fish species living there.',
+    stem: 'Which finding, if true, would most directly support the biologists\' argument?',
+    choices: ['The artificial reefs were made of recycled materials.', 'Three years after artificial reefs were installed, the bay contained 40 fish species, compared to 22 species in a similar nearby bay without reefs.', 'The bay\'s water temperature changed slightly over the same three years.', 'Local fishers said the bay seemed "more lively" after the reefs went in.'],
+    answer: 1,
+    explanation: 'A direct species-count comparison with a control bay supports the variety claim. Fisher impressions are vague; the reef\'s materials don\'t bear on diversity; and the temperature change is a confound, not support.'
+  },
+  {
+    id: 'q-psatrw-032',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'command-of-evidence',
+    difficulty: 630,
+    passage: 'A historian claims that the spread of public libraries in the late 1800s helped widen literacy among working-class adults, not just children.',
+    stem: 'Which finding, if true, would most strongly support the historian\'s claim?',
+    choices: ['Census records show that adult literacy rates in towns that built libraries between 1880 and 1900 rose noticeably faster than rates in similar towns without new libraries.', 'Many libraries from this period are still in use today.', 'New libraries often hosted public readings and lectures.', 'Children\'s book sections were the most popular part of many libraries.'],
+    answer: 0,
+    explanation: 'Comparing adult literacy growth in library and non-library towns directly tests the claim about working-class adults. Lectures show activity but not literacy gains. Library longevity and children\'s-section popularity miss the adult-literacy point.'
+  },
+  {
+    id: 'q-psatrw-033',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'command-of-evidence',
+    difficulty: 700,
+    passage: 'Education researcher Kai Lin argues that high school courses that require frequent low-stakes quizzes lead to better long-term retention of material than courses that rely on a few high-stakes tests.',
+    stem: 'Which finding, if true, would most strongly support Lin\'s argument?',
+    choices: [
+      'Students reported that they preferred classes with frequent low-stakes quizzes.',
+      'On a cumulative exam given six months after the course ended, students from frequent-quiz sections scored significantly higher than students from sections of the same course that used only midterm and final exams.',
+      'Teachers spent more time grading in the frequent-quiz sections.',
+      'Frequent-quiz sections finished the textbook slightly later in the semester.'
+    ],
+    answer: 1,
+    explanation: 'A delayed cumulative exam comparing matched sections directly tests "long-term retention." Preferences, grading time, and pacing differences don\'t measure how much students remember six months later.'
+  },
+
+  // ===== boundaries (8) =====
+  {
+    id: 'q-psatrw-034',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 320,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nThe new bakery on Oak Street ______ fresh bread every morning at six.',
+    choices: ['have baked', 'bakes', 'baking', 'bake'],
+    answer: 1,
+    explanation: 'The singular subject "bakery" needs the singular present-tense verb "bakes." "Bake" is plural; "baking" lacks a helping verb; "have baked" is plural and mismatches the present-routine adverb "every morning."'
+  },
+  {
+    id: 'q-psatrw-035',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 380,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nThe coach reminded the team about the practice schedule ______ no one would be late.',
+    choices: [', so that', 'so that:', 'so that;', '; so'],
+    answer: 0,
+    explanation: 'A comma plus the subordinator "so that" cleanly joins the main clause to a subordinate purpose clause. "; so" creates a misjoined fragment; the others place punctuation incorrectly inside the conjunction.'
+  },
+  {
+    id: 'q-psatrw-036',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 470,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nMy aunt, who lives in Toronto, ______ visiting us next month.',
+    choices: ['is', 'were', 'have been', 'are'],
+    answer: 0,
+    explanation: 'The singular subject "aunt" requires singular "is." The interrupting clause "who lives in Toronto" doesn\'t change the subject\'s number. The other options are plural or shift tense.'
+  },
+  {
+    id: 'q-psatrw-037',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 480,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nThe chef prepared three dishes for the contest______ a soup, a salad, and a stew.',
+    choices: ['—and', ',', ':', ';'],
+    answer: 2,
+    explanation: 'A colon properly introduces the list that explains "three dishes." A comma is too weak; a semicolon must join two independent clauses; "—and" is grammatically tangled before a list set off by commas.'
+  },
+  {
+    id: 'q-psatrw-038',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 540,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nDr. Alvarez\'s research ______ surprising even her colleagues, who had expected results closer to the original predictions.',
+    choices: ['are', 'were', 'have been', 'is'],
+    answer: 3,
+    explanation: 'The singular noncount subject "research" takes singular "is." "Were," "are," and "have been" are all plural forms. The participle "surprising" works with singular "is" as a present-progressive description.'
+  },
+  {
+    id: 'q-psatrw-039',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 590,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nHaving studied the maps for hours______ chose a route that avoided the busy highway.',
+    choices: ['; the driver', ', the driver', 'the driver', '. The driver'],
+    answer: 1,
+    explanation: 'After an introductory participial phrase, a comma is required before the subject "the driver." Without the comma, the modifier dangles. A period or semicolon would create a fragment beginning with the participial phrase.'
+  },
+  {
+    id: 'q-psatrw-040',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 620,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nThe museum displays artifacts from many ancient civilizations______ Egyptian jewelry, Roman coins, and Mayan pottery are visitor favorites.',
+    choices: ['. For example,', 'for example,', ', for example,', ': for example,'],
+    answer: 0,
+    explanation: 'Two independent clauses must be separated by a period (or a semicolon). The first clause ends after "civilizations"; "Egyptian jewelry, Roman coins, and Mayan pottery are visitor favorites" is a complete clause. A comma or no punctuation creates a comma splice or run-on; a colon followed by "for example" is non-standard.'
+  },
+  {
+    id: 'q-psatrw-041',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'boundaries',
+    difficulty: 645,
+    passage: null,
+    stem: 'Which choice completes the text so that it conforms to the conventions of Standard English?\n\nNeither the manager nor the assistants ______ aware that the shipment had arrived an hour early.',
+    choices: ['were', 'has been', 'was', 'is'],
+    answer: 0,
+    explanation: 'With "neither…nor," the verb agrees with the nearer subject. The nearer subject "assistants" is plural, so "were" is correct. "Was," "is," and "has been" are singular and would only work if the nearer subject were singular.'
+  },
+
+  // ===== form-structure (4) =====
+  {
+    id: 'q-psatrw-042',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'form-structure',
+    difficulty: 410,
+    passage: 'A student is writing about the local farmers\' market and has noted:\n• The market opens every Saturday at 8 a.m.\n• It is held in the parking lot of City Hall.\n• It features more than 30 local vendors.\n• The student wants to introduce the market to readers who have never visited it.',
+    stem: 'Which choice most effectively uses information from the notes to introduce the market to new readers?',
+    choices: ['The market features vendors.', 'City Hall has a parking lot.', 'There are more than 30 local vendors.', 'Every Saturday at 8 a.m., the parking lot of City Hall transforms into a farmers\' market with more than 30 local vendors.'],
+    answer: 3,
+    explanation: 'Choice A combines time, location, and scale into one introductory sentence — exactly what new readers need. The other choices use only fragments of the notes and don\'t function as an introduction.'
+  },
+  {
+    id: 'q-psatrw-043',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'form-structure',
+    difficulty: 510,
+    passage: 'A student writing about a local artist has noted:\n• Helena Ortiz is a sculptor based in Albuquerque.\n• Her recent exhibit featured 12 large clay figures.\n• Each figure depicted a worker from a different local industry.\n• The student wants to emphasize the unifying theme of Ortiz\'s exhibit.',
+    stem: 'Which choice most effectively uses information from the notes to emphasize the exhibit\'s unifying theme?',
+    choices: ['Ortiz used clay to make her figures.', 'The exhibit featured 12 figures.', 'Helena Ortiz lives in Albuquerque, where she works as a sculptor.', 'Albuquerque sculptor Helena Ortiz\'s recent exhibit unified 12 large clay figures around a single theme: workers from the city\'s various industries.'],
+    answer: 3,
+    explanation: 'Choice B states the unifying theme — workers from various industries — using all relevant notes. The others omit the theme entirely or report only logistical or material facts.'
+  },
+  {
+    id: 'q-psatrw-044',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'form-structure',
+    difficulty: 560,
+    passage: 'A student is writing about a recent science study and has noted:\n• Researchers tracked 200 wild bees over one summer.\n• Bees that nested near wildflower strips made 45% more flower visits than bees nesting near bare fields.\n• The study suggests planting wildflower strips can boost pollination.\n• The student wants to make a generalization based on the study.',
+    stem: 'Which choice most effectively uses information from the notes to make a generalization based on the study?',
+    choices: ['A summer-long study of 200 wild bees suggests that planting wildflower strips near nesting sites can substantially increase pollination activity.', 'In one study, researchers used 200 bees.', 'Wildflowers are common in many regions.', 'Bees fly from flower to flower.'],
+    answer: 0,
+    explanation: 'Choice C draws a generalization from the study\'s scale, finding, and recommendation. The other choices are off-topic, restate only setup details, or offer unrelated background.'
+  },
+  {
+    id: 'q-psatrw-045',
+    state: 'live',
+    testType: 'PSAT',
+    section: 'reading-writing',
+    topic: 'form-structure',
+    difficulty: 670,
+    passage: 'A student is writing about a research finding and has noted:\n• Sleep researcher Idris Khan studied 800 high school students.\n• Students with consistent bedtimes scored higher on memory tests than students with irregular bedtimes.\n• The size of the effect was greater than the effect of total hours slept.\n• The student wants to highlight the most surprising aspect of Khan\'s finding for an audience that already knows sleep is important.',
+    stem: 'Which choice most effectively uses information from the notes to highlight the most surprising aspect of Khan\'s finding for this audience?',
+    choices: ['Sleep is important for memory.', 'Memory tests can measure sleep quality.', 'Khan\'s study of 800 high school students suggests that the consistency of a bedtime can matter more for memory than the total number of hours slept.', 'Khan studied 800 high school students.'],
+    answer: 2,
+    explanation: 'Choice A foregrounds the surprising twist for an informed audience — consistency outweighing duration. The other choices state methodology, restate what the audience already knows, or invent a claim not in the notes.'
+  }
+]);

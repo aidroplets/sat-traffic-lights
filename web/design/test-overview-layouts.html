@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Test overview — layout exploration</title>
+<link rel="stylesheet" href="../app.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  /* ---- page chrome (preview only — not shipped) ---- */
+  :root { --stl-tint: 139 134 255; --stl-accent: rgb(139, 134, 255); --stl-bg: #0e0e12; --stl-fg: #e8e8f0; --stl-surface: #16161c; --stl-surface-2: #1c1c24; --stl-hairline: #2a2a32; --stl-text: #e8e8f0; --stl-text-muted: #8a8a98; --stl-text-subtle: #6a6a78; --stl-font: 'Inter', system-ui, sans-serif; }
+  html { background: var(--stl-bg); }
+  body {
+    background: var(--stl-bg);
+    color: var(--stl-text);
+    font-family: var(--stl-font);
+    padding: 40px 24px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .preview-h1 { font-weight: 600; font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .preview-sub { color: var(--stl-text-muted); margin: 0 0 32px; }
+  .variant {
+    margin: 56px 0;
+    padding: 0;
+  }
+  .variant__head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--stl-hairline);
+  }
+  .variant__tag {
+    font-family: "Geist Mono", ui-monospace, SF Mono, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgb(var(--stl-tint));
+    padding: 3px 8px;
+    background: rgba(var(--stl-tint), 0.10);
+    border-radius: 999px;
+  }
+  .variant__name { font-weight: 600; font-size: 18px; margin: 0; }
+  .variant__why { color: var(--stl-text-muted); font-size: 13px; margin: 0 0 16px; }
+
+  /* ---- shared bits across variants ---- */
+  .demo { background: var(--stl-surface); border: 1px solid var(--stl-hairline); border-radius: 12px; padding: 20px; position: relative; }
+  .demo h3.eyebrow { font-family: "Geist Mono", ui-monospace, SF Mono, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stl-text-subtle); margin: 0 0 12px; font-weight: 500; }
+  .demo h3.eyebrow::before { content: '● '; color: rgb(var(--stl-tint)); }
+  .canvas-host { position: relative; aspect-ratio: 1 / 1; max-height: 360px; }
+  .canvas-host canvas { width: 100% !important; height: 100% !important; }
+
+  /* SW tabs (50/50) */
+  .sw-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; background: rgba(255,255,255,0.04); border: 1px solid var(--stl-hairline); border-radius: 999px; margin-bottom: 10px; width: 100%; }
+  .sw-tab { appearance: none; background: transparent; border: 0; padding: 6px 12px; border-radius: 999px; font: inherit; font-size: 12px; color: var(--stl-text-muted); text-align: center; white-space: nowrap; cursor: pointer; }
+  .sw-tab.is-active { background: rgba(var(--stl-tint), 0.18); color: var(--stl-text); font-weight: 500; }
+
+  /* focus list */
+  .focus { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+  .focus__item { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.03); border: 1px solid var(--stl-hairline); font-size: 13px; }
+  .focus__pct { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: rgb(var(--stl-tint)); font-weight: 600; }
+
+  /* CTA */
+  .cta {
+    appearance: none; background: linear-gradient(180deg, #f5f3ff, #e0dcff); color: #1a1a22;
+    border: 0; border-radius: 8px; padding: 12px 20px;
+    font-family: inherit; font-size: 15px; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; box-shadow: 0 8px 24px -10px rgba(var(--stl-tint), 0.5);
+    width: 100%;
+  }
+  .cta svg { display: block; }
+  .cta-hint { color: var(--stl-text-muted); font-size: 12px; margin: 8px 0 0; }
+  .expand-link { color: rgb(var(--stl-tint)); background: none; border: 0; cursor: pointer; font-size: 12px; padding: 0; }
+
+  /* AI sparkle icon — reusable SVG mark */
+  .ai-svg { width: 16px; height: 16px; }
+
+  /* card chip for option E */
+  .card { background: rgba(255,255,255,0.03); border: 1px solid var(--stl-hairline); border-radius: 10px; padding: 14px; }
+  .card__title { font-family: "Geist Mono", ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stl-text-subtle); margin: 0 0 8px; }
+  .topic-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--stl-hairline); font-size: 12px; margin-right: 6px; margin-bottom: 6px; }
+  .topic-pill__pct { font-family: "Geist Mono", ui-monospace, monospace; color: rgb(var(--stl-tint)); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1 class="preview-h1">Test overview — 6 layout options</h1>
+<p class="preview-sub">Same data on every variant so you can compare directly. Tell me which one (or hybrid) to ship.</p>
+
+<!-- ──────────────────── OPTION A ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option A</span>
+    <h2 class="variant__name">Chart-hero with sidebar (refined current)</h2>
+  </header>
+  <p class="variant__why">Bigger chart (60/40), tabs clearly above focus list. Conservative refinement of what's there.</p>
+  <div class="demo">
+    <h3 class="eyebrow">All-time per-topic mastery</h3>
+    <div style="display: grid; grid-template-columns: minmax(260px, 1.4fr) minmax(220px, 1fr); gap: 24px; align-items: center;">
+      <div class="canvas-host"><canvas id="chartA"></canvas></div>
+      <aside style="display: grid; gap: 12px;">
+        <div class="sw-tabs"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+        <p class="eyebrow" style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stl-text-subtle);">● Where you're weakest</p>
+        <ul class="focus">
+          <li class="focus__item"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item"><span>Linear Equations</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item"><span>Range Statistics</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </aside>
+    </div>
+    <div style="margin-top: 20px;">
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+      <p class="cta-hint">Question mix scales with your topic mastery — weakest areas dominate.</p>
+      <div style="text-align: right; margin-top: 8px;"><button class="expand-link">Show all 47 topics</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION B ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B</span>
+    <h2 class="variant__name">Vertical stack, chart commands</h2>
+  </header>
+  <p class="variant__why">Chart is the hero, centered. Focus topics as horizontal cards below toggle. Best on mobile.</p>
+  <div class="demo">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+      <button class="expand-link">Show all 47 topics</button>
+    </div>
+    <div style="max-width: 480px; margin: 8px auto 0;" class="canvas-host"><canvas id="chartB"></canvas></div>
+    <div style="display: flex; justify-content: center; margin: 16px 0;"><div class="sw-tabs" style="width: 240px;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div></div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+      <div class="card" style="text-align: center;"><p class="card__title">#1</p><p style="margin: 0; font-weight: 600;">Place Value</p><p style="margin: 4px 0 0; color: rgb(var(--stl-tint)); font-family: 'Geist Mono', monospace; font-weight: 600;">0%</p></div>
+      <div class="card" style="text-align: center;"><p class="card__title">#2</p><p style="margin: 0; font-weight: 600;">Linear Equations</p><p style="margin: 4px 0 0; color: rgb(var(--stl-tint)); font-family: 'Geist Mono', monospace; font-weight: 600;">0%</p></div>
+      <div class="card" style="text-align: center;"><p class="card__title">#3</p><p style="margin: 0; font-weight: 600;">Range Statistics</p><p style="margin: 4px 0 0; color: rgb(var(--stl-tint)); font-family: 'Geist Mono', monospace; font-weight: 600;">0%</p></div>
+    </div>
+    <div style="max-width: 480px; margin: 0 auto;">
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION C ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option C</span>
+    <h2 class="variant__name">Symmetric both-sides view (no toggle)</h2>
+  </header>
+  <p class="variant__why">Show weaknesses + strengths simultaneously — no toggle needed. Highest comprehension density.</p>
+  <div class="demo">
+    <h3 class="eyebrow" style="text-align: center;">All-time per-topic mastery</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 20px; align-items: center;">
+      <aside>
+        <p class="card__title" style="color: #f87171;">⚠ Weakest</p>
+        <ul class="focus">
+          <li class="focus__item"><span>Place Value</span><span class="focus__pct" style="color: #f87171;">0%</span></li>
+          <li class="focus__item"><span>Linear Equations</span><span class="focus__pct" style="color: #f87171;">0%</span></li>
+          <li class="focus__item"><span>Range Statistics</span><span class="focus__pct" style="color: #f87171;">0%</span></li>
+        </ul>
+      </aside>
+      <div class="canvas-host"><canvas id="chartC"></canvas></div>
+      <aside>
+        <p class="card__title" style="color: #34d399;">★ Strongest</p>
+        <ul class="focus">
+          <li class="focus__item"><span>Functions</span><span class="focus__pct" style="color: #34d399;">90%</span></li>
+          <li class="focus__item"><span>Word Problems</span><span class="focus__pct" style="color: #34d399;">85%</span></li>
+          <li class="focus__item"><span>Geometry</span><span class="focus__pct" style="color: #34d399;">78%</span></li>
+        </ul>
+      </aside>
+    </div>
+    <div style="margin-top: 20px; max-width: 480px; margin-left: auto; margin-right: auto;">
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+      <div style="text-align: center; margin-top: 10px;"><button class="expand-link">Show all 47 topics</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION D ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option D</span>
+    <h2 class="variant__name">Top-down with prominent CTA band</h2>
+  </header>
+  <p class="variant__why">Structural toggle at top → chart + focus in middle → bold CTA band anchored at bottom. Most "dashboard" feeling.</p>
+  <div class="demo" style="padding: 0;">
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--stl-hairline);">
+      <div class="sw-tabs" style="margin: 0;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+    </div>
+    <div style="padding: 20px; display: grid; grid-template-columns: minmax(260px, 1.4fr) minmax(200px, 1fr); gap: 24px; align-items: center;">
+      <div class="canvas-host"><canvas id="chartD"></canvas></div>
+      <aside>
+        <p class="card__title">Where you're weakest</p>
+        <ul class="focus">
+          <li class="focus__item"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item"><span>Linear Equations</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item"><span>Range Statistics</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </aside>
+    </div>
+    <div style="padding: 16px 20px; border-top: 1px solid var(--stl-hairline); background: linear-gradient(180deg, transparent, rgba(var(--stl-tint), 0.04));">
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+      <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+        <span class="cta-hint" style="margin: 0;">Weakest areas dominate.</span>
+        <button class="expand-link">Show all 47 topics</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION E ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option E</span>
+    <h2 class="variant__name">Card grid (2×2, chart spans two)</h2>
+  </header>
+  <p class="variant__why">Compartmentalized — weak + strong both visible as separate cards. Modular: easy to add more stat cards later.</p>
+  <div class="demo">
+    <h3 class="eyebrow">All-time per-topic mastery</h3>
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px;">
+      <div class="canvas-host" style="grid-row: span 2; max-height: 400px;"><canvas id="chartE"></canvas></div>
+      <div class="card">
+        <p class="card__title" style="color: #f87171;">⚠ Weakest 3</p>
+        <ul class="focus">
+          <li class="focus__item" style="background: transparent; border: none; padding: 4px 0;"><span>Place Value</span><span class="focus__pct" style="color: #f87171;">0%</span></li>
+          <li class="focus__item" style="background: transparent; border: none; padding: 4px 0;"><span>Linear Equations</span><span class="focus__pct" style="color: #f87171;">0%</span></li>
+          <li class="focus__item" style="background: transparent; border: none; padding: 4px 0;"><span>Range Statistics</span><span class="focus__pct" style="color: #f87171;">0%</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card__title" style="color: #34d399;">★ Strongest 3</p>
+        <ul class="focus">
+          <li class="focus__item" style="background: transparent; border: none; padding: 4px 0;"><span>Functions</span><span class="focus__pct" style="color: #34d399;">90%</span></li>
+          <li class="focus__item" style="background: transparent; border: none; padding: 4px 0;"><span>Word Problems</span><span class="focus__pct" style="color: #34d399;">85%</span></li>
+          <li class="focus__item" style="background: transparent; border: none; padding: 4px 0;"><span>Geometry</span><span class="focus__pct" style="color: #34d399;">78%</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 16px;">
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION F ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option F</span>
+    <h2 class="variant__name">Chart-dominant with mini-aside</h2>
+  </header>
+  <p class="variant__why">Maximize chart real estate (70% width). Sidebar is just a thin strip of stacked topic chips. Most chart-forward.</p>
+  <div class="demo">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+      <div class="sw-tabs" style="width: 200px; margin: 0;"><button class="sw-tab is-active">Weak</button><button class="sw-tab">Strong</button></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px;">
+      <div class="canvas-host" style="max-height: 420px;"><canvas id="chartF"></canvas></div>
+      <aside style="display: grid; gap: 6px; align-content: start;">
+        <div class="focus__item"><span>Place Value</span><span class="focus__pct">0%</span></div>
+        <div class="focus__item"><span>Linear Equations</span><span class="focus__pct">0%</span></div>
+        <div class="focus__item"><span>Range Statistics</span><span class="focus__pct">0%</span></div>
+      </aside>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 16px; align-items: center;">
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+      <button class="expand-link" style="white-space: nowrap;">Show all 47 topics</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- OPTION B EXPLORATIONS — vertical stack variants                       -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div style="margin: 80px 0 24px; padding: 16px; background: rgba(var(--stl-tint), 0.06); border-left: 3px solid rgb(var(--stl-tint)); border-radius: 8px;">
+  <h2 style="margin: 0 0 6px; font-size: 18px;">More variations on Option B</h2>
+  <p style="margin: 0; color: var(--stl-text-muted); font-size: 13px;">All built on the vertical-stack thesis. Variants explore where to anchor the strengths/weaknesses block — flat with the chart, in a sub-card container, attached to the CTA, etc.</p>
+</div>
+
+<!-- ──────────────────── OPTION B1 ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B1</span>
+    <h2 class="variant__name">SW + focus in a single nested card</h2>
+  </header>
+  <p class="variant__why">Chart on top, then a SECOND framed card inside the main card holds the SW toggle, focus list, and CTA. Container-within-container reads as "this is the actionable zone".</p>
+  <div class="demo">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+      <button class="expand-link">Show all 47 topics</button>
+    </div>
+    <div style="max-width: 460px; margin: 0 auto 20px;" class="canvas-host"><canvas id="chartB1"></canvas></div>
+    <!-- nested container -->
+    <div style="background: rgba(var(--stl-tint), 0.04); border: 1px solid var(--stl-hairline); border-radius: 10px; padding: 16px;">
+      <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+        <div class="sw-tabs" style="width: 260px; margin: 0;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+      </div>
+      <ul class="focus" style="grid-template-columns: repeat(3, 1fr); display: grid; gap: 8px; margin-bottom: 14px;">
+        <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+        <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+        <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+      </ul>
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION B2 ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B2</span>
+    <h2 class="variant__name">Two stacked cards: chart card + action card</h2>
+  </header>
+  <p class="variant__why">Two clearly-distinct cards — top one is "look at your data", bottom one is "act on it". Most architectural separation.</p>
+  <div class="demo" style="background: transparent; border: 0; padding: 0;">
+    <!-- chart card -->
+    <div style="background: var(--stl-surface); border: 1px solid var(--stl-hairline); border-radius: 12px; padding: 20px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+        <button class="expand-link">Show all 47 topics</button>
+      </div>
+      <div style="max-width: 460px; margin: 0 auto;" class="canvas-host"><canvas id="chartB2"></canvas></div>
+    </div>
+    <!-- action card -->
+    <div style="background: var(--stl-surface); border: 1px solid var(--stl-hairline); border-radius: 12px; padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 14px;">
+        <div class="sw-tabs" style="width: 260px; margin: 0;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+        <p style="margin: 0; color: var(--stl-text-muted); font-size: 12px;">Top 3 areas to drill</p>
+      </div>
+      <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+        <li class="focus__item"><span>Place Value</span><span class="focus__pct">0%</span></li>
+        <li class="focus__item"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+        <li class="focus__item"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+      </ul>
+      <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION B3 ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B3</span>
+    <h2 class="variant__name">Nested SW card beside chart (side-by-side stack)</h2>
+  </header>
+  <p class="variant__why">B-style vertical hierarchy but the SW card lives BESIDE the chart on wide screens, dropping below on narrow. Container nesting feels more contained than the current "loose aside" pattern.</p>
+  <div class="demo">
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: stretch;">
+      <div>
+        <h3 class="eyebrow" style="margin: 0 0 12px;">All-time per-topic mastery</h3>
+        <div class="canvas-host"><canvas id="chartB3"></canvas></div>
+      </div>
+      <!-- nested SW container -->
+      <div style="background: rgba(var(--stl-tint), 0.05); border: 1px solid var(--stl-hairline); border-radius: 10px; padding: 16px; display: grid; gap: 12px; align-content: start;">
+        <div class="sw-tabs" style="margin: 0;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+        <p class="card__title" style="margin: 0;">Top 3 to drill</p>
+        <ul class="focus">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+        <button class="cta" style="margin-top: auto;"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start AI test →</button>
+      </div>
+    </div>
+    <div style="text-align: right; margin-top: 8px;"><button class="expand-link">Show all 47 topics</button></div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION B4 ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B4</span>
+    <h2 class="variant__name">Chart full-width + SW row of mini-cards below</h2>
+  </header>
+  <p class="variant__why">Chart goes full-width like a hero. Below it, 3 mini-cards (each a topic) sit in a row, each with its own contained chrome. Toggle pill above the row.</p>
+  <div class="demo">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+      <button class="expand-link">Show all 47 topics</button>
+    </div>
+    <div style="max-width: 100%; margin-bottom: 24px;" class="canvas-host"><canvas id="chartB4"></canvas></div>
+    <div style="display: flex; justify-content: center; align-items: baseline; gap: 16px; margin-bottom: 12px;">
+      <div class="sw-tabs" style="width: 260px; margin: 0;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+      <div style="background: rgba(var(--stl-tint), 0.06); border: 1px solid var(--stl-hairline); border-radius: 8px; padding: 14px; text-align: center;">
+        <p style="margin: 0 0 4px; font-size: 12px; color: var(--stl-text-muted);">1st</p>
+        <p style="margin: 0; font-weight: 600;">Place Value</p>
+        <p style="margin: 4px 0 0; color: rgb(var(--stl-tint)); font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 600;">0%</p>
+      </div>
+      <div style="background: rgba(var(--stl-tint), 0.06); border: 1px solid var(--stl-hairline); border-radius: 8px; padding: 14px; text-align: center;">
+        <p style="margin: 0 0 4px; font-size: 12px; color: var(--stl-text-muted);">2nd</p>
+        <p style="margin: 0; font-weight: 600;">Linear Equations</p>
+        <p style="margin: 4px 0 0; color: rgb(var(--stl-tint)); font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 600;">0%</p>
+      </div>
+      <div style="background: rgba(var(--stl-tint), 0.06); border: 1px solid var(--stl-hairline); border-radius: 8px; padding: 14px; text-align: center;">
+        <p style="margin: 0 0 4px; font-size: 12px; color: var(--stl-text-muted);">3rd</p>
+        <p style="margin: 0; font-weight: 600;">Range Statistics</p>
+        <p style="margin: 4px 0 0; color: rgb(var(--stl-tint)); font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 600;">0%</p>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION B5 ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B5</span>
+    <h2 class="variant__name">Inset SW panel with CTA inline-attached</h2>
+  </header>
+  <p class="variant__why">Chart on top. SW panel sits in its own inset container with the CTA fused to its right edge — they read as one decision unit (here's where you're weak, take the test).</p>
+  <div class="demo">
+    <h3 class="eyebrow">All-time per-topic mastery</h3>
+    <div style="max-width: 480px; margin: 0 auto 20px;" class="canvas-host"><canvas id="chartB5"></canvas></div>
+    <!-- inset SW + CTA -->
+    <div style="background: rgba(var(--stl-tint), 0.05); border: 1px solid var(--stl-hairline); border-radius: 10px; padding: 14px; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;">
+      <div>
+        <div class="sw-tabs" style="margin: 0 0 10px; width: 220px;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span class="topic-pill">Place Value <span class="topic-pill__pct">0%</span></span>
+          <span class="topic-pill">Linear Equations <span class="topic-pill__pct">0%</span></span>
+          <span class="topic-pill">Range Statistics <span class="topic-pill__pct">0%</span></span>
+        </div>
+      </div>
+      <button class="cta" style="width: auto; white-space: nowrap;"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start AI-tailored test →</button>
+    </div>
+    <div style="text-align: right; margin-top: 10px;"><button class="expand-link">Show all 47 topics</button></div>
+  </div>
+</section>
+
+<!-- ──────────────────── OPTION B6 ──────────────────── -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Option B6</span>
+    <h2 class="variant__name">Bento — chart + SW container + CTA strip</h2>
+  </header>
+  <p class="variant__why">Three distinct visual zones (bento-style) inside the outer card: chart top, SW container middle, full-width CTA strip bottom. Each zone has its own container chrome.</p>
+  <div class="demo">
+    <!-- Joined chart + SW container — one outer box with rounded corners,
+         a divider line splitting the two zones. Each zone has flush
+         corners on the side it meets its neighbor. -->
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <!-- chart zone (top half) — square bottom edge, rounded top edges
+           inherited from the outer container. -->
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartB6"></canvas></div>
+      </div>
+      <!-- divider — single hairline rule between the two zones. -->
+      <div style="height: 1px; background: var(--stl-hairline);"></div>
+      <!-- SW zone (bottom half) — square top edge, rounded bottom edges
+           inherited from the outer container. -->
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+          <div class="sw-tabs" style="width: 260px; margin: 0;"><button class="sw-tab is-active">Weaknesses</button><button class="sw-tab">Strengths</button></div>
+        </div>
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <!-- CTA — no container chrome; the button itself is the surface. -->
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- TAB STYLE EXPLORATIONS — Weaknesses / Strengths variants             -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div style="margin: 80px 0 24px; padding: 16px; background: rgba(var(--stl-tint), 0.06); border-left: 3px solid rgb(var(--stl-tint)); border-radius: 8px;">
+  <h2 style="margin: 0 0 6px; font-size: 18px;">Tab style variations</h2>
+  <p style="margin: 0; color: var(--stl-text-muted); font-size: 13px;">All full-width. Different shapes, different active-state treatments, different relationships to the container above/below.</p>
+</div>
+
+<!-- T1 — Pill, full-width, strong active fill -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T1</span>
+    <h2 class="variant__name">Pill row — bold active fill</h2>
+  </header>
+  <p class="variant__why">Same shape as today but full-width and the active tab gets a solid lavender fill with contrasting text. Hard to miss which is selected.</p>
+  <div class="demo">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; background: rgba(255,255,255,0.04); border: 1px solid var(--stl-hairline); border-radius: 999px; width: 100%;">
+      <button style="border: 0; padding: 8px; border-radius: 999px; background: rgb(var(--stl-tint)); color: #1a1a22; font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+      <button style="border: 0; padding: 8px; border-radius: 999px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+    </div>
+  </div>
+</section>
+
+<!-- T2 — Segmented (iOS-style) -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T2</span>
+    <h2 class="variant__name">Segmented control — iOS-style</h2>
+  </header>
+  <p class="variant__why">Rectangular segmented control. Active gets a raised "card" look with subtle shadow + lighter bg. Reads like a hardware toggle.</p>
+  <div class="demo">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: rgba(0,0,0,0.25); border: 1px solid var(--stl-hairline); border-radius: 8px; width: 100%;">
+      <button style="border: 0; padding: 9px; border-radius: 6px; background: var(--stl-surface-2); color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.25);">Weaknesses</button>
+      <button style="border: 0; padding: 9px; border-radius: 6px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+    </div>
+  </div>
+</section>
+
+<!-- T3 — Underline tabs, flush -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T3</span>
+    <h2 class="variant__name">Underline tabs (flush, no container)</h2>
+  </header>
+  <p class="variant__why">No pill, no background. Each tab is flat text spanning half the row, with a thick underline marking the active one. Sits flush at the top of the parent — no padding above. Classic web-app dashboard pattern.</p>
+  <div class="demo" style="padding: 0; overflow: hidden;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--stl-hairline);">
+      <button style="border: 0; padding: 16px 12px; background: transparent; color: var(--stl-text); font-weight: 600; font-size: 14px; cursor: pointer; border-bottom: 3px solid rgb(var(--stl-tint)); margin-bottom: -1px;">Weaknesses</button>
+      <button style="border: 0; padding: 16px 12px; background: transparent; color: var(--stl-text-muted); font-size: 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px;">Strengths</button>
+    </div>
+    <div style="padding: 16px; color: var(--stl-text-muted); font-size: 13px;">
+      [Content here — e.g., focus list + CTA. The tabs are flush with the card's top edge.]
+    </div>
+  </div>
+</section>
+
+<!-- T4 — Tinted half-fill split -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T4</span>
+    <h2 class="variant__name">Split-fill — active half tinted</h2>
+  </header>
+  <p class="variant__why">A single pill split in half. The active half fills with the tint color, the inactive stays transparent. Less heavy than T1's solid fill; cleaner than the underline.</p>
+  <div class="demo">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--stl-hairline); border-radius: 999px; width: 100%; overflow: hidden;">
+      <button style="border: 0; padding: 12px; background: rgba(var(--stl-tint), 0.22); color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+      <button style="border: 0; padding: 12px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+    </div>
+  </div>
+</section>
+
+<!-- T5 — Card-header tabs (flush, full width, no border-radius on top) -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T5</span>
+    <h2 class="variant__name">Card-header tabs (active = card top)</h2>
+  </header>
+  <p class="variant__why">The active tab IS the card header — its background extends down into the card. The inactive tab sits next to it like a recessed sibling. Strongest sense of "you are here".</p>
+  <div class="demo" style="padding: 0; overflow: hidden;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+      <button style="border: 0; padding: 14px; background: var(--stl-surface-2); color: var(--stl-text); font-weight: 600; font-size: 14px; cursor: pointer; border-top: 2px solid rgb(var(--stl-tint));">Weaknesses</button>
+      <button style="border: 0; padding: 14px; background: transparent; color: var(--stl-text-muted); font-size: 14px; cursor: pointer; border-bottom: 1px solid var(--stl-hairline);">Strengths</button>
+    </div>
+    <div style="padding: 16px; background: var(--stl-surface-2); color: var(--stl-text-muted); font-size: 13px;">
+      [Content here uses the same bg as the active tab — they read as one continuous panel.]
+    </div>
+  </div>
+</section>
+
+<!-- T6 — Pill with bordered active, soft hover -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T6</span>
+    <h2 class="variant__name">Pill with bordered active</h2>
+  </header>
+  <p class="variant__why">Full-width pill row but the active tab is marked by a brighter border + slightly elevated background. Subtler than T1's solid fill, more contained than T2's segmented look.</p>
+  <div class="demo">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; width: 100%;">
+      <button style="border: 1px solid rgb(var(--stl-tint)); padding: 9px; border-radius: 999px; background: rgba(var(--stl-tint), 0.12); color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+      <button style="border: 1px solid var(--stl-hairline); padding: 9px; border-radius: 999px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+    </div>
+  </div>
+</section>
+
+<!-- T7 — Big bold split, dramatic active state -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T7</span>
+    <h2 class="variant__name">Big split — dramatic active state</h2>
+  </header>
+  <p class="variant__why">Tall, wide tabs that double as section headers. Active tab gets a tinted background + indicator dot. Inactive is dimmed. High-contrast, very obvious.</p>
+  <div class="demo" style="padding: 0; overflow: hidden;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+      <button style="border: 0; padding: 18px 12px; background: rgba(var(--stl-tint), 0.10); color: var(--stl-text); font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 2px solid rgb(var(--stl-tint));">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: rgb(var(--stl-tint));"></span>
+        Weaknesses
+      </button>
+      <button style="border: 0; padding: 18px 12px; background: transparent; color: var(--stl-text-subtle); font-size: 15px; cursor: pointer; border-bottom: 2px solid var(--stl-hairline);">Strengths</button>
+    </div>
+  </div>
+</section>
+
+<!-- T8 — Pill, full-width, animated sliding indicator -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">Tab T8</span>
+    <h2 class="variant__name">Sliding-indicator pill (animated)</h2>
+  </header>
+  <p class="variant__why">Pill row with a SLIDING active background that animates between tabs on click (try clicking). Most polished; the motion makes the change feel intentional and the selected state unmistakable.</p>
+  <div class="demo">
+    <div id="t8-tabs" style="position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 3px; background: rgba(255,255,255,0.04); border: 1px solid var(--stl-hairline); border-radius: 999px; width: 100%;" data-active="0">
+      <!-- The sliding pill — absolutely positioned, animated via transform. -->
+      <div id="t8-indicator" style="position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); background: rgba(var(--stl-tint), 0.22); border-radius: 999px; transition: transform 320ms cubic-bezier(.22, .9, .25, 1); pointer-events: none;"></div>
+      <button onclick="document.getElementById('t8-tabs').dataset.active='0'; document.getElementById('t8-indicator').style.transform='translateX(0)'; this.style.color='var(--stl-text)'; this.style.fontWeight='600'; this.nextElementSibling.style.color='var(--stl-text-muted)'; this.nextElementSibling.style.fontWeight='400';" style="position: relative; z-index: 1; border: 0; padding: 10px; background: transparent; color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+      <button onclick="document.getElementById('t8-tabs').dataset.active='1'; document.getElementById('t8-indicator').style.transform='translateX(100%)'; this.style.color='var(--stl-text)'; this.style.fontWeight='600'; this.previousElementSibling.style.color='var(--stl-text-muted)'; this.previousElementSibling.style.fontWeight='400';" style="position: relative; z-index: 1; border: 0; padding: 10px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- TABS IN CONTEXT — Option B6 with each tab variant                    -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div style="margin: 80px 0 24px; padding: 16px; background: rgba(var(--stl-tint), 0.06); border-left: 3px solid rgb(var(--stl-tint)); border-radius: 8px;">
+  <h2 style="margin: 0 0 6px; font-size: 18px;">Tabs in context — Option B6 + each tab style</h2>
+  <p style="margin: 0; color: var(--stl-text-muted); font-size: 13px;">Same joined-card layout, eight different tab treatments. Now you can see how each style reads against the chart, focus list, and CTA.</p>
+</div>
+
+<!-- T1-in-context — solid lavender fill -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T1</span>
+    <h2 class="variant__name">Solid lavender fill</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT1"></canvas></div>
+      </div>
+      <div style="height: 1px; background: var(--stl-hairline);"></div>
+      <div style="padding: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; background: rgba(255,255,255,0.04); border: 1px solid var(--stl-hairline); border-radius: 999px; width: 100%; margin-bottom: 12px;">
+          <button style="border: 0; padding: 8px; border-radius: 999px; background: rgb(var(--stl-tint)); color: #1a1a22; font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+          <button style="border: 0; padding: 8px; border-radius: 999px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+        </div>
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T2-in-context — segmented control -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T2</span>
+    <h2 class="variant__name">Segmented control (iOS-style)</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT2"></canvas></div>
+      </div>
+      <div style="height: 1px; background: var(--stl-hairline);"></div>
+      <div style="padding: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: rgba(0,0,0,0.25); border: 1px solid var(--stl-hairline); border-radius: 8px; width: 100%; margin-bottom: 12px;">
+          <button style="border: 0; padding: 9px; border-radius: 6px; background: var(--stl-surface-2); color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.25);">Weaknesses</button>
+          <button style="border: 0; padding: 9px; border-radius: 6px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+        </div>
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T3-in-context — underline tabs flush at top of SW zone -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T3</span>
+    <h2 class="variant__name">Underline tabs (flush, no container)</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT3"></canvas></div>
+      </div>
+      <!-- No divider line between chart and tabs — the underline below
+           the active tab takes its place as the visual separator. -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--stl-hairline);">
+        <button style="border: 0; padding: 14px 12px; background: transparent; color: var(--stl-text); font-weight: 600; font-size: 14px; cursor: pointer; border-bottom: 3px solid rgb(var(--stl-tint)); margin-bottom: -1px;">Weaknesses</button>
+        <button style="border: 0; padding: 14px 12px; background: transparent; color: var(--stl-text-muted); font-size: 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px;">Strengths</button>
+      </div>
+      <div style="padding: 16px;">
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T4-in-context — split-fill -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T4</span>
+    <h2 class="variant__name">Split-fill (tinted half)</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT4"></canvas></div>
+      </div>
+      <div style="height: 1px; background: var(--stl-hairline);"></div>
+      <div style="padding: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; background: rgba(255,255,255,0.03); border: 1px solid var(--stl-hairline); border-radius: 999px; width: 100%; overflow: hidden; margin-bottom: 12px;">
+          <button style="border: 0; padding: 11px; background: rgba(var(--stl-tint), 0.22); color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+          <button style="border: 0; padding: 11px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+        </div>
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T5-in-context — card-header tabs (active = top of SW zone) -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T5</span>
+    <h2 class="variant__name">Card-header tabs (active extends down)</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px; background: var(--stl-surface-2);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT5"></canvas></div>
+      </div>
+      <!-- Tabs sit flush with the SW zone's top. Active tab's bg
+           matches the bg of the focus list below — they read as one
+           connected panel. The inactive tab is a recessed neighbor. -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+        <button style="border: 0; padding: 14px; background: rgba(var(--stl-tint), 0.10); color: var(--stl-text); font-weight: 600; font-size: 14px; cursor: pointer; border-top: 2px solid rgb(var(--stl-tint));">Weaknesses</button>
+        <button style="border: 0; padding: 14px; background: transparent; color: var(--stl-text-muted); font-size: 14px; cursor: pointer; border-top: 1px solid var(--stl-hairline); border-bottom: 1px solid var(--stl-hairline); border-left: 1px solid var(--stl-hairline);">Strengths</button>
+      </div>
+      <div style="padding: 16px; background: rgba(var(--stl-tint), 0.10);">
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T6-in-context — bordered pill -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T6</span>
+    <h2 class="variant__name">Bordered pill (active outlined)</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT6"></canvas></div>
+      </div>
+      <div style="height: 1px; background: var(--stl-hairline);"></div>
+      <div style="padding: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0; width: 100%; margin-bottom: 12px;">
+          <button style="border: 1px solid rgb(var(--stl-tint)); padding: 9px; border-radius: 999px; background: rgba(var(--stl-tint), 0.12); color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+          <button style="border: 1px solid var(--stl-hairline); padding: 9px; border-radius: 999px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+        </div>
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T7-in-context — big bold split with indicator dot -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T7</span>
+    <h2 class="variant__name">Big split with indicator dot</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT7"></canvas></div>
+      </div>
+      <!-- Big split tabs replace the divider line — they read as the
+           visual transition between zones. -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+        <button style="border: 0; padding: 16px 12px; background: rgba(var(--stl-tint), 0.10); color: var(--stl-text); font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 2px solid rgb(var(--stl-tint));">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background: rgb(var(--stl-tint));"></span>
+          Weaknesses
+        </button>
+        <button style="border: 0; padding: 16px 12px; background: transparent; color: var(--stl-text-subtle); font-size: 15px; cursor: pointer; border-bottom: 2px solid var(--stl-hairline);">Strengths</button>
+      </div>
+      <div style="padding: 16px;">
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<!-- T8-in-context — sliding indicator -->
+<section class="variant">
+  <header class="variant__head">
+    <span class="variant__tag">B6 + T8</span>
+    <h2 class="variant__name">Sliding-indicator pill (click to animate!)</h2>
+  </header>
+  <div class="demo">
+    <div style="background: var(--stl-surface-2); border: 1px solid var(--stl-hairline); border-radius: 10px; overflow: hidden; margin-bottom: 14px;">
+      <div style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 class="eyebrow" style="margin: 0;">All-time per-topic mastery</h3>
+          <button class="expand-link">Show all 47 topics</button>
+        </div>
+        <div style="max-width: 480px; margin: 0 auto;" class="canvas-host"><canvas id="chartCT8"></canvas></div>
+      </div>
+      <div style="height: 1px; background: var(--stl-hairline);"></div>
+      <div style="padding: 16px;">
+        <div id="ctx-t8-tabs" style="position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 3px; background: rgba(255,255,255,0.04); border: 1px solid var(--stl-hairline); border-radius: 999px; width: 100%; margin-bottom: 12px;">
+          <div id="ctx-t8-indicator" style="position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); background: rgba(var(--stl-tint), 0.22); border-radius: 999px; transition: transform 320ms cubic-bezier(.22, .9, .25, 1); pointer-events: none;"></div>
+          <button onclick="document.getElementById('ctx-t8-indicator').style.transform='translateX(0)'; this.style.color='var(--stl-text)'; this.style.fontWeight='600'; this.nextElementSibling.style.color='var(--stl-text-muted)'; this.nextElementSibling.style.fontWeight='400';" style="position: relative; z-index: 1; border: 0; padding: 10px; background: transparent; color: var(--stl-text); font-weight: 600; font-size: 13px; cursor: pointer;">Weaknesses</button>
+          <button onclick="document.getElementById('ctx-t8-indicator').style.transform='translateX(100%)'; this.style.color='var(--stl-text)'; this.style.fontWeight='600'; this.previousElementSibling.style.color='var(--stl-text-muted)'; this.previousElementSibling.style.fontWeight='400';" style="position: relative; z-index: 1; border: 0; padding: 10px; background: transparent; color: var(--stl-text-muted); font-size: 13px; cursor: pointer;">Strengths</button>
+        </div>
+        <ul class="focus" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Place Value</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Linear Eqs</span><span class="focus__pct">0%</span></li>
+          <li class="focus__item" style="background: rgba(255,255,255,0.04);"><span>Range Stats</span><span class="focus__pct">0%</span></li>
+        </ul>
+      </div>
+    </div>
+    <button class="cta"><svg class="ai-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Start new AI-tailored test →</button>
+  </div>
+</section>
+
+<script>
+// Same mock dataset on every chart so they're directly comparable.
+// Real version would pull from window.__stlHistoryPerfRows.
+const MOCK = {
+  labels: ['Word Problem', 'Functions', 'Data Analysis', 'Fractions', 'Geometry Perimeter', 'Geometry Area', 'Place Value', 'Other (40)'],
+  data:   [25, 70, 30, 40, 35, 50, 15, 20],
+};
+
+function buildConfig() {
+  return {
+    type: 'radar',
+    data: {
+      labels: MOCK.labels,
+      datasets: [{
+        data: MOCK.data,
+        backgroundColor: 'rgba(139, 134, 255, 0.18)',
+        borderColor: 'rgba(139, 134, 255, 0.95)',
+        borderWidth: 1.5,
+        pointBackgroundColor: 'rgba(139, 134, 255, 1)',
+        pointRadius: 3,
+        tension: 0.15,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, backdropColor: 'transparent', color: 'rgba(255,255,255,0.35)', font: { size: 9 }, callback: (v) => v + '%' },
+          angleLines: { color: 'rgba(255,255,255,0.08)' },
+          grid:       { color: 'rgba(255,255,255,0.08)' },
+          pointLabels: { color: 'rgba(255,255,255,0.78)', font: { size: 11, weight: '500' } },
+        },
+      },
+      plugins: { legend: { display: false } },
+    },
+  };
+}
+
+// Wait for Chart.js to load, then build all six.
+const ready = () => {
+  if (!window.Chart) { setTimeout(ready, 50); return; }
+  [
+    'A', 'B', 'C', 'D', 'E', 'F',
+    'B1', 'B2', 'B3', 'B4', 'B5', 'B6',
+    'CT1', 'CT2', 'CT3', 'CT4', 'CT5', 'CT6', 'CT7', 'CT8',
+  ].forEach((tag) => {
+    const el = document.getElementById('chart' + tag);
+    if (el) new Chart(el.getContext('2d'), buildConfig());
+  });
+};
+ready();
+</script>
+
+</body>
+</html>

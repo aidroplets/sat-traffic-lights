@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StudySignal — rainbow gradient options</title>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+/>
+<style>
+  :root {
+    --bg:          #050509;
+    --surface:     #16161c;
+    --surface-2:   #1d1d24;
+    --text:        #ededf2;
+    --text-muted:  #8a8a96;
+    --text-subtle: #5a5a66;
+    --hairline:    rgba(255, 255, 255, 0.08);
+    --hairline-hi: rgba(255, 255, 255, 0.22);
+
+    /* ============ GRADIENT CANDIDATES ============ */
+    --g1: linear-gradient(90deg, #f472b6 0%, #fb923c 20%, #facc15 40%, #4ade80 60%, #60a5fa 80%, #8b86ff 100%);
+    --g1-soft: linear-gradient(90deg, rgba(244,114,182,0.85), rgba(251,146,60,0.85), rgba(250,204,21,0.85), rgba(74,222,128,0.85), rgba(96,165,250,0.85), rgba(139,134,255,0.85));
+
+    --g2: linear-gradient(90deg, #a855f7 0%, #6366f1 33%, #3b82f6 66%, #06b6d4 100%);
+
+    --g3: linear-gradient(90deg, #ec4899 0%, #f97316 50%, #fbbf24 100%);
+
+    --g4: linear-gradient(90deg, #ef4444 0%, #f97316 17%, #facc15 33%, #22c55e 50%, #06b6d4 67%, #6366f1 83%, #a855f7 100%);
+
+    --g5: linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #f0abfc 100%);
+
+    --g6: linear-gradient(90deg, #f0abfc 0%, #c084fc 20%, #8b86ff 40%, #60a5fa 60%, #5eead4 80%, #86efac 100%);
+
+    --g7: linear-gradient(90deg, #8b86ff 0%, #c084fc 25%, #f472b6 50%, #fb923c 75%, #facc15 100%);
+
+    --g8: conic-gradient(from 180deg at 50% 50%,
+                         #f472b6, #fb923c, #facc15, #4ade80, #60a5fa, #8b86ff, #f472b6);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Geist", -apple-system, system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  body {
+    padding: 40px 32px 80px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+  .lede {
+    color: var(--text-muted); margin: 0 0 32px;
+    max-width: 720px;
+  }
+  .lede code { font-family: "Geist Mono", monospace; font-size: 12px;
+               background: var(--surface); padding: 2px 6px; border-radius: 4px; }
+
+  .preview-grid { display: grid; gap: 32px; max-width: 1100px; }
+
+  .option {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 24px 28px;
+  }
+  .option__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .option__title {
+    font-size: 16px; font-weight: 600; margin: 0;
+  }
+  .option__id {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--text-subtle); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .option__desc { font-size: 12px; color: var(--text-muted); margin: -16px 0 20px; }
+
+  .specimens {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .specimen {
+    display: grid; gap: 8px;
+  }
+  .specimen__label {
+    font-family: "Geist Mono", monospace; font-size: 10.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  /* ----- specimen: navbar underline ----- */
+  .demo-navbar {
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 14px 16px 0;
+    position: relative;
+    height: 56px;
+    display: flex; gap: 24px; align-items: stretch;
+    overflow: hidden;
+  }
+  .demo-navbar__tab {
+    font-size: 13.5px; font-weight: 500;
+    color: var(--text-muted);
+    display: inline-flex; align-items: center;
+    padding: 0 6px;
+    position: relative;
+  }
+  .demo-navbar__tab.is-active { color: var(--text); }
+  .demo-navbar__underline {
+    position: absolute;
+    bottom: 0;
+    height: 2px;
+    width: 80px;
+    background: var(--gradient);
+  }
+
+  /* ----- specimen: primary button ----- */
+  .demo-btn {
+    appearance: none; border: 0;
+    background: var(--gradient);
+    color: var(--bg);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 11px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .demo-btn--cta {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 18px;
+  }
+
+  /* ----- specimen: All chip ----- */
+  .demo-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--gradient) border-box;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+  }
+  .demo-chip__n {
+    display: inline-grid; place-items: center;
+    min-width: 20px; height: 18px; padding: 0 6px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-family: "Geist Mono", monospace; font-weight: 500;
+    color: var(--text);
+    background: var(--gradient);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    /* fallback */
+  }
+  .demo-chip__n--fill {
+    background: var(--gradient);
+    color: var(--bg);
+    -webkit-background-clip: border-box; background-clip: border-box;
+    font-weight: 600;
+  }
+
+  /* ----- specimen: radar polygon line ----- */
+  .demo-radar {
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .demo-radar svg { display: block; }
+  .demo-radar__grid line, .demo-radar__grid polygon {
+    fill: none;
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 1;
+  }
+  .demo-radar__poly {
+    fill: rgba(139, 134, 255, 0.18);
+    stroke: url(#strokeGradient);
+    stroke-width: 1.8;
+  }
+  .demo-radar__node {
+    fill: var(--text);
+  }
+
+  /* ----- shared toolbar ----- */
+  .pick-bar {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(5, 5, 9, 0.92);
+    backdrop-filter: blur(12px);
+    margin: -40px -32px 32px;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .pick-bar__title { font-size: 13px; color: var(--text-muted); margin: 0; }
+  .pick-bar__title strong { color: var(--text); }
+  .pick-bar__nav { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick-bar__link {
+    color: var(--text-muted); font-size: 12px;
+    padding: 6px 10px; border-radius: 6px;
+    background: var(--surface);
+    text-decoration: none;
+    font-family: "Geist Mono", monospace;
+  }
+  .pick-bar__link:hover { color: var(--text); background: var(--surface-2); }
+</style>
+</head>
+<body>
+
+<div class="pick-bar">
+  <p class="pick-bar__title">
+    <strong>StudySignal — Rainbow Gradient Options.</strong>
+    Pick one (or a few) and reply with the ID; I'll wire it everywhere.
+  </p>
+  <nav class="pick-bar__nav">
+    <a href="#g1" class="pick-bar__link">G1</a>
+    <a href="#g1-soft" class="pick-bar__link">G1·soft</a>
+    <a href="#g2" class="pick-bar__link">G2</a>
+    <a href="#g3" class="pick-bar__link">G3</a>
+    <a href="#g4" class="pick-bar__link">G4</a>
+    <a href="#g5" class="pick-bar__link">G5</a>
+    <a href="#g6" class="pick-bar__link">G6</a>
+    <a href="#g7" class="pick-bar__link">G7</a>
+    <a href="#g8" class="pick-bar__link">G8</a>
+  </nav>
+</div>
+
+<h1>Rainbow gradient candidates</h1>
+<p class="lede">
+  Each option is shown applied to the surfaces it'd replace: the navbar underline,
+  the "All" chip border, the primary <code>New test</code> button, the full-width
+  AI-tailored CTA, and the radar polygon line. All previews use the actual dark
+  surface tokens from <code>app.css</code>.
+</p>
+
+<div class="preview-grid">
+
+  <!-- =================== G1 — Brand-tint rainbow =================== -->
+  <section class="option" id="g1" style="--gradient: var(--g1);">
+    <div class="option__head">
+      <h2 class="option__title">G1 — Brand-tint rainbow</h2>
+      <span class="option__id">recommended · ties to test colors</span>
+    </div>
+    <p class="option__desc">
+      Rose → orange → amber → green → blue → lavender. Uses your existing six
+      test-tint colors as the gradient stops, so the "all tests" mode visually
+      summarizes every test's identity.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+      <div class="specimen" style="grid-column: 1 / -1;">
+        <span class="specimen__label">Radar polygon line</span>
+        <div class="demo-radar">
+          <svg viewBox="0 0 320 200" width="100%" height="200">
+            <defs>
+              <linearGradient id="strokeGradient_g1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f472b6"/>
+                <stop offset="20%" stop-color="#fb923c"/>
+                <stop offset="40%" stop-color="#facc15"/>
+                <stop offset="60%" stop-color="#4ade80"/>
+                <stop offset="80%" stop-color="#60a5fa"/>
+                <stop offset="100%" stop-color="#8b86ff"/>
+              </linearGradient>
+            </defs>
+            <g class="demo-radar__grid" transform="translate(160 100)">
+              <polygon points="0,-70 60,-35 60,35 0,70 -60,35 -60,-35"/>
+              <polygon points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25"/>
+              <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15"/>
+              <line x1="0" y1="0" x2="0" y2="-70"/>
+              <line x1="0" y1="0" x2="60" y2="-35"/>
+              <line x1="0" y1="0" x2="60" y2="35"/>
+              <line x1="0" y1="0" x2="0" y2="70"/>
+              <line x1="0" y1="0" x2="-60" y2="35"/>
+              <line x1="0" y1="0" x2="-60" y2="-35"/>
+            </g>
+            <g transform="translate(160 100)">
+              <polygon
+                points="0,-55 50,-22 45,30 0,58 -38,20 -30,-20"
+                fill="rgba(139, 134, 255, 0.18)"
+                stroke="url(#strokeGradient_g1)" stroke-width="1.8" stroke-linejoin="round" />
+              <circle cx="0" cy="-55" r="3.5" fill="#f472b6"/>
+              <circle cx="50" cy="-22" r="3.5" fill="#fb923c"/>
+              <circle cx="45" cy="30" r="3.5" fill="#facc15"/>
+              <circle cx="0" cy="58" r="3.5" fill="#4ade80"/>
+              <circle cx="-38" cy="20" r="3.5" fill="#60a5fa"/>
+              <circle cx="-30" cy="-20" r="3.5" fill="#8b86ff"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G1-soft — same gradient, lower saturation =================== -->
+  <section class="option" id="g1-soft" style="--gradient: var(--g1-soft);">
+    <div class="option__head">
+      <h2 class="option__title">G1·soft — Brand rainbow, dampened</h2>
+      <span class="option__id">muted variant of G1</span>
+    </div>
+    <p class="option__desc">
+      Same stops as G1 but each color sits at 85% alpha to dim the vibrancy
+      against the dark background. Good if G1 reads too "loud".
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G2 — Cool spectrum =================== -->
+  <section class="option" id="g2" style="--gradient: var(--g2);">
+    <div class="option__head">
+      <h2 class="option__title">G2 — Cool spectrum</h2>
+      <span class="option__id">violet → indigo → blue → cyan</span>
+    </div>
+    <p class="option__desc">
+      Restrained tech-feel gradient. Stays in the cool half of the wheel —
+      reads as "elevated default" without the full-rainbow energy.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G3 — Warm sunset =================== -->
+  <section class="option" id="g3" style="--gradient: var(--g3);">
+    <div class="option__head">
+      <h2 class="option__title">G3 — Warm sunset</h2>
+      <span class="option__id">pink → orange → amber</span>
+    </div>
+    <p class="option__desc">
+      Energetic, warm. Reads as friendly and inviting. Fewer hues so it
+      doesn't compete with the test-specific tints elsewhere.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G4 — Full ROYGBIV =================== -->
+  <section class="option" id="g4" style="--gradient: var(--g4);">
+    <div class="option__head">
+      <h2 class="option__title">G4 — Full ROYGBIV</h2>
+      <span class="option__id">red → orange → yellow → green → cyan → indigo → violet</span>
+    </div>
+    <p class="option__desc">
+      Classic full spectrum. Maximum visibility. Risk: can feel kindergarten
+      if overused.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G5 — Stripe-style =================== -->
+  <section class="option" id="g5" style="--gradient: var(--g5);">
+    <div class="option__head">
+      <h2 class="option__title">G5 — Tri-tone (Stripe-style)</h2>
+      <span class="option__id">sky → violet → pink</span>
+    </div>
+    <p class="option__desc">
+      Restrained 3-stop gradient in the tech-aesthetic mold. Easy on the eye,
+      doesn't pull focus from page content.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G6 — Pastel rainbow =================== -->
+  <section class="option" id="g6" style="--gradient: var(--g6);">
+    <div class="option__head">
+      <h2 class="option__title">G6 — Pastel rainbow</h2>
+      <span class="option__id">soft pink → lavender → blue → teal → mint</span>
+    </div>
+    <p class="option__desc">
+      Pastel-spectrum version. Less saturated than G1/G4. Reads as "premium"
+      and "modern" without being loud.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G7 — Aurora =================== -->
+  <section class="option" id="g7" style="--gradient: var(--g7);">
+    <div class="option__head">
+      <h2 class="option__title">G7 — Aurora</h2>
+      <span class="option__id">lavender → violet → pink → orange → amber</span>
+    </div>
+    <p class="option__desc">
+      Aurora-style gradient — cool on one side, warm on the other. Hits the
+      same brand colors as G1 but in a more flow-y order.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== G8 — Conic =================== -->
+  <section class="option" id="g8" style="--gradient: var(--g8);">
+    <div class="option__head">
+      <h2 class="option__title">G8 — Conic (all hues)</h2>
+      <span class="option__id">circular sweep through every brand color</span>
+    </div>
+    <p class="option__desc">
+      Conic version of the brand rainbow. On buttons looks like a coin-edge
+      sheen; on a thin underline reads similar to G1 but with a soft
+      gradient "wrap" at the join.
+    </p>
+    <div class="specimens">
+      <div class="specimen">
+        <span class="specimen__label">Navbar underline</span>
+        <div class="demo-navbar">
+          <span class="demo-navbar__tab">History</span>
+          <span class="demo-navbar__tab is-active" style="position: relative;">
+            AI Analysis
+            <span class="demo-navbar__underline" style="left: 0; width: 100%; bottom: -14px;"></span>
+          </span>
+          <span class="demo-navbar__tab">Admin</span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">"All" chip</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <span class="demo-chip">All <span class="demo-chip__n demo-chip__n--fill">13</span></span>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Primary button</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn">+ New test</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <span class="specimen__label">Full-width AI CTA</span>
+        <div style="padding: 14px; background: var(--bg); border-radius: 10px; border: 1px solid var(--hairline);">
+          <button class="demo-btn demo-btn--cta">Start new AI-tailored test →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<p class="lede" style="margin-top: 48px;">
+  Pick one (or several) and tell me the ID — I'll wire it into
+  <code>app.css</code> as <code>--stl-rainbow</code> and apply it to the navbar
+  underline, the "All" chip, primary buttons (<code>+ New test</code> and
+  <code>Start new AI-tailored test</code>), the radar polygon line for the
+  "All" filter, and the admin elements that currently use white.
+</p>
+
+</body>
+</html>

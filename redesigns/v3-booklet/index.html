@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4efe4" />
+    <title>SAT Traffic Lights — booklet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+    <style>
+      /* ============================================================
+         v3 — booklet
+         A deliberately different direction. Reads like a printed
+         test-prep workbook: warm paper, ruled margins, Source Serif
+         display, small caps, red printer's-mark accent. Confidence
+         signal becomes a hand-stamped check.
+         ============================================================ */
+      :root {
+        --paper:     #f4efe4;
+        --paper-2:   #ece5d4;
+        --paper-3:   #e3dac4;
+        --rule:      rgba(34, 28, 18, 0.18);
+        --rule-soft: rgba(34, 28, 18, 0.08);
+        --ink:       #1a160e;
+        --ink-2:     #4d4536;
+        --ink-3:     #847a64;
+        --ink-4:     #b3a98c;
+
+        --mark:        #b91d1d; /* printer's red */
+        --mark-soft:   rgba(185, 29, 29, 0.08);
+        --mark-line:   rgba(185, 29, 29, 0.32);
+
+        --green:  #2f6b40;
+        --yellow: #a37100;
+        --red:    #b91d1d;
+
+        --serif: "Source Serif 4", "Source Serif Pro", "Charter", "Iowan Old Style", Georgia, serif;
+        --sans:  "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        --mono:  "JetBrains Mono", ui-monospace, SF Mono, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 17px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100dvh;
+        overflow-x: hidden;
+      }
+      a { color: inherit; text-decoration: none; }
+      button { font: inherit; cursor: pointer; }
+
+      /* paper grain */
+      body::after {
+        content: "";
+        position: fixed; inset: 0;
+        z-index: 100; pointer-events: none;
+        opacity: 0.05;
+        mix-blend-mode: multiply;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+      }
+      /* faint warm vignette */
+      body::before {
+        content: "";
+        position: fixed; inset: 0;
+        z-index: -1; pointer-events: none;
+        background:
+          radial-gradient(120% 80% at 50% 0%, rgba(255, 220, 170, 0.18), transparent 60%),
+          radial-gradient(80% 120% at 100% 100%, rgba(180, 130, 70, 0.06), transparent 70%);
+      }
+
+      .page {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 36px;
+      }
+
+      /* === masthead (looks like a workbook cover line) === */
+      .masthead {
+        display: flex; align-items: flex-end; justify-content: space-between;
+        gap: 24px; flex-wrap: wrap;
+        padding: 28px 36px 14px;
+        max-width: 720px; margin: 0 auto;
+        border-bottom: 2px solid var(--ink);
+        position: sticky; top: 0; z-index: 50;
+        background: var(--paper);
+      }
+      .masthead::after {
+        content: "";
+        position: absolute;
+        left: 36px; right: 36px;
+        bottom: -6px;
+        height: 1px;
+        background: var(--ink);
+        opacity: 0.5;
+      }
+      .masthead__l {
+        display: flex; align-items: center; gap: 14px;
+      }
+      .lights {
+        display: inline-flex; gap: 4px;
+        padding: 5px 7px;
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 0;
+      }
+      .lights i { width: 7px; height: 7px; border-radius: 50%; display: block; }
+      .lights i.g { background: var(--green); }
+      .lights i.y { background: var(--yellow); }
+      .lights i.r { background: var(--red); }
+      .masthead__name {
+        font-family: var(--serif);
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        color: var(--ink);
+      }
+      .masthead__name em { font-style: italic; color: var(--mark); font-weight: 600; }
+      .masthead__r {
+        display: flex; align-items: baseline; gap: 16px;
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.14em;
+        color: var(--ink-2);
+      }
+      .masthead__r a { border-bottom: 1px solid var(--rule); padding-bottom: 1px; }
+      .masthead__r a:hover { color: var(--mark); border-color: var(--mark-line); }
+
+      /* === stamp / marker === */
+      .stamp {
+        display: flex; align-items: center; gap: 12px;
+        margin: 64px 0 18px;
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.18em;
+        color: var(--ink-3);
+      }
+      .stamp__num {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 28px;
+        font-weight: 400;
+        color: var(--mark);
+        letter-spacing: -0.01em;
+      }
+      .stamp__rule {
+        flex: 1; height: 1px; background: var(--rule);
+      }
+
+      /* === paper card (single bezel, no rounded plastic) === */
+      .sheet {
+        background: #fbf6ea;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        padding: 40px 44px;
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.7) inset,
+          0 1px 2px rgba(34, 28, 18, 0.04),
+          0 12px 32px -16px rgba(34, 28, 18, 0.18);
+        position: relative;
+      }
+      /* ruled margin */
+      .sheet::before {
+        content: "";
+        position: absolute;
+        left: 84px; top: 24px; bottom: 24px;
+        width: 1px;
+        background: var(--mark);
+        opacity: 0.15;
+      }
+
+      /* === eyebrow / heads === */
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--mark);
+        display: inline-flex; align-items: center; gap: 8px;
+        margin: 0 0 14px;
+      }
+      .eyebrow::before {
+        content: "§"; font-family: var(--serif); font-style: italic;
+        font-size: 18px; color: var(--mark);
+        letter-spacing: 0;
+      }
+      .h1 {
+        font-family: var(--serif);
+        font-size: clamp(36px, 5vw, 52px);
+        line-height: 1.05;
+        font-weight: 600;
+        letter-spacing: -0.018em;
+        margin: 0 0 16px;
+        max-width: 18ch;
+        color: var(--ink);
+      }
+      .h1 em { font-style: italic; font-weight: 500; color: var(--mark); }
+      .lede {
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--ink-2);
+        max-width: 56ch;
+        margin: 0 0 28px;
+      }
+      .lede em { color: var(--mark); font-style: italic; }
+
+      /* === score form === */
+      .score-form { display: grid; gap: 22px; }
+      .field { display: grid; gap: 8px; }
+      .field__lbl {
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--ink-3);
+      }
+      .field__input {
+        width: 100%;
+        padding: 14px 16px 12px;
+        font-family: var(--serif);
+        font-size: 36px;
+        font-weight: 500;
+        color: var(--ink);
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid var(--ink);
+        outline: none;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        border-radius: 0;
+      }
+      .field__input:focus { border-bottom-color: var(--mark); }
+      .field__hint {
+        font-family: var(--mono); font-size: 11px;
+        color: var(--ink-3); letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .tiers {
+        display: flex; flex-wrap: wrap; gap: 0;
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.1em;
+      }
+      .tier {
+        color: var(--ink-3);
+        padding: 6px 12px 6px 0;
+        border-right: 1px solid var(--rule);
+        margin-right: 12px;
+      }
+      .tier:last-child { border-right: 0; }
+      .tier.is-on { color: var(--mark); font-weight: 500; }
+      .tier.is-on::before {
+        content: "✓ "; color: var(--mark);
+      }
+
+      /* === buttons === */
+      .btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        font-family: var(--sans);
+        font-size: 14px; font-weight: 500;
+        padding: 12px 20px;
+        border: 1px solid var(--ink);
+        background: transparent;
+        color: var(--ink);
+        border-radius: 0;
+      }
+      .btn:hover { background: var(--ink); color: var(--paper); }
+      .btn--primary {
+        background: var(--ink); color: var(--paper);
+        font-weight: 600;
+      }
+      .btn--primary:hover { background: var(--mark); border-color: var(--mark); }
+      .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+      /* === quiz === */
+      .quiz-meta {
+        display: flex; align-items: baseline; gap: 18px;
+        flex-wrap: wrap; margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed var(--rule);
+      }
+      .quiz-counter {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 18px;
+        color: var(--ink-2);
+      }
+      .quiz-counter strong {
+        font-family: var(--mono); font-style: normal;
+        font-size: 13px; font-weight: 500;
+        color: var(--ink); letter-spacing: 0.04em;
+      }
+      .pill {
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--ink-2);
+        padding: 0;
+      }
+      .pill--hard { color: var(--mark); }
+      .pill--alg::before {
+        content: "—"; margin: 0 6px; color: var(--ink-4);
+      }
+
+      .progress {
+        display: flex; gap: 3px;
+        margin: 14px 0 28px;
+      }
+      .progress span {
+        flex: 1; height: 6px;
+        background: var(--paper-3);
+        border: 1px solid var(--rule);
+      }
+      .progress span.done { background: var(--mark); border-color: var(--mark); }
+      .progress span.now { background: var(--ink); border-color: var(--ink); }
+
+      .stem {
+        font-family: var(--serif);
+        font-size: 22px;
+        line-height: 1.5;
+        font-weight: 500;
+        margin: 0 0 22px;
+        color: var(--ink);
+      }
+      .stem em { font-style: italic; color: var(--mark); }
+
+      .choices {
+        display: grid; gap: 0;
+        list-style: none; padding: 0; margin: 0 0 32px;
+        border-top: 1px solid var(--rule);
+      }
+      .choice {
+        display: flex; align-items: center; gap: 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--rule);
+        font-family: var(--serif);
+        font-size: 17px; line-height: 1.45;
+        color: var(--ink);
+      }
+      .choice__letter {
+        flex: 0 0 auto;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: transparent;
+        border: 1.5px solid var(--ink);
+        display: grid; place-items: center;
+        font-family: var(--serif);
+        font-size: 15px; font-weight: 600;
+        font-style: italic;
+        color: var(--ink);
+      }
+      .choice.is-on .choice__letter {
+        background: var(--ink); color: var(--paper);
+      }
+      .choice.is-on {
+        background: var(--mark-soft);
+        margin: 0 -16px; padding-left: 16px; padding-right: 16px;
+      }
+
+      /* === signal — looks like a teacher's stamp === */
+      .signal-help {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 19px;
+        color: var(--ink-2);
+        text-align: center;
+        margin: 0 0 20px;
+      }
+      .signal {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      }
+      .sig-btn {
+        display: grid; gap: 8px;
+        padding: 18px 16px;
+        border: 1.5px solid currentColor;
+        background: transparent;
+        border-radius: 0;
+        text-align: left;
+        position: relative;
+      }
+      .sig-btn::before {
+        content: "";
+        position: absolute;
+        inset: 4px;
+        border: 1px dashed currentColor;
+        opacity: 0.35;
+        pointer-events: none;
+      }
+      .sig-btn:hover { background: currentColor; }
+      .sig-btn:hover .lbl,
+      .sig-btn:hover .sub { color: var(--paper); }
+      .sig-btn--g { color: var(--green); }
+      .sig-btn--y { color: var(--yellow); }
+      .sig-btn--r { color: var(--red); }
+      .sig-btn .lbl {
+        font-family: var(--serif);
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+      }
+      .sig-btn .sub {
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-2);
+      }
+
+      /* === results === */
+      .ledger {
+        margin: 24px 0;
+        border-top: 2px solid var(--ink);
+      }
+      .ledger__row {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 24px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      .ledger__row--hero { border-bottom-width: 2px; border-color: var(--ink); }
+      .ledger__lbl {
+        font-family: var(--mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-2);
+      }
+      .ledger__lbl small {
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--ink-3);
+        font-family: var(--serif);
+        font-style: italic;
+        margin-left: 6px;
+      }
+      .ledger__num {
+        font-family: var(--serif);
+        font-size: 40px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+      .ledger__row--hero .ledger__num {
+        font-size: 56px; color: var(--mark);
+      }
+      .ledger__num span { color: var(--ink-4); font-weight: 400; }
+
+      .foot {
+        margin: 80px 0 56px;
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--ink-4);
+        text-align: center;
+      }
+
+      @media (max-width: 640px) {
+        .page, .masthead { padding-left: 24px; padding-right: 24px; }
+        .sheet { padding: 28px 24px; }
+        .sheet::before { display: none; }
+        .signal { grid-template-columns: 1fr; }
+        .h1 { font-size: 32px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead__l">
+        <span class="lights" aria-hidden="true"><i class="g"></i><i class="y"></i><i class="r"></i></span>
+        <span class="masthead__name">SAT Traffic <em>Lights</em></span>
+      </div>
+      <div class="masthead__r">
+        <span>Vol. 1 · No. 1</span>
+        <a href="../../../../homepage/index.html">aidroplets</a>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- ============== 01 · SCORE ============== -->
+      <div class="stamp" aria-hidden="true">
+        <span class="stamp__num">i.</span>
+        <span>Set a target</span>
+        <span class="stamp__rule"></span>
+      </div>
+      <section class="sheet">
+        <p class="eyebrow">Step 1 of 3</p>
+        <h1 class="h1">What score are you <em>aiming for?</em></h1>
+        <p class="lede">
+          We tune the question pool to your goal so you spend time on problems that
+          <em>move the needle</em>. Anywhere from 200 to 800.
+        </p>
+
+        <form class="score-form" onsubmit="return false">
+          <label class="field">
+            <span class="field__lbl">Target score</span>
+            <input class="field__input" type="number" value="690" />
+            <span class="field__hint">200–800 · 10-point steps</span>
+          </label>
+
+          <div class="tiers" aria-hidden="true">
+            <span class="tier">≤500 easy</span>
+            <span class="tier">501–600 medium</span>
+            <span class="tier is-on">601–700 hard</span>
+            <span class="tier">701–800 insane</span>
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn btn--primary">Begin 30-question test</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ============== 02 · QUIZ ============== -->
+      <div class="stamp" aria-hidden="true">
+        <span class="stamp__num">ii.</span>
+        <span>Per-question signal</span>
+        <span class="stamp__rule"></span>
+      </div>
+      <section class="sheet">
+        <div class="quiz-meta">
+          <span class="quiz-counter">Question <strong>12 of 30</strong></span>
+          <span class="pill pill--hard">Hard</span>
+          <span class="pill pill--alg">Algebra</span>
+        </div>
+        <div class="progress" aria-hidden="true">
+          <span class="done"></span><span class="done"></span><span class="done"></span>
+          <span class="done"></span><span class="done"></span><span class="done"></span>
+          <span class="done"></span><span class="done"></span><span class="done"></span>
+          <span class="done"></span><span class="done"></span><span class="now"></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span>
+        </div>
+
+        <h2 class="stem">
+          If 3<em>x</em> + 2 = 5<em>x</em> − 8, what is the value of <em>x</em>?
+        </h2>
+
+        <ul class="choices">
+          <li class="choice"><span class="choice__letter">A</span><span>−5</span></li>
+          <li class="choice"><span class="choice__letter">B</span><span>−3</span></li>
+          <li class="choice is-on"><span class="choice__letter">C</span><span>5</span></li>
+          <li class="choice"><span class="choice__letter">D</span><span>10</span></li>
+        </ul>
+
+        <p class="signal-help">How sure are you, <em>really?</em></p>
+        <div class="signal">
+          <button class="sig-btn sig-btn--g">
+            <span class="lbl">Green</span>
+            <span class="sub">I understood it</span>
+          </button>
+          <button class="sig-btn sig-btn--y">
+            <span class="lbl">Yellow</span>
+            <span class="sub">Educated guess</span>
+          </button>
+          <button class="sig-btn sig-btn--r">
+            <span class="lbl">Red</span>
+            <span class="sub">No idea</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============== 03 · RESULTS ============== -->
+      <div class="stamp" aria-hidden="true">
+        <span class="stamp__num">iii.</span>
+        <span>What you actually know</span>
+        <span class="stamp__rule"></span>
+      </div>
+      <section class="sheet">
+        <p class="eyebrow">Results</p>
+        <h2 class="h1">Nice work. The <em>honest</em> tally.</h2>
+        <p class="lede">
+          True mastery is what you got right <em>and</em> flagged green. Everything
+          else is either luck or a topic to drill.
+        </p>
+
+        <dl class="ledger">
+          <div class="ledger__row ledger__row--hero">
+            <dt class="ledger__lbl">True mastery <small>green + correct</small></dt>
+            <dd class="ledger__num" style="margin:0;">18<span>/30</span></dd>
+          </div>
+          <div class="ledger__row">
+            <dt class="ledger__lbl">Correct overall</dt>
+            <dd class="ledger__num" style="margin:0;">23</dd>
+          </div>
+          <div class="ledger__row">
+            <dt class="ledger__lbl">Lucky <small>correct, not green</small></dt>
+            <dd class="ledger__num" style="margin:0;">5</dd>
+          </div>
+        </dl>
+
+        <div class="btn-row">
+          <button class="btn btn--primary">Walk through review</button>
+          <button class="btn">Custom tailored test</button>
+          <button class="btn">New regular test</button>
+        </div>
+      </section>
+
+      <p class="foot">v3 · booklet</p>
+    </main>
+  </body>
+</html>

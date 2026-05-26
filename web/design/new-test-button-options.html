@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StudySignal — New test button options</title>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+/>
+<style>
+  :root {
+    --bg:          #050509;
+    --surface:     #15161d;
+    --surface-2:   #1c1d25;
+    --surface-3:   #23242c;
+    --text:        #ededf2;
+    --text-muted:  #8a8a96;
+    --text-subtle: #5a5a66;
+    --hairline:    rgba(255, 255, 255, 0.08);
+    --hairline-hi: rgba(255, 255, 255, 0.18);
+
+    /* Current ship gradient (G5 + teal) */
+    --rainbow: linear-gradient(90deg, #5eead4 0%, #60a5fa 33%, #a78bfa 66%, #f0abfc 100%);
+    --rainbow-soft: linear-gradient(90deg,
+      rgba( 94, 234, 212, 0.16),
+      rgba( 96, 165, 250, 0.16),
+      rgba(167, 139, 250, 0.16),
+      rgba(240, 171, 252, 0.16));
+    --rainbow-mid:     #a78bfa;
+    --rainbow-mid-rgb: 167, 139, 250;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Geist", -apple-system, system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  body { padding: 40px 32px 80px; }
+  h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .lede { color: var(--text-muted); margin: 0 0 32px; max-width: 720px; }
+  .lede code { font-family: "Geist Mono", monospace; font-size: 12px;
+               background: var(--surface); padding: 2px 6px; border-radius: 4px; }
+
+  /* ============ FAUX NAVBAR ============ */
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px; padding: 0 24px;
+    background: rgba(10, 11, 18, 0.92);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .nav__left { display: inline-flex; align-items: stretch; gap: 32px; align-self: stretch; }
+  .nav__brand {
+    align-self: center;
+    font-weight: 600; font-size: 18px; letter-spacing: -0.02em;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav__brand-dots {
+    display: inline-flex; gap: 4px; margin-left: 4px;
+  }
+  .nav__brand-dots span {
+    width: 7px; height: 7px; border-radius: 50%; display: block;
+  }
+  .nav__tabs {
+    display: inline-flex; align-items: stretch; gap: 0;
+  }
+  .nav__tab {
+    background: transparent; border: 0;
+    align-self: stretch; padding: 0 12px;
+    color: rgba(255, 255, 255, 0.6);
+    display: inline-flex; align-items: center; gap: 9px;
+    font: inherit; font-size: 13.5px; font-weight: 500;
+    cursor: pointer;
+  }
+  .nav__tab.is-active { color: var(--text); }
+  .nav__tab-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .nav__tab.is-active .nav__tab-icon {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--rainbow) border-box;
+    color: var(--text);
+  }
+  .nav__right { display: inline-flex; align-items: center; gap: 8px; }
+
+  /* ============ OPTION CARD ============ */
+  .opt {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .opt__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .opt__title { font-size: 16px; font-weight: 600; margin: 0; }
+  .opt__id {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    color: var(--text-subtle); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .opt__desc { font-size: 12.5px; color: var(--text-muted); margin: 0 0 20px; line-height: 1.55; }
+
+  /* ============ BUTTON BASE ============ */
+  .b {
+    appearance: none; cursor: pointer;
+    font: inherit;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 600; font-size: 13px;
+    letter-spacing: -0.005em;
+    border-radius: 9px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    transition: all 180ms ease;
+  }
+  .b svg { display: block; flex-shrink: 0; }
+
+  /* ============ Treatments ============ */
+  .b--filled-gradient {
+    background: var(--rainbow);
+    color: var(--bg);
+    border: 0;
+    padding: 9px 16px;
+  }
+  .b--outline-gradient {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--rainbow) border-box;
+  }
+  .b--soft-tint {
+    background: var(--rainbow-soft);
+    border: 1px solid rgba(var(--rainbow-mid-rgb), 0.25);
+  }
+  .b--solid-violet {
+    background: var(--rainbow-mid);
+    color: var(--bg);
+    border: 0;
+    padding: 9px 16px;
+  }
+  .b--ghost-icon-tinted {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--hairline);
+  }
+  .b--ghost-icon-tinted svg { color: var(--rainbow-mid); }
+  .b--ghost-icon-gradient {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--hairline);
+  }
+  .b--ghost-icon-gradient .icon-wrap {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    background: var(--rainbow);
+    color: var(--bg);
+  }
+  .b--ghost-icon-gradient .icon-wrap svg { width: 11px; height: 11px; }
+  .b--bare-text {
+    background: transparent; border: 0;
+    color: var(--text);
+    padding: 6px 10px;
+  }
+  .b--bare-text svg { color: var(--text-muted); }
+  .b--subtle-surface {
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--text);
+  }
+  .b--subtle-surface:hover { background: var(--surface-3); border-color: var(--hairline-hi); }
+  .b--pill-filled {
+    background: var(--rainbow);
+    color: var(--bg);
+    border: 0;
+    border-radius: 9999px;
+    padding: 8px 16px 8px 12px;
+  }
+  .b--icon-only {
+    width: 32px; height: 32px;
+    padding: 0;
+    justify-content: center;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--rainbow) border-box;
+  }
+
+  /* ============ Sizing variants ============ */
+  .b--sm { font-size: 12.5px; padding: 6px 12px; }
+  .b--lg { font-size: 13.5px; padding: 10px 18px; }
+
+  /* Hover lift for filled */
+  .b--filled-gradient:hover,
+  .b--solid-violet:hover,
+  .b--pill-filled:hover {
+    transform: translate3d(0, -1px, 0);
+    box-shadow: 0 10px 24px -10px rgba(var(--rainbow-mid-rgb), 0.5);
+  }
+  .b--outline-gradient:hover,
+  .b--icon-only:hover {
+    background:
+      linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+      var(--rainbow) border-box;
+    transform: translate3d(0, -1px, 0);
+  }
+
+  /* Reusable Tab structure (for the navbar mock) */
+  .pre-tabs { display: inline-flex; gap: 0; align-self: stretch; }
+  .pre-tabs .nav__tab:first-child { color: var(--text); }
+  .pre-tabs .nav__tab:first-child::after {
+    content: ""; position: absolute; bottom: 0; left: 12px; right: 12px;
+    height: 2px; background: var(--rainbow);
+  }
+  .pre-tabs .nav__tab { position: relative; }
+
+  /* Sticky toc */
+  .toc {
+    position: sticky; top: 0; z-index: 5;
+    margin: -40px -32px 24px;
+    padding: 16px 32px;
+    background: rgba(5,5,9,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--hairline);
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .toc strong { color: var(--text); margin-right: 12px; font-size: 13px; }
+  .toc a {
+    color: var(--text-muted); font-size: 11.5px;
+    padding: 4px 10px; border-radius: 6px;
+    background: var(--surface);
+    text-decoration: none; font-family: "Geist Mono", monospace;
+  }
+  .toc a:hover { color: var(--text); background: var(--surface-2); }
+</style>
+</head>
+<body>
+
+<div class="toc">
+  <strong>New-test button options</strong>
+  <a href="#current">current</a>
+  <a href="#b1">B1</a>
+  <a href="#b2">B2</a>
+  <a href="#b3">B3</a>
+  <a href="#b4">B4</a>
+  <a href="#b5">B5</a>
+  <a href="#b6">B6</a>
+  <a href="#b7">B7</a>
+  <a href="#b8">B8</a>
+  <a href="#b9">B9</a>
+  <a href="#b10">B10</a>
+  <a href="#b11">B11</a>
+  <a href="#b12">B12</a>
+</div>
+
+<h1>"New test" button — alternatives</h1>
+<p class="lede">
+  The filled gradient works for the big AI-tailored CTA but feels too loud at
+  navbar scale. Below: lower-volume treatments, icon swaps, and size tweaks —
+  each shown inside a faux navbar with the wordmark + active tab so you can
+  judge in context.
+</p>
+
+<!-- ============ CURRENT ============ -->
+<section class="opt" id="current">
+  <div class="opt__head">
+    <h2 class="opt__title">Current (filled gradient + <code>+</code> icon)</h2>
+    <span class="opt__id">SHIPPED</span>
+  </div>
+  <p class="opt__desc">What's in production right now — full gradient pill, dark text, bare plus icon.</p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--filled-gradient">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B1 ============ -->
+<section class="opt" id="b1">
+  <div class="opt__head">
+    <h2 class="opt__title">B1 — Outline gradient, file-plus icon</h2>
+    <span class="opt__id">QUIETER · GRADIENT MOVES TO BORDER</span>
+  </div>
+  <p class="opt__desc">
+    Same gradient identity as the active nav tab — keeps the navbar visually
+    consistent and lets the AI CTA on each page stay the strongest filled gradient.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--outline-gradient">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B2 ============ -->
+<section class="opt" id="b2">
+  <div class="opt__head">
+    <h2 class="opt__title">B2 — Soft tinted background</h2>
+    <span class="opt__id">GRADIENT AS WASH · NOT A FILL</span>
+  </div>
+  <p class="opt__desc">
+    A whisper of the gradient at 16% alpha sits as a tinted background. Border at the
+    midpoint color. Text bright white. Reads as "lit" without dominating.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--soft-tint">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B3 ============ -->
+<section class="opt" id="b3">
+  <div class="opt__head">
+    <h2 class="opt__title">B3 — Solid violet (mid-color, not gradient)</h2>
+    <span class="opt__id">SINGLE BRAND COLOR</span>
+  </div>
+  <p class="opt__desc">
+    Replaces the gradient with just the violet midpoint. Loses the rainbow but
+    gains predictability — the button reads cleanly at small size.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--solid-violet">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B4 ============ -->
+<section class="opt" id="b4">
+  <div class="opt__head">
+    <h2 class="opt__title">B4 — Ghost with tinted icon (file-plus)</h2>
+    <span class="opt__id">CHROME-FREE · COLOR ONLY ON ICON</span>
+  </div>
+  <p class="opt__desc">
+    Plain bordered button — but the icon is tinted with the rainbow midpoint.
+    The button "borrows" brand color through the icon without paint anywhere else.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--ghost-icon-tinted">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B5 ============ -->
+<section class="opt" id="b5">
+  <div class="opt__head">
+    <h2 class="opt__title">B5 — Ghost with gradient icon-chip</h2>
+    <span class="opt__id">MICRO-GRADIENT INSIDE A TINY ICON CHIP</span>
+  </div>
+  <p class="opt__desc">
+    Just the icon gets a tiny rounded-square gradient chip with the plus on top.
+    Button body stays neutral. The brand pop concentrates in a 18×18 corner.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--ghost-icon-gradient">
+        <span class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B6 ============ -->
+<section class="opt" id="b6">
+  <div class="opt__head">
+    <h2 class="opt__title">B6 — Bare text + icon, no chrome</h2>
+    <span class="opt__id">PURE LINK-STYLE</span>
+  </div>
+  <p class="opt__desc">
+    Treats it like nav-link siblings — no border, no background. Cheapest visual
+    weight; depends entirely on the icon + word pair to draw attention.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--bare-text">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B7 ============ -->
+<section class="opt" id="b7">
+  <div class="opt__head">
+    <h2 class="opt__title">B7 — Subtle surface (no rainbow)</h2>
+    <span class="opt__id">QUIETER CTA · STANDARD CHROME</span>
+  </div>
+  <p class="opt__desc">
+    Surface-2 fill + hairline border. Same chrome family as other secondary
+    buttons in the app — fits in without competing with the active tab.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--subtle-surface">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B8 ============ -->
+<section class="opt" id="b8">
+  <div class="opt__head">
+    <h2 class="opt__title">B8 — Filled gradient, smaller size, full pill</h2>
+    <span class="opt__id">CURRENT STYLE · SHRUNK + ROUNDED</span>
+  </div>
+  <p class="opt__desc">
+    Same gradient as current, but trimmed: smaller font, tighter padding, full
+    pill shape. Tries to make the existing treatment hit by reducing scale.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--pill-filled b--sm">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B9 ============ -->
+<section class="opt" id="b9">
+  <div class="opt__head">
+    <h2 class="opt__title">B9 — Icon-only chip (gradient border)</h2>
+    <span class="opt__id">MAXIMUM ECONOMY</span>
+  </div>
+  <p class="opt__desc">
+    Drop the label entirely. The button is a 32×32 chip matching the active
+    nav-icon visual language. Tooltip on hover ("New test"). Saves the navbar
+    a lot of horizontal real estate.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--icon-only" title="New test">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M12 18v-6"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B10 ============ -->
+<section class="opt" id="b10">
+  <div class="opt__head">
+    <h2 class="opt__title">B10 — Subtle surface + sparkles icon</h2>
+    <span class="opt__id">AI HINT · NEUTRAL BG</span>
+  </div>
+  <p class="opt__desc">
+    Calm chrome + sparkles icon to imply "AI-powered". Less direct than file-plus
+    but pairs nicely with the AI Analysis tab's existing sparkles iconography.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--subtle-surface">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--rainbow-mid);">
+          <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+          <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+        </svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B11 ============ -->
+<section class="opt" id="b11">
+  <div class="opt__head">
+    <h2 class="opt__title">B11 — Outline gradient + pencil-line icon</h2>
+    <span class="opt__id">OUTLINE · WRITING METAPHOR</span>
+  </div>
+  <p class="opt__desc">
+    Outline-gradient body + a pencil-writing icon — pairs visually with the Test
+    History tab's square-pen icon, suggesting "start writing a new test."
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--outline-gradient">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
+          <path d="m15 5 3 3"/>
+        </svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B12 ============ -->
+<section class="opt" id="b12">
+  <div class="opt__head">
+    <h2 class="opt__title">B12 — Bare text + circle-plus icon (slightly bigger)</h2>
+    <span class="opt__id">UNDERSTATED · DISTINCT GLYPH</span>
+  </div>
+  <p class="opt__desc">
+    Bare text variant (B6) paired with the more visually distinctive
+    <code>plus-circle</code> icon. Easier to recognize as "an action" than a bare +.
+  </p>
+  <div class="nav">
+    <div class="nav__left">
+      <span class="nav__brand">studysignal
+        <span class="nav__brand-dots">
+          <span style="background:#fb7185"></span>
+          <span style="background:#facc15"></span>
+          <span style="background:#4ade80"></span>
+        </span>
+      </span>
+      <nav class="nav__tabs pre-tabs">
+        <button class="nav__tab"><span class="nav__tab-icon"></span>Test History</button>
+        <button class="nav__tab is-active"><span class="nav__tab-icon"></span>AI Analysis</button>
+      </nav>
+    </div>
+    <div class="nav__right">
+      <button class="b b--bare-text" style="font-size:14px;">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text);">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 12h8"/>
+          <path d="M12 8v8"/>
+        </svg>
+        New test
+      </button>
+    </div>
+  </div>
+</section>
+
+<p class="lede" style="margin-top:48px;">
+  Reply with the ID (or a combination — e.g. "B1 + pencil icon from B11") and I'll
+  wire it into <code>app.css</code> / <code>index.html</code>.
+</p>
+
+</body>
+</html>

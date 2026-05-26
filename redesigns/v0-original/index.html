@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SAT practice with a green/yellow/red confidence signal — surface the topics you guessed right on, not just the ones you got wrong."
+    />
+    <title>SAT Traffic Lights — aidroplets.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="./app.css" />
+  </head>
+  <body class="stl-app">
+    <header class="stl-header">
+      <div class="stl-header__brand">
+        <span class="stl-logo" aria-hidden="true">
+          <span class="stl-logo__dot stl-logo__dot--g"></span>
+          <span class="stl-logo__dot stl-logo__dot--y"></span>
+          <span class="stl-logo__dot stl-logo__dot--r"></span>
+        </span>
+        <div class="stl-header__titles">
+          <span class="stl-header__name">SAT Traffic Lights</span>
+          <span class="stl-header__eyebrow">aidroplets</span>
+        </div>
+      </div>
+      <div class="stl-header__actions">
+        <a class="stl-btn stl-btn--ghost" href="../../../homepage/index.html">Homepage</a>
+        <button type="button" class="stl-btn stl-btn--ghost" id="btn-restart" hidden>Restart</button>
+      </div>
+    </header>
+
+    <main id="stl-main" class="stl-main">
+      <!-- ============== SCREEN: SCORE ============== -->
+      <section class="stl-screen" data-screen="score">
+        <div class="stl-card stl-card--hero stl-score">
+          <p class="stl-eyebrow">Step 1 of 3</p>
+          <h1 class="stl-h1">What score are you aiming for?</h1>
+          <p class="stl-sub">
+            We tune the question pool to your goal so you spend time on problems that move
+            the needle. Anywhere from 200 to 800.
+          </p>
+
+          <form id="score-form" class="stl-score__form" novalidate>
+            <label class="stl-field">
+              <span class="stl-label">Target score</span>
+              <input
+                id="score-input"
+                type="number"
+                min="200"
+                max="800"
+                step="10"
+                inputmode="numeric"
+                placeholder="650"
+                autocomplete="off"
+                class="stl-input"
+              />
+              <span class="stl-hint" id="score-hint">200–800, in 10-point steps.</span>
+            </label>
+
+            <div class="stl-score__tiers" aria-hidden="true">
+              <span class="stl-tier" data-tier="easy">≤500 · easy</span>
+              <span class="stl-tier" data-tier="medium">501–600 · + medium</span>
+              <span class="stl-tier" data-tier="hard">601–700 · + hard</span>
+              <span class="stl-tier" data-tier="insane">701–800 · + insane</span>
+            </div>
+
+            <button type="submit" class="stl-btn stl-btn--primary">
+              Start 30-question test
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: QUIZ ============== -->
+      <section class="stl-screen" data-screen="quiz" hidden>
+        <header class="stl-quiz__top">
+          <div class="stl-quiz__meta">
+            <span class="stl-quiz__counter" id="quiz-counter">Question 1 of 30</span>
+            <span class="stl-pill" id="quiz-difficulty">easy</span>
+            <span class="stl-pill" id="quiz-topic">algebra</span>
+          </div>
+          <div class="stl-quiz__progress" aria-hidden="true">
+            <span class="stl-quiz__progress-fill" id="quiz-progress-fill"></span>
+          </div>
+        </header>
+
+        <article class="stl-card stl-card--hero stl-quiz__card">
+          <p class="stl-quiz__passage" id="quiz-passage" hidden></p>
+          <h2 class="stl-quiz__stem" id="quiz-stem">Loading…</h2>
+
+          <fieldset class="stl-quiz__choices" id="quiz-choices">
+            <legend class="sr-only">Choices</legend>
+          </fieldset>
+        </article>
+
+        <footer class="stl-quiz__signal">
+          <p class="stl-quiz__signal-help">
+            How sure are you? Pick one — that locks in your answer and moves on.
+          </p>
+          <div class="stl-signal" role="group" aria-label="Confidence">
+            <button type="button" class="stl-signal__btn stl-signal__btn--green" data-signal="green">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Green</span>
+              <span class="stl-signal__sub">I understood it</span>
+            </button>
+            <button type="button" class="stl-signal__btn stl-signal__btn--yellow" data-signal="yellow">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Yellow</span>
+              <span class="stl-signal__sub">Educated guess</span>
+            </button>
+            <button type="button" class="stl-signal__btn stl-signal__btn--red" data-signal="red">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Red</span>
+              <span class="stl-signal__sub">No idea</span>
+            </button>
+          </div>
+          <button type="button" class="stl-skip" id="btn-skip-question">
+            Skip this question
+          </button>
+        </footer>
+      </section>
+
+      <!-- ============== SCREEN: RESULTS ============== -->
+      <section class="stl-screen" data-screen="results" hidden>
+        <div class="stl-card stl-card--hero stl-results">
+          <p class="stl-eyebrow">Results</p>
+          <h2 class="stl-h1" id="results-headline">Nice work.</h2>
+          <p class="stl-sub" id="results-sub">Here's the breakdown.</p>
+
+          <div class="stl-results__grid">
+            <div class="stl-stat stl-stat--featured">
+              <span class="stl-stat__num" id="stat-true-mastery">0</span>
+              <span class="stl-stat__lbl">True mastery <small>green + correct</small></span>
+            </div>
+            <div class="stl-stat">
+              <span class="stl-stat__num" id="stat-correct">0</span>
+              <span class="stl-stat__lbl">Correct</span>
+            </div>
+            <div class="stl-stat">
+              <span class="stl-stat__num" id="stat-lucky">0</span>
+              <span class="stl-stat__lbl">Lucky <small>correct, not green</small></span>
+            </div>
+            <div class="stl-stat">
+              <span class="stl-stat__num" id="stat-review">0</span>
+              <span class="stl-stat__lbl">To review</span>
+            </div>
+          </div>
+
+          <div class="stl-results__actions">
+            <button type="button" class="stl-btn stl-btn--primary" id="btn-start-review">
+              Walk through review
+            </button>
+            <button type="button" class="stl-btn" id="btn-results-tailored">
+              Custom tailored test
+            </button>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-results-fresh">
+              New regular test
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: REVIEW ============== -->
+      <section class="stl-screen" data-screen="review" hidden>
+        <header class="stl-quiz__top">
+          <div class="stl-quiz__meta">
+            <span class="stl-quiz__counter" id="review-counter">Review 1 of 1</span>
+            <span class="stl-pill" id="review-result">missed</span>
+            <span class="stl-pill" id="review-topic">topic</span>
+          </div>
+        </header>
+
+        <article class="stl-card stl-card--hero stl-quiz__card">
+          <p class="stl-quiz__passage" id="review-passage" hidden></p>
+          <h2 class="stl-quiz__stem" id="review-stem"></h2>
+          <ul class="stl-review__choices" id="review-choices"></ul>
+          <div class="stl-review__explain">
+            <p class="stl-eyebrow">Explanation</p>
+            <p id="review-explanation"></p>
+          </div>
+        </article>
+
+        <footer class="stl-review__nav">
+          <button type="button" class="stl-btn stl-btn--ghost" id="btn-review-prev">Previous</button>
+          <button type="button" class="stl-btn stl-btn--primary" id="btn-review-next">Next</button>
+        </footer>
+      </section>
+
+      <!-- ============== SCREEN: REGEN ============== -->
+      <section class="stl-screen" data-screen="regen" hidden>
+        <div class="stl-card stl-card--hero stl-results">
+          <p class="stl-eyebrow">What's next</p>
+          <h2 class="stl-h1">Pick your next round</h2>
+          <p class="stl-sub" id="regen-sub">
+            Drill the topics you just struggled with, take a fresh randomized test, or
+            start over with a new score.
+          </p>
+          <div class="stl-results__actions">
+            <button type="button" class="stl-btn stl-btn--primary" id="btn-regen-tailored">
+              Custom tailored test
+            </button>
+            <button type="button" class="stl-btn" id="btn-regen-fresh">
+              New regular test
+            </button>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-regen-no">
+              Start over with a new score
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./questions.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

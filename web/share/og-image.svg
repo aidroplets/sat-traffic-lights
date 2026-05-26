@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Studysignal share card · 1200×630 · matches current app visual language:
+       - dark canvas with top-right ambient glow
+       - subject + test pills in their per-test colors
+       - Geist + Space Grotesk type
+       - pill chrome with leading dots (mirrors the live UI)
+       Source-of-truth file. Re-render PNG via render-share-image.js. -->
+
+  <defs>
+    <radialGradient id="glow" cx="0.85" cy="0" r="0.6">
+      <stop offset="0%" stop-color="#8b86ff" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#8b86ff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#8b86ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8b86ff"/>
+      <stop offset="100%" stop-color="#5d8dff"/>
+    </linearGradient>
+    <linearGradient id="cta-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b86ff"/>
+      <stop offset="100%" stop-color="#5d8dff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ===== background ===== -->
+  <rect width="1200" height="630" fill="#050509"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- subtle inner card border so the image reads as "the app screen" -->
+  <rect x="48" y="48" width="1104" height="534" rx="20" ry="20"
+        fill="#0e1018" stroke="#1c1f2c" stroke-width="1"/>
+  <rect x="48" y="48" width="1104" height="534" rx="20" ry="20"
+        fill="url(#glow)" opacity="0.6"/>
+
+  <!-- ===== wordmark (top-left of card) ===== -->
+  <g transform="translate(96, 132)">
+    <text font-family="Geist, system-ui, sans-serif"
+          font-size="56" font-weight="600" letter-spacing="-1.4"
+          fill="#ecedef">studysignal</text>
+    <!-- traffic-light dots -->
+    <circle cx="412" cy="-10" r="11" fill="#fb7185"/>
+    <circle cx="444" cy="-10" r="11" fill="#facc15"/>
+    <circle cx="476" cy="-10" r="11" fill="#4ade80"/>
+  </g>
+
+  <!-- ===== headline ===== -->
+  <g transform="translate(96, 220)">
+    <text font-family="'Space Grotesk', Geist, system-ui, sans-serif"
+          font-size="64" font-weight="600" letter-spacing="-1.4"
+          fill="#ecedef">
+      <tspan x="0" dy="0">Practice that signals what</tspan>
+      <tspan x="0" dy="76">you actually <tspan fill="url(#accent-grad)">know</tspan>.</tspan>
+    </text>
+  </g>
+
+  <!-- ===== sub-headline ===== -->
+  <text x="96" y="430"
+        font-family="Geist, system-ui, sans-serif"
+        font-size="24" font-weight="400"
+        fill="#a8b0c4">
+    SAT · PSAT · ACT · ISEE · SSAT · HSPT — custom-tailored questions for your goal score.
+  </text>
+
+  <!-- ===== test-color pill row (visual sample of per-test theming) ===== -->
+  <!-- Each pill: rounded rect + leading colored dot + uppercase mono label -->
+  <g transform="translate(96, 478)" font-family="'Geist Mono', ui-monospace, monospace"
+     font-size="13" font-weight="500" letter-spacing="0.8">
+
+    <!-- SAT — lavender -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="86" height="34" rx="17" ry="17"
+            fill="rgba(139,134,255,0.10)" stroke="rgba(139,134,255,0.45)" stroke-width="1"/>
+      <circle cx="16" cy="17" r="5" fill="#8b86ff"/>
+      <circle cx="16" cy="17" r="9" fill="#8b86ff" opacity="0.25"/>
+      <text x="30" y="22" fill="#ecedef">SAT</text>
+    </g>
+
+    <!-- PSAT — slate blue -->
+    <g transform="translate(102, 0)">
+      <rect x="0" y="0" width="98" height="34" rx="17" ry="17"
+            fill="rgba(96,165,250,0.10)" stroke="rgba(96,165,250,0.45)" stroke-width="1"/>
+      <circle cx="16" cy="17" r="5" fill="#60a5fa"/>
+      <circle cx="16" cy="17" r="9" fill="#60a5fa" opacity="0.25"/>
+      <text x="30" y="22" fill="#ecedef">PSAT</text>
+    </g>
+
+    <!-- ACT — orange -->
+    <g transform="translate(216, 0)">
+      <rect x="0" y="0" width="86" height="34" rx="17" ry="17"
+            fill="rgba(251,146,60,0.10)" stroke="rgba(251,146,60,0.45)" stroke-width="1"/>
+      <circle cx="16" cy="17" r="5" fill="#fb923c"/>
+      <circle cx="16" cy="17" r="9" fill="#fb923c" opacity="0.25"/>
+      <text x="30" y="22" fill="#ecedef">ACT</text>
+    </g>
+
+    <!-- ISEE — green -->
+    <g transform="translate(318, 0)">
+      <rect x="0" y="0" width="92" height="34" rx="17" ry="17"
+            fill="rgba(74,222,128,0.10)" stroke="rgba(74,222,128,0.45)" stroke-width="1"/>
+      <circle cx="16" cy="17" r="5" fill="#4ade80"/>
+      <circle cx="16" cy="17" r="9" fill="#4ade80" opacity="0.25"/>
+      <text x="30" y="22" fill="#ecedef">ISEE</text>
+    </g>
+
+    <!-- SSAT — rose -->
+    <g transform="translate(426, 0)">
+      <rect x="0" y="0" width="96" height="34" rx="17" ry="17"
+            fill="rgba(244,114,182,0.10)" stroke="rgba(244,114,182,0.45)" stroke-width="1"/>
+      <circle cx="16" cy="17" r="5" fill="#f472b6"/>
+      <circle cx="16" cy="17" r="9" fill="#f472b6" opacity="0.25"/>
+      <text x="30" y="22" fill="#ecedef">SSAT</text>
+    </g>
+
+    <!-- HSPT — amber -->
+    <g transform="translate(538, 0)">
+      <rect x="0" y="0" width="96" height="34" rx="17" ry="17"
+            fill="rgba(250,204,21,0.10)" stroke="rgba(250,204,21,0.45)" stroke-width="1"/>
+      <circle cx="16" cy="17" r="5" fill="#facc15"/>
+      <circle cx="16" cy="17" r="9" fill="#facc15" opacity="0.25"/>
+      <text x="30" y="22" fill="#ecedef">HSPT</text>
+    </g>
+  </g>
+
+  <!-- ===== domain bottom-right ===== -->
+  <text x="1104" y="540" text-anchor="end"
+        font-family="'Geist Mono', ui-monospace, monospace"
+        font-size="14" letter-spacing="1.2"
+        fill="#6b7288">studysignal.ai</text>
+
+</svg>

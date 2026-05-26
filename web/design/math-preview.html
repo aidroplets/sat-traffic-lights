@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>StudySignal — math rendering preview</title>
+<link rel="stylesheet" href="../app.css" />
+<style>
+  body { background: var(--stl-bg, #0e0e12); color: var(--stl-fg, #e8e8f0); padding: 40px 24px; max-width: 820px; margin: 0 auto; font-family: var(--stl-font, system-ui, sans-serif); }
+  h1 { font-weight: 600; font-size: 22px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-weight: 500; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--stl-muted, #888); margin: 32px 0 12px; }
+  .card { background: var(--stl-surface, #16161c); border: 1px solid var(--stl-hairline, #28282f); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; }
+  .card .stem { font-size: 17px; line-height: 1.55; color: var(--stl-fg, #e8e8f0); }
+  .card .src  { display: block; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12.5px; color: var(--stl-muted, #999); margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--stl-hairline, #28282f); white-space: pre-wrap; }
+  .card .choices { margin-top: 14px; display: grid; gap: 6px; font-size: 16px; }
+  .card .choices .choice { display: flex; gap: 10px; align-items: baseline; }
+  .card .choices .choice b { color: var(--stl-muted, #888); font-weight: 500; min-width: 22px; }
+  /* Pin a sensible accent so the math color reads on this preview without the full app shell setting --stl-tint. */
+  :root { --stl-tint: 139 134 255; --stl-accent: rgb(var(--stl-tint)); --stl-bg: #0e0e12; --stl-fg: #e8e8f0; --stl-surface: #16161c; --stl-hairline: #2a2a32; --stl-muted: #8a8a98; --stl-font: 'Inter', system-ui, sans-serif; }
+  small.note { color: var(--stl-muted); font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<h1>Display fraction & radical preview</h1>
+<small class="note">Reproduces the two screenshots Joshua shared. Authored with the new <code>\frac{}{}</code> and <code>\sqrt{}</code> syntax. Same renderer the production app uses.</small>
+
+<h2>Example 1 — SAT-style fraction equation</h2>
+<div class="card">
+  <div class="stem" data-bind="ex1"></div>
+  <div class="choices">
+    <div class="choice"><b>A.</b> <span data-bind="ex1a"></span></div>
+    <div class="choice"><b>B.</b> <span data-bind="ex1b"></span></div>
+    <div class="choice"><b>C.</b> <span data-bind="ex1c"></span></div>
+    <div class="choice"><b>D.</b> <span data-bind="ex1d"></span></div>
+  </div>
+  <code class="src">stem: 'Solve for x: \\frac{2x − 5}{3} − \\frac{x + 1}{4} = \\frac{5x − 7}{12}'</code>
+</div>
+
+<h2>Example 2 — Parallel-line problem</h2>
+<div class="card">
+  <div class="stem" data-bind="ex2"></div>
+  <div class="choices">
+    <div class="choice"><b>A.</b> <span data-bind="ex2a"></span></div>
+    <div class="choice"><b>B.</b> <span data-bind="ex2b"></span></div>
+    <div class="choice"><b>C.</b> <span data-bind="ex2c"></span></div>
+    <div class="choice"><b>D.</b> <span data-bind="ex2d"></span></div>
+  </div>
+  <code class="src">stem: 'Which equation represents a line parallel to y = −\\frac{3}{2}x + 4 and passing through the point (4, −7)?'</code>
+</div>
+
+<h2>Example 3 — Radical + nested fraction</h2>
+<div class="card">
+  <div class="stem" data-bind="ex3"></div>
+  <code class="src">stem: 'If h = \\sqrt{\\frac{2g}{m}}, what is m in terms of g and h?'</code>
+</div>
+
+<h2>Example 4 — Mixed inline & display (proves opt-in works)</h2>
+<div class="card">
+  <div class="stem" data-bind="ex4"></div>
+  <code class="src">stem: 'A fraction 2/3 appears inline. A fraction \\frac{2x − 5}{3} stacks. Both can coexist in one stem.'</code>
+</div>
+
+<!-- Load the actual app.js so we use the EXACT renderer that ships in production. -->
+<!-- The script needs the test hooks exposure to be evaluated; running it standalone
+     would try to wire DOM listeners that don't exist here. Easier path: inline the
+     three relevant functions verbatim so this preview stays self-contained. -->
+<script>
+(() => {
+  // ---- Inlined from app.js (single source of truth: app.js) -----------------
+  // If you change the renderer, mirror here OR delete this preview and load
+  // app.js with a sandbox shim. For preview purposes the inlined copy is
+  // simpler and survives the build script's dist/ exclusion of /design.
+
+  const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ESC[c]);
+
+  const STEM_SKIP_LETTERS = new Set(['A','I','a']);
+  const MATH_NEIGHBOR = /[\d+\-=()*\/^²³⁰¹⁴⁵⁶⁷⁸⁹·×÷−.,%∠°≤≥≠√±≈]/;
+  const MATH_OPERATOR_FAR = /[+\-=*\/^×÷−≤≥≠±≈]/;
+
+  const formatStemHtml = (text) => {
+    const src = String(text == null ? '' : text);
+    return src.replace(/[A-Za-z]+/g, (word, offset) => {
+      if (word.length === 1) {
+        const ch = word;
+        const beforeImm = offset > 0 ? src.charAt(offset - 1) : '';
+        const afterImm  = src.charAt(offset + 1);
+        const beforeFar = offset > 1 ? src.slice(Math.max(0, offset - 3), offset) : '';
+        const afterFar  = src.slice(offset + 1, offset + 4);
+        const inMathContext =
+          MATH_NEIGHBOR.test(beforeImm) || MATH_NEIGHBOR.test(afterImm) ||
+          MATH_OPERATOR_FAR.test(beforeFar) || MATH_OPERATOR_FAR.test(afterFar);
+        if (inMathContext || !STEM_SKIP_LETTERS.has(ch)) {
+          return '<em class="stl-quiz__var">' + escapeHtml(ch) + '</em>';
+        }
+        return escapeHtml(ch);
+      }
+      const beforeRun = offset > 0 ? src.charAt(offset - 1) : '';
+      const afterRun  = src.charAt(offset + word.length);
+      if (/\d/.test(beforeRun) || /\d/.test(afterRun)) {
+        let out = '';
+        for (const c of word) out += '<em class="stl-quiz__var">' + escapeHtml(c) + '</em>';
+        return out;
+      }
+      return escapeHtml(word);
+    });
+  };
+
+  const consumeBalancedBraces = (src, startIdx) => {
+    if (src.charAt(startIdx) !== '{') return null;
+    let depth = 0;
+    for (let i = startIdx; i < src.length; i++) {
+      const ch = src.charAt(i);
+      if (ch === '{') depth++;
+      else if (ch === '}') { depth--; if (depth === 0) return { body: src.slice(startIdx + 1, i), endIdx: i }; }
+    }
+    return null;
+  };
+  const renderLatexCommands = (html) => {
+    const expand = (token, wrap) => {
+      let out = ''; let i = 0; const tokenLen = token.length;
+      while (i < html.length) {
+        const idx = html.indexOf(token, i);
+        if (idx === -1) { out += html.slice(i); break; }
+        out += html.slice(i, idx);
+        if (html.charAt(idx + tokenLen) !== '{') { out += html.slice(idx, idx + tokenLen); i = idx + tokenLen; continue; }
+        const balanced = consumeBalancedBraces(html, idx + tokenLen);
+        if (!balanced) { out += html.slice(idx, idx + tokenLen + 1); i = idx + tokenLen + 1; continue; }
+        if (token === '\\frac') {
+          const second = consumeBalancedBraces(html, balanced.endIdx + 1);
+          if (!second) { out += html.slice(idx, balanced.endIdx + 1); i = balanced.endIdx + 1; continue; }
+          out += wrap(balanced.body, second.body); i = second.endIdx + 1;
+        } else {
+          out += wrap(balanced.body); i = balanced.endIdx + 1;
+        }
+      }
+      html = out;
+    };
+    expand('\\frac', (num, den) => '<span class="stl-math-displayfrac"><span class="stl-math-displayfrac__num">' + renderLatexCommands(num) + '</span><span class="stl-math-displayfrac__den">' + renderLatexCommands(den) + '</span></span>');
+    expand('\\sqrt', (radicand) => '<span class="stl-math-sqrt"><span class="stl-math-sqrt__radical">√</span><span class="stl-math-sqrt__body">' + renderLatexCommands(radicand) + '</span></span>');
+    return html;
+  };
+  const renderMath = (html) => {
+    if (html == null) return '';
+    return String(renderLatexCommands(String(html)))
+      .replace(/\^\(([^()]+)\)/g, (_, body) => {
+        const slashIdx = body.indexOf('/');
+        if (slashIdx > 0 && slashIdx < body.length - 1) {
+          return '<span class="stl-math-fracsup"><span class="stl-math-num">' + body.slice(0, slashIdx) + '</span><span class="stl-math-den">' + body.slice(slashIdx + 1) + '</span></span>';
+        }
+        return '<sup class="stl-math-sup">' + body + '</sup>';
+      })
+      .replace(/\^(-?\d+)/g, (_, body) => '<sup class="stl-math-sup">' + body + '</sup>');
+  };
+  // wrapExpressions: full copy from app.js so the preview matches production.
+  const wrapExpressions = (html) => {
+    if (html == null) return '';
+    const VAR_TOKEN = '<em class="stl-quiz__var">[A-Za-z]<\\/em>';
+    const MATH_CHARS = '[0-9+\\-=()*\\/^²³⁰¹⁴⁵⁶⁷⁸⁹·×÷−.,%∠°≤≥≠√±≈]';
+    const MATH_ANCHORS = /[∠°≤≥≠√±≈]/;
+    const TOKEN = '(?:' + VAR_TOKEN + '|' + MATH_CHARS + '+)';
+    const RUN_RE = new RegExp(TOKEN + '(?:\\s*' + TOKEN + ')*', 'g');
+    return html.replace(RUN_RE, (run, offset, full) => {
+      let trail = '';
+      const peek = () => full.charAt(offset + run.length);
+      while (run.length > 0) {
+        const last = run[run.length - 1];
+        const next = peek();
+        const isWordHyphen = last === '-' && /[A-Za-z]/.test(next);
+        const isSentencePeriod = last === '.' && (next === '' || /\s/.test(next));
+        const isSentenceComma = last === ',' && /\s[A-Za-z]/.test(next + full.charAt(offset + run.length + 1));
+        if (!isWordHyphen && !isSentencePeriod && !isSentenceComma) break;
+        trail = last + trail; run = run.slice(0, -1);
+      }
+      const hasVar = run.includes('class="stl-quiz__var"');
+      const hasAnchor = MATH_ANCHORS.test(run);
+      if (!hasVar && !hasAnchor) return run + trail;
+      if (/^<em class="stl-quiz__var">[A-Za-z]<\/em>$/.test(run)) return run + trail;
+      return '<span class="stl-quiz__expr">' + run + '</span>' + trail;
+    });
+  };
+  const formatRich = (text) => renderMath(wrapExpressions(formatStemHtml(text)));
+
+  // ---- Bind the preview entries ---------------------------------------------
+  const set = (key, text) => {
+    const el = document.querySelector('[data-bind="' + key + '"]');
+    if (el) el.innerHTML = formatRich(text);
+  };
+
+  set('ex1', 'Solve for x: \\frac{2x − 5}{3} − \\frac{x + 1}{4} = \\frac{5x − 7}{12}');
+  set('ex1a', '−9');
+  set('ex1b', '−3');
+  set('ex1c', '3');
+  set('ex1d', '9');
+
+  set('ex2', 'Which equation represents a line parallel to y = −\\frac{3}{2}x + 4 and passing through the point (4, −7)?');
+  set('ex2a', '3x + 2y = −2');
+  set('ex2b', '2x + 3y = −13');
+  set('ex2c', '3x − 2y = 26');
+  set('ex2d', '2x − 3y = 29');
+
+  set('ex3', 'If h = \\sqrt{\\frac{2g}{m}}, what is m in terms of g and h?');
+
+  set('ex4', 'A fraction 2/3 appears inline. A fraction \\frac{2x − 5}{3} stacks. Both can coexist in one stem.');
+})();
+</script>
+</body>
+</html>
