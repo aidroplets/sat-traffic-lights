@@ -1,0 +1,7 @@
+# Never upload local secrets to Vercel build storage.
+.env
+.env.*
+.tokens/
+.secrets/
+.git/
+node_modules/

@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>StudySignal — Test overview (results) layout options</title>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+/>
+<style>
+  :root {
+    --bg:          #050509;
+    --surface:     #15161d;
+    --surface-2:   #1c1d25;
+    --surface-3:   #23242c;
+    --text:        #ededf2;
+    --text-muted:  #8a8a96;
+    --text-subtle: #5a5a66;
+    --hairline:    rgba(255, 255, 255, 0.08);
+    --hairline-hi: rgba(255, 255, 255, 0.18);
+
+    --green:  #4ade80;
+    --green-text: #86efac;
+    --yellow: #facc15;
+    --yellow-text: #fde047;
+    --red:    #fb7185;
+    --red-text: #fda4af;
+
+    --rainbow: linear-gradient(90deg, #5eead4 0%, #60a5fa 33%, #a78bfa 66%, #f0abfc 100%);
+    --rainbow-soft: linear-gradient(90deg,
+      rgba( 94, 234, 212, 0.16),
+      rgba( 96, 165, 250, 0.16),
+      rgba(167, 139, 250, 0.16),
+      rgba(240, 171, 252, 0.16));
+    --rainbow-mid-rgb: 167, 139, 250;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+               font-family: "Geist", -apple-system, system-ui, sans-serif;
+               font-size: 14px; line-height: 1.5; }
+  body { padding: 32px 24px 80px; }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 6px; }
+  h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .lede { color: var(--text-muted); margin: 0 0 28px; max-width: 760px; }
+  code { font-family: "Geist Mono", monospace; font-size: 12px;
+         background: var(--surface); padding: 1px 5px; border-radius: 4px; }
+
+  .toc {
+    position: sticky; top: 0; z-index: 5;
+    margin: -32px -24px 24px;
+    padding: 16px 24px;
+    background: rgba(5,5,9,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--hairline);
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .toc strong { color: var(--text); margin-right: 12px; font-size: 13px; }
+  .toc a {
+    color: var(--text-muted); font-size: 11.5px;
+    padding: 4px 10px; border-radius: 6px;
+    background: var(--surface);
+    text-decoration: none; font-family: "Geist Mono", monospace;
+  }
+  .toc a:hover { color: var(--text); background: var(--surface-2); }
+
+  .opt {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    max-width: 900px;
+  }
+  .opt__head { display: flex; align-items: baseline; justify-content: space-between;
+               gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
+  .opt__id { font-family: "Geist Mono", monospace; font-size: 11px;
+             color: var(--text-subtle); letter-spacing: 0.06em; text-transform: uppercase; }
+  .opt__desc { font-size: 12.5px; color: var(--text-muted);
+               margin: 0 0 24px; line-height: 1.55; }
+
+  /* Mock card surrounding each option's results layout. */
+  .mock {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 24px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* Shared atoms */
+  .h-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0;
+  }
+  .h-eyebrow::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rainbow-mid-rgb); background: rgb(var(--rainbow-mid-rgb));
+  }
+  .h-title { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+  .h-sub { color: var(--text-muted); margin: 0; }
+  .h-divider { height: 1px; background: var(--hairline); margin: 0; }
+
+  /* CTA pill (gradient outline, same as live app) */
+  .h-cta {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 22px;
+    font-size: 14px; font-weight: 600;
+    color: var(--text);
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--rainbow) border-box;
+    border-radius: 9999px;
+    cursor: pointer;
+  }
+  .h-cta--lg { padding: 16px 22px; font-size: 15px; }
+
+  /* Secondary button (ghost) */
+  .h-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border-radius: 9px;
+    border: 1px solid var(--hairline);
+    background: transparent;
+    color: var(--text);
+    font: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer;
+  }
+  .h-btn:hover { background: var(--surface-2); border-color: var(--hairline-hi); }
+  .h-btn--ghost { border: 0; padding: 6px 10px; color: var(--text-muted); }
+
+  /* Stat tile primitives — colored variants */
+  .tile {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: grid; gap: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tile__num { font-size: 1.5rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile__lbl { font-family: "Geist Mono", monospace; font-size: 10.5px;
+               letter-spacing: 0.06em; text-transform: uppercase;
+               color: var(--text-subtle); }
+  .tile__sub { font-size: 12px; color: var(--text-muted); }
+  .tile--mastery {
+    border-color: rgba(74, 222, 128, 0.4);
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.06), transparent 60%);
+  }
+  .tile--mastery .tile__num { color: var(--green-text); }
+  .tile--lucky {
+    border-color: rgba(250, 204, 21, 0.35);
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.05), transparent 60%);
+  }
+  .tile--lucky .tile__num { color: var(--yellow-text); }
+  .tile--review {
+    border-color: rgba(251, 113, 133, 0.35);
+    background: linear-gradient(135deg, rgba(251, 113, 133, 0.05), transparent 60%);
+  }
+  .tile--review .tile__num { color: var(--red-text); }
+  .tile--featured {
+    /* The score itself; uses the brand rainbow outline. */
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(#15161d, #15161d) padding-box,
+      var(--rainbow) border-box;
+    padding: 18px 20px;
+  }
+  .tile--featured .tile__num { font-size: 2.2rem; }
+
+  /* Specifically scoped layouts */
+
+  /* ======= O1: classic — 1 hero score + 3 stat rows ======= */
+  .o1__grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; }
+
+  /* ======= O2: hero card with split-meter bar ======= */
+  .o2__hero {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(#15161d, #15161d) padding-box,
+      var(--rainbow) border-box;
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: grid; gap: 16px;
+  }
+  .o2__hero-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .o2__score-main { font-size: 3rem; font-weight: 600; line-height: 1;
+                    font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+  .o2__score-meta { color: var(--text-muted); font-size: 13px; }
+  .o2__meter {
+    height: 10px; border-radius: 5px; overflow: hidden;
+    display: flex; gap: 2px; background: rgba(255,255,255,0.04);
+  }
+  .o2__meter span { display: block; height: 100%; }
+  .o2__meter-key { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+  .o2__meter-key span::before {
+    content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px;
+    border-radius: 50%; vertical-align: 0;
+  }
+  .o2__meter-key .k-mastery::before { background: var(--green); }
+  .o2__meter-key .k-lucky::before { background: var(--yellow); }
+  .o2__meter-key .k-review::before { background: var(--red); }
+
+  /* ======= O3: ledger rows (text-forward) ======= */
+  .o3__ledger { display: grid; gap: 1px; background: var(--hairline);
+                border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+  .o3__row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 16px;
+    align-items: center; padding: 14px 18px;
+    background: var(--surface);
+  }
+  .o3__row-label { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+  .o3__row-label::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+  }
+  .o3__row--mastery .o3__row-label::before { background: var(--green); }
+  .o3__row--lucky   .o3__row-label::before { background: var(--yellow); }
+  .o3__row--review  .o3__row-label::before { background: var(--red); }
+  .o3__row-num { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 18px; }
+  .o3__row-sub { color: var(--text-muted); font-size: 12px; }
+
+  /* ======= O4: large score + signal grid ======= */
+  .o4__score {
+    display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
+  }
+  .o4__big {
+    font-size: 5rem; font-weight: 600; line-height: 0.9;
+    letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+    background: var(--rainbow); -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .o4__big small { font-size: 0.4em; color: var(--text-muted);
+                   -webkit-text-fill-color: var(--text-muted); }
+  .o4__signals { display: grid; gap: 8px; }
+  .o4__signal { display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+                align-items: center; padding: 10px 14px;
+                background: var(--surface-2); border-radius: 8px; }
+  .o4__dot { width: 10px; height: 10px; border-radius: 50%; }
+  .o4__signal--mastery .o4__dot { background: var(--green); }
+  .o4__signal--lucky   .o4__dot { background: var(--yellow); }
+  .o4__signal--review  .o4__dot { background: var(--red); }
+  .o4__signal-lbl { font-size: 13px; }
+  .o4__signal-num { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* ======= O5: donut-like score + chips ======= */
+  .o5__center { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .o5__donut {
+    width: 120px; height: 120px; border-radius: 50%;
+    background:
+      conic-gradient(
+        var(--green) 0 calc(4 / 30 * 360deg),
+        var(--yellow) calc(4 / 30 * 360deg) calc(5 / 30 * 360deg),
+        var(--red) calc(5 / 30 * 360deg) 360deg
+      );
+    display: grid; place-items: center;
+    position: relative;
+  }
+  .o5__donut::before {
+    content: ""; position: absolute; inset: 12px;
+    border-radius: 50%; background: var(--surface);
+  }
+  .o5__donut-inner {
+    position: relative; text-align: center;
+  }
+  .o5__donut-num { font-size: 1.8rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .o5__donut-lbl { font-size: 10px; color: var(--text-muted);
+                   font-family: "Geist Mono", monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+  .o5__chips { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .o5__chip {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 10px;
+    align-items: center; padding: 8px 12px; border-radius: 9999px;
+    border: 1px solid var(--hairline); background: rgba(255,255,255,0.02);
+  }
+  .o5__chip-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .o5__chip--m .o5__chip-dot { background: var(--green); }
+  .o5__chip--l .o5__chip-dot { background: var(--yellow); }
+  .o5__chip--r .o5__chip-dot { background: var(--red); }
+  .o5__chip-lbl { font-size: 13px; }
+  .o5__chip-num { font-weight: 600; font-variant-numeric: tabular-nums; font-size: 14px; }
+
+  /* ======= O6: kpis row + segmented bar ======= */
+  .o6__kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .o6__kpi {
+    padding: 12px 14px; border-radius: 10px; border: 1px solid var(--hairline);
+    background: rgba(255,255,255,0.02);
+    display: grid; gap: 4px;
+  }
+  .o6__kpi-num { font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+  .o6__kpi-lbl { font-family: "Geist Mono", monospace; font-size: 10.5px;
+                 letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-subtle); }
+  .o6__kpi--featured {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(#15161d, #15161d) padding-box,
+      var(--rainbow) border-box;
+  }
+  .o6__kpi--mastery { border-color: rgba(74, 222, 128, 0.35); }
+  .o6__kpi--mastery .o6__kpi-num { color: var(--green-text); }
+  .o6__kpi--lucky { border-color: rgba(250, 204, 21, 0.3); }
+  .o6__kpi--lucky .o6__kpi-num { color: var(--yellow-text); }
+  .o6__kpi--review { border-color: rgba(251, 113, 133, 0.3); }
+  .o6__kpi--review .o6__kpi-num { color: var(--red-text); }
+
+  /* ======= O7: vertical narrative — quote-style ======= */
+  .o7__quote {
+    font-size: 18px; line-height: 1.55; font-weight: 500;
+    border-left: 2px solid; border-image: var(--rainbow) 1 100%;
+    padding: 4px 0 4px 20px;
+    margin: 0;
+  }
+  .o7__quote em { font-style: normal; font-weight: 600;
+                  background: var(--rainbow); -webkit-background-clip: text; background-clip: text;
+                  color: transparent; }
+  .o7__stats { display: flex; gap: 24px; flex-wrap: wrap; color: var(--text-muted); font-size: 13px; }
+  .o7__stats strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* ======= O8: 2x2 quadrant tiles ======= */
+  .o8__quad { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .o8__cell {
+    padding: 18px 20px; border-radius: 12px; border: 1px solid var(--hairline);
+    display: grid; gap: 6px;
+    background: rgba(255,255,255,0.02);
+    position: relative;
+  }
+  .o8__cell--score {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(#15161d, #15161d) padding-box,
+      var(--rainbow) border-box;
+  }
+  .o8__cell-num { font-size: 2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .o8__cell-lbl { font-family: "Geist Mono", monospace; font-size: 10.5px;
+                  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-subtle); }
+  .o8__cell-sub { color: var(--text-muted); font-size: 12px; }
+  .o8__cell--mastery .o8__cell-num { color: var(--green-text); }
+  .o8__cell--lucky .o8__cell-num { color: var(--yellow-text); }
+  .o8__cell--review .o8__cell-num { color: var(--red-text); }
+
+  /* Shared bottom row: share + review buttons */
+  .actions-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 12px;
+    align-items: center;
+  }
+  .share-cluster { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ======================================================== */
+  /* REFINED FOCUS SET — O2 (no border), O3, and combinations */
+  /* ======================================================== */
+  .focus-banner {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 8px 0 16px;
+  }
+  .focus-banner::before, .focus-banner::after {
+    content: ""; flex: 1; height: 1px; background: var(--hairline);
+  }
+  .opt--focus { border-color: rgba(167, 139, 250, 0.35); }
+  .opt--focus .opt__id { color: rgb(var(--rainbow-mid-rgb)); }
+
+  /* O2-plain — score + meter on a hairline-only card (no rainbow border). */
+  .o2p__hero {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: grid; gap: 16px;
+  }
+  /* O2-naked — score + meter as raw layout, no card at all. */
+  .o2n__hero { display: grid; gap: 14px; padding: 4px 2px 0; }
+  .o2n__hero .o2__score-main { font-size: 3.4rem; }
+
+  /* Combined: meter sits inline above the ledger; ledger does the per-row breakdown. */
+  .oc__meter {
+    height: 8px; border-radius: 4px; overflow: hidden;
+    display: flex; gap: 2px; background: rgba(255,255,255,0.04);
+  }
+  .oc__meter span { display: block; height: 100%; }
+  .oc__top {
+    display: grid; gap: 14px;
+    padding-bottom: 4px;
+  }
+  .oc__top-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .oc__score {
+    font-size: 3rem; font-weight: 600; line-height: 1;
+    letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
+  }
+  .oc__score small { font-size: 0.4em; color: var(--text-muted); font-weight: 500; }
+  .oc__meta { color: var(--text-muted); font-size: 13px; }
+
+  /* Variant C2 — meter + ledger inside one bordered hairline card */
+  .oc2__card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: grid; gap: 16px;
+  }
+  /* Ledger inside the card needs to drop its own border so it doesn't double up. */
+  .oc2__card .o3__ledger { border: 0; border-radius: 0;
+                           background: transparent; gap: 0; }
+  .oc2__card .o3__row { background: transparent;
+                        padding: 12px 0;
+                        border-top: 1px solid var(--hairline); }
+  .oc2__card .o3__row:first-child { border-top: 0; }
+</style>
+</head>
+<body>
+
+<div class="toc">
+  <strong>Results / Test overview options</strong>
+  <a href="#focus" style="color: rgb(var(--rainbow-mid-rgb));">★ Focus</a>
+  <a href="#o2p">O2′</a><a href="#o3r">O3</a><a href="#oc1">C1</a><a href="#oc2">C2</a><a href="#oc3">C3</a>
+  <span style="opacity:.5; padding:0 6px;">|</span>
+  <a href="#o1">O1</a><a href="#o2">O2</a><a href="#o4">O4</a>
+  <a href="#o5">O5</a><a href="#o6">O6</a><a href="#o7">O7</a><a href="#o8">O8</a>
+</div>
+
+<h1>Test overview — layout options</h1>
+<p class="lede">
+  All options assume the AI-Analysis-page layout vocabulary: hairline-divided
+  card, eyebrow + h2 header, joined radar/SW section sits at top (omitted from
+  these mocks for focus), then this lower stack shows the score + signal
+  breakdown + the AI tailored CTA + share/review actions.
+  Each option uses the live tokens (G5+teal rainbow, dark surface, hairline
+  borders) so the comparison is real.
+</p>
+
+<!-- ============================================================ -->
+<!-- ====================== FOCUSED SET ========================= -->
+<!-- ============================================================ -->
+<div class="focus-banner" id="focus">★ Focus: O2 (no border) · O3 · O2+O3 combos</div>
+
+<!-- ===================== O2′ — O2 without the gradient border ===================== -->
+<section class="opt opt--focus" id="o2p">
+  <div class="opt__head">
+    <h2>O2′ — Hero card + meter (no rainbow border)</h2>
+    <span class="opt__id">o2 stripped of border-chrome</span>
+  </div>
+  <p class="opt__desc">
+    Same shape as O2 but the hero card drops the gradient outline — just a
+    plain hairline card. Score + meter still hold the visual weight; the
+    rainbow shows up only on the AI CTA below, so it stays a true accent.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="o2p__hero">
+      <div class="o2__hero-top">
+        <div>
+          <div class="o2__score-main">5<span style="font-size: 0.4em; color: var(--text-muted)">/30</span></div>
+          <div class="o2__score-meta">17% correct · 22 min</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="o2__score-meta">Target was 600</div>
+        </div>
+      </div>
+      <div class="o2__meter">
+        <span style="background: var(--green); flex: 4;"></span>
+        <span style="background: var(--yellow); flex: 1;"></span>
+        <span style="background: var(--red); flex: 25;"></span>
+      </div>
+      <div class="o2__meter-key">
+        <span class="k-mastery"><strong>4</strong> mastery</span>
+        <span class="k-lucky"><strong>1</strong> lucky</span>
+        <span class="k-review"><strong>25</strong> to review</span>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+      </div>
+      <button class="h-btn">Review answers</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O3r — Same as O3, repeated up here for direct compare ===================== -->
+<section class="opt opt--focus" id="o3r">
+  <div class="opt__head">
+    <h2>O3 — Ledger rows (text-first)</h2>
+    <span class="opt__id">no hero · pure ledger</span>
+  </div>
+  <p class="opt__desc">
+    Pulled up into the focus set so you can compare directly against O2′ and
+    the combos. Each signal gets a horizontal row with colored dot + label
+    + number + percentage. Score doesn't get its own block — it lives in
+    the eyebrow header sentence.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="o3__ledger">
+      <div class="o3__row o3__row--mastery">
+        <div class="o3__row-label">True mastery <span class="o3__row-sub">(green + correct)</span></div>
+        <div class="o3__row-num">4</div>
+        <div class="o3__row-sub">13%</div>
+      </div>
+      <div class="o3__row o3__row--lucky">
+        <div class="o3__row-label">Lucky <span class="o3__row-sub">(unsure but correct)</span></div>
+        <div class="o3__row-num">1</div>
+        <div class="o3__row-sub">3%</div>
+      </div>
+      <div class="o3__row o3__row--review">
+        <div class="o3__row-label">To review <span class="o3__row-sub">(wrong or skipped)</span></div>
+        <div class="o3__row-num">25</div>
+        <div class="o3__row-sub">83%</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">PDF</button>
+        <button class="h-btn">Image</button>
+      </div>
+      <button class="h-btn">Review →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== C1 — Score + meter on top (naked), ledger below ===================== -->
+<section class="opt opt--focus" id="oc1">
+  <div class="opt__head">
+    <h2>C1 — Score + meter (no card), then ledger</h2>
+    <span class="opt__id">o2 hero stripped + o3 below</span>
+  </div>
+  <p class="opt__desc">
+    The most stripped version. Big score and the segmented meter sit naked at
+    the top — no card, no border, just air around them. Then the O3 ledger
+    breaks down each signal with name + count + percentage. The meter
+    visualizes the proportion at a glance, the ledger gives the exact numbers.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <div class="o2n__hero">
+      <div class="oc__top-row">
+        <div class="oc__score">5<small>/30</small></div>
+        <div class="oc__meta" style="text-align: right;">17% correct · 22 min</div>
+      </div>
+      <div class="oc__meter">
+        <span style="background: var(--green); flex: 4;"></span>
+        <span style="background: var(--yellow); flex: 1;"></span>
+        <span style="background: var(--red); flex: 25;"></span>
+      </div>
+    </div>
+    <div class="o3__ledger">
+      <div class="o3__row o3__row--mastery">
+        <div class="o3__row-label">True mastery <span class="o3__row-sub">(green + correct)</span></div>
+        <div class="o3__row-num">4</div>
+        <div class="o3__row-sub">13%</div>
+      </div>
+      <div class="o3__row o3__row--lucky">
+        <div class="o3__row-label">Lucky <span class="o3__row-sub">(unsure but correct)</span></div>
+        <div class="o3__row-num">1</div>
+        <div class="o3__row-sub">3%</div>
+      </div>
+      <div class="o3__row o3__row--review">
+        <div class="o3__row-label">To review <span class="o3__row-sub">(wrong or skipped)</span></div>
+        <div class="o3__row-num">25</div>
+        <div class="o3__row-sub">83%</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+      </div>
+      <button class="h-btn">Review answers</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== C2 — All in one card: score + meter + ledger inline ===================== -->
+<section class="opt opt--focus" id="oc2">
+  <div class="opt__head">
+    <h2>C2 — All-in-one card (score + meter + ledger inline)</h2>
+    <span class="opt__id">unified container</span>
+  </div>
+  <p class="opt__desc">
+    Score, meter, and per-signal rows all live inside one hairline card —
+    visually grouped as a single overview block. Ledger rows drop their
+    outer border and use hairline rules between rows instead, so the
+    container does the work.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="oc2__card">
+      <div class="oc__top-row">
+        <div class="oc__score">5<small>/30</small></div>
+        <div class="oc__meta" style="text-align: right;">17% correct · 22 min</div>
+      </div>
+      <div class="oc__meter">
+        <span style="background: var(--green); flex: 4;"></span>
+        <span style="background: var(--yellow); flex: 1;"></span>
+        <span style="background: var(--red); flex: 25;"></span>
+      </div>
+      <div class="o3__ledger">
+        <div class="o3__row o3__row--mastery">
+          <div class="o3__row-label">True mastery <span class="o3__row-sub">(green + correct)</span></div>
+          <div class="o3__row-num">4</div>
+          <div class="o3__row-sub">13%</div>
+        </div>
+        <div class="o3__row o3__row--lucky">
+          <div class="o3__row-label">Lucky <span class="o3__row-sub">(unsure but correct)</span></div>
+          <div class="o3__row-num">1</div>
+          <div class="o3__row-sub">3%</div>
+        </div>
+        <div class="o3__row o3__row--review">
+          <div class="o3__row-label">To review <span class="o3__row-sub">(wrong or skipped)</span></div>
+          <div class="o3__row-num">25</div>
+          <div class="o3__row-sub">83%</div>
+        </div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+      </div>
+      <button class="h-btn">Review answers</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== C3 — Hero card (O2′) + separate ledger card ===================== -->
+<section class="opt opt--focus" id="oc3">
+  <div class="opt__head">
+    <h2>C3 — Hero card + separate ledger card  <span style="color: rgb(var(--rainbow-mid-rgb)); font-size: 12px; font-weight: 500;">★ chosen</span></h2>
+    <span class="opt__id">two stacked cards · clearest separation</span>
+  </div>
+  <p class="opt__desc">
+    O2′ hero on top (score + meter inside its own hairline card), the O3 ledger
+    as its own card below. The redundant "5 of 30 correct." title is dropped —
+    the score reads "5/30 correct" inline so the word does the work.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <div class="o2p__hero">
+      <div class="o2__hero-top">
+        <div>
+          <div class="o2__score-main">5<span style="font-size: 0.4em; color: var(--text-muted)">/30</span> <span style="font-size: 0.34em; color: var(--text-muted); font-weight: 500; letter-spacing: 0.01em;">correct</span></div>
+          <div class="o2__score-meta">17% accuracy · 22 min</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="o2__score-meta">Target was 600</div>
+        </div>
+      </div>
+      <div class="o2__meter">
+        <span style="background: var(--green); flex: 4;"></span>
+        <span style="background: var(--yellow); flex: 1;"></span>
+        <span style="background: var(--red); flex: 25;"></span>
+      </div>
+    </div>
+    <div class="o3__ledger">
+      <div class="o3__row o3__row--mastery">
+        <div class="o3__row-label">True mastery <span class="o3__row-sub">(green + correct)</span></div>
+        <div class="o3__row-num">4</div>
+        <div class="o3__row-sub">13%</div>
+      </div>
+      <div class="o3__row o3__row--lucky">
+        <div class="o3__row-label">Lucky <span class="o3__row-sub">(unsure but correct)</span></div>
+        <div class="o3__row-num">1</div>
+        <div class="o3__row-sub">3%</div>
+      </div>
+      <div class="o3__row o3__row--review">
+        <div class="o3__row-label">To review <span class="o3__row-sub">(wrong or skipped)</span></div>
+        <div class="o3__row-num">25</div>
+        <div class="o3__row-sub">83%</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+      </div>
+      <button class="h-btn">Review answers</button>
+    </div>
+  </div>
+</section>
+
+<div class="focus-banner">↓ Original 8 options below for reference</div>
+
+<!-- ===================== O1 ===================== -->
+<section class="opt" id="o1">
+  <div class="opt__head">
+    <h2>O1 — Featured score + 3 signal tiles</h2>
+    <span class="opt__id">most direct · scoreboard feel</span>
+  </div>
+  <p class="opt__desc">
+    Big score box on the left (gradient outline — the brand hero), three signal
+    tiles to the right (mastery / lucky / to review). The signals get color-coded
+    backgrounds + accent borders so they read as separate categories at a glance.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <p class="h-sub">4 true mastery, 1 correct but not confident, 25 to review.</p>
+    <div class="o1__grid">
+      <div class="tile tile--featured">
+        <div class="tile__lbl">Score</div>
+        <div class="tile__num">5/30</div>
+        <div class="tile__sub">17% correct</div>
+      </div>
+      <div class="tile tile--mastery">
+        <div class="tile__lbl">True mastery</div>
+        <div class="tile__num">4</div>
+        <div class="tile__sub">green + correct</div>
+      </div>
+      <div class="tile tile--lucky">
+        <div class="tile__lbl">Lucky</div>
+        <div class="tile__num">1</div>
+        <div class="tile__sub">not confident, correct</div>
+      </div>
+      <div class="tile tile--review">
+        <div class="tile__lbl">To review</div>
+        <div class="tile__num">25</div>
+        <div class="tile__sub">missed or skipped</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+        <button class="h-btn">Share image</button>
+      </div>
+      <button class="h-btn">Review all 30 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O2 ===================== -->
+<section class="opt" id="o2">
+  <div class="opt__head">
+    <h2>O2 — Hero card + segmented meter</h2>
+    <span class="opt__id">narrative score · visual signal mix</span>
+  </div>
+  <p class="opt__desc">
+    Single rainbow-bordered hero card. Big score top-left, percentage top-right.
+    A 10px segmented meter bar shows the green/yellow/red split proportionally.
+    Less individual numbers — more "shape of your run".
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="o2__hero">
+      <div class="o2__hero-top">
+        <div>
+          <div class="o2__score-main">5<span style="font-size: 0.4em; color: var(--text-muted)">/30</span></div>
+          <div class="o2__score-meta">17% correct · 22 min</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="o2__score-meta">Target was 600</div>
+        </div>
+      </div>
+      <div class="o2__meter">
+        <span style="background: var(--green); flex: 4;"></span>
+        <span style="background: var(--yellow); flex: 1;"></span>
+        <span style="background: var(--red); flex: 25;"></span>
+      </div>
+      <div class="o2__meter-key">
+        <span class="k-mastery"><strong>4</strong> mastery</span>
+        <span class="k-lucky"><strong>1</strong> lucky</span>
+        <span class="k-review"><strong>25</strong> to review</span>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+      </div>
+      <button class="h-btn">Review answers</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O3 ===================== -->
+<section class="opt" id="o3">
+  <div class="opt__head">
+    <h2>O3 — Ledger rows (text-first)</h2>
+    <span class="opt__id">spreadsheet-style · maximum density</span>
+  </div>
+  <p class="opt__desc">
+    Each signal category gets a horizontal row in a hairline-divided ledger.
+    No tinted backgrounds — just colored dot + label + number. Reads like
+    a financial summary, very compact.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="o3__ledger">
+      <div class="o3__row o3__row--mastery">
+        <div class="o3__row-label">True mastery <span class="o3__row-sub">(green + correct)</span></div>
+        <div class="o3__row-num">4</div>
+        <div class="o3__row-sub">13%</div>
+      </div>
+      <div class="o3__row o3__row--lucky">
+        <div class="o3__row-label">Lucky <span class="o3__row-sub">(unsure but correct)</span></div>
+        <div class="o3__row-num">1</div>
+        <div class="o3__row-sub">3%</div>
+      </div>
+      <div class="o3__row o3__row--review">
+        <div class="o3__row-label">To review <span class="o3__row-sub">(wrong or skipped)</span></div>
+        <div class="o3__row-num">25</div>
+        <div class="o3__row-sub">83%</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">PDF</button>
+        <button class="h-btn">Image</button>
+      </div>
+      <button class="h-btn">Review →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O4 ===================== -->
+<section class="opt" id="o4">
+  <div class="opt__head">
+    <h2>O4 — Giant gradient score + signal stack</h2>
+    <span class="opt__id">emotive · maximum hero</span>
+  </div>
+  <p class="opt__desc">
+    Score rendered HUGE with the brand rainbow as the text gradient.
+    Signals stacked on the right as small rows. Number-forward but the
+    big score does the emotional work.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <div class="o4__score">
+      <div class="o4__big">5<small>/30</small></div>
+      <div class="o4__signals">
+        <div class="o4__signal o4__signal--mastery">
+          <span class="o4__dot"></span>
+          <span class="o4__signal-lbl">True mastery</span>
+          <span class="o4__signal-num">4</span>
+        </div>
+        <div class="o4__signal o4__signal--lucky">
+          <span class="o4__dot"></span>
+          <span class="o4__signal-lbl">Lucky</span>
+          <span class="o4__signal-num">1</span>
+        </div>
+        <div class="o4__signal o4__signal--review">
+          <span class="o4__dot"></span>
+          <span class="o4__signal-lbl">To review</span>
+          <span class="o4__signal-num">25</span>
+        </div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+      </div>
+      <button class="h-btn">Review answers</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O5 ===================== -->
+<section class="opt" id="o5">
+  <div class="opt__head">
+    <h2>O5 — Donut chart + chip column</h2>
+    <span class="opt__id">visual · friendly</span>
+  </div>
+  <p class="opt__desc">
+    Conic-gradient donut shows the green/yellow/red split as a single
+    proportional circle, score in the middle. Chips on the side give the
+    detailed breakdown. Most visual, least number-dense.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <div class="o5__center">
+      <div class="o5__donut">
+        <div class="o5__donut-inner">
+          <div class="o5__donut-num">5</div>
+          <div class="o5__donut-lbl">/ 30</div>
+        </div>
+      </div>
+      <div class="o5__chips">
+        <div class="o5__chip o5__chip--m">
+          <span class="o5__chip-dot"></span>
+          <span class="o5__chip-lbl">True mastery</span>
+          <span class="o5__chip-num">4</span>
+        </div>
+        <div class="o5__chip o5__chip--l">
+          <span class="o5__chip-dot"></span>
+          <span class="o5__chip-lbl">Lucky</span>
+          <span class="o5__chip-num">1</span>
+        </div>
+        <div class="o5__chip o5__chip--r">
+          <span class="o5__chip-dot"></span>
+          <span class="o5__chip-lbl">To review</span>
+          <span class="o5__chip-num">25</span>
+        </div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">PDF</button>
+        <button class="h-btn">Image</button>
+      </div>
+      <button class="h-btn">Review →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O6 ===================== -->
+<section class="opt" id="o6">
+  <div class="opt__head">
+    <h2>O6 — 4-up KPI strip</h2>
+    <span class="opt__id">admin-style · symmetric</span>
+  </div>
+  <p class="opt__desc">
+    Score + 3 signals all on one row as equal-weight KPI tiles
+    (matching the admin Total/Live/etc. visual). Score gets the rainbow
+    outline; signals get colored borders.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="o6__kpis">
+      <div class="o6__kpi o6__kpi--featured">
+        <div class="o6__kpi-lbl">Score</div>
+        <div class="o6__kpi-num">5/30</div>
+      </div>
+      <div class="o6__kpi o6__kpi--mastery">
+        <div class="o6__kpi-lbl">Mastery</div>
+        <div class="o6__kpi-num">4</div>
+      </div>
+      <div class="o6__kpi o6__kpi--lucky">
+        <div class="o6__kpi-lbl">Lucky</div>
+        <div class="o6__kpi-num">1</div>
+      </div>
+      <div class="o6__kpi o6__kpi--review">
+        <div class="o6__kpi-lbl">Review</div>
+        <div class="o6__kpi-num">25</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+        <button class="h-btn">Image</button>
+      </div>
+      <button class="h-btn">Review answers →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O7 ===================== -->
+<section class="opt" id="o7">
+  <div class="opt__head">
+    <h2>O7 — Editorial quote + inline stats</h2>
+    <span class="opt__id">writerly · low-chrome</span>
+  </div>
+  <p class="opt__desc">
+    Recasts the run as a sentence — a quote-style block with the key numbers
+    bolded inline. Inline stat row below for the breakdown. Very different
+    "feel" — reads more like a coach speaking to you than a scoreboard.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <blockquote class="o7__quote">
+      You answered <em>5 of 30</em>. <em>4</em> of those were
+      true mastery — green and correct. <em>1</em> you got right but
+      flagged as unsure. The other <em>25</em> are worth a closer look.
+    </blockquote>
+    <div class="o7__stats">
+      <span><strong>4</strong> mastery</span>
+      <span><strong>1</strong> lucky</span>
+      <span><strong>25</strong> to review</span>
+      <span><strong>22 min</strong> total</span>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn h-btn--ghost">Copy link</button>
+        <button class="h-btn h-btn--ghost">Save PDF</button>
+        <button class="h-btn h-btn--ghost">Image</button>
+      </div>
+      <button class="h-btn">Review answers →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== O8 ===================== -->
+<section class="opt" id="o8">
+  <div class="opt__head">
+    <h2>O8 — 2×2 quadrant tiles</h2>
+    <span class="opt__id">balanced · symmetric grid</span>
+  </div>
+  <p class="opt__desc">
+    Score top-left (rainbow outline), three signal stats fill the rest of a
+    2×2 grid. Same visual weight per cell so they read as four equal
+    angles on the same data. Works well at narrower widths too.
+  </p>
+  <div class="mock">
+    <p class="h-eyebrow">Your run</p>
+    <h2 class="h-title">5 of 30 correct.</h2>
+    <div class="o8__quad">
+      <div class="o8__cell o8__cell--score">
+        <div class="o8__cell-lbl">Score</div>
+        <div class="o8__cell-num">5/30</div>
+        <div class="o8__cell-sub">17% correct · 22 min</div>
+      </div>
+      <div class="o8__cell o8__cell--mastery">
+        <div class="o8__cell-lbl">True mastery</div>
+        <div class="o8__cell-num">4</div>
+        <div class="o8__cell-sub">green + correct</div>
+      </div>
+      <div class="o8__cell o8__cell--lucky">
+        <div class="o8__cell-lbl">Lucky</div>
+        <div class="o8__cell-num">1</div>
+        <div class="o8__cell-sub">not confident, correct</div>
+      </div>
+      <div class="o8__cell o8__cell--review">
+        <div class="o8__cell-lbl">To review</div>
+        <div class="o8__cell-num">25</div>
+        <div class="o8__cell-sub">missed or skipped</div>
+      </div>
+    </div>
+    <button class="h-cta">✦ Start new AI-tailored test  →</button>
+    <div class="actions-row">
+      <div class="share-cluster">
+        <button class="h-btn">Copy link</button>
+        <button class="h-btn">Save PDF</button>
+        <button class="h-btn">Image</button>
+      </div>
+      <button class="h-btn">Review answers →</button>
+    </div>
+  </div>
+</section>
+
+<p class="lede" style="margin-top: 40px;">
+  Pick the layout ID (and optional: which share-cluster style — full/compact/ghost),
+  and I'll wire it into the live <code>data-screen="results"</code> with the
+  AI Analysis page's hairline-card + eyebrow conventions. Radar block stays
+  the same as currently lives on the screen (the AI Analysis pattern).
+</p>
+
+</body>
+</html>

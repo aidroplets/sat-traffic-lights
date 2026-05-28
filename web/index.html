@@ -1,0 +1,2269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Study Signal — SAT/ACT practice with a confidence signal</title>
+    <meta
+      name="description"
+      content="SAT/ACT practice with a green/yellow/red confidence signal on every question — see the topics you guessed right on, not just the ones you got wrong."
+    />
+    <meta name="theme-color" content="#050509" />
+
+    <!-- ===== Link unfurls ===== -->
+    <!-- Open Graph (iMessage, Facebook, LinkedIn, Slack, Discord, Notion…) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Study Signal" />
+    <meta property="og:title" content="Study Signal — SAT/ACT practice with a confidence signal" />
+    <meta property="og:description" content="Practice SAT and ACT questions with a green/yellow/red confidence signal on every answer. See where you really know the material vs. where you got lucky." />
+    <meta property="og:url" content="https://studysignal.ai/" />
+    <meta property="og:image" content="https://studysignal.ai/share/og-image.png" />
+    <meta property="og:image:secure_url" content="https://studysignal.ai/share/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Study Signal — the studysignal wordmark with red, yellow, and green traffic-light dots." />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X large-image card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Study Signal — SAT/ACT practice with a confidence signal" />
+    <meta name="twitter:description" content="Practice SAT and ACT questions with a green/yellow/red confidence signal on every answer." />
+    <meta name="twitter:image" content="https://studysignal.ai/share/og-image.png" />
+    <meta name="twitter:image:alt" content="Study Signal — wordmark + traffic-light dots." />
+
+    <!-- iOS home-screen + status bar -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/share/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Study Signal" />
+
+    <!-- Favicons (browser tabs) -->
+    <link rel="icon" type="image/svg+xml" href="/share/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/share/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/share/favicon-16.png" />
+
+    <!-- PWA manifest (Android home-screen + Chrome install prompt) -->
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Canonical URL — helps search engines + rich-link platforms
+         resolve preview/normalized version. -->
+    <link rel="canonical" href="https://studysignal.ai/" />
+    <!-- Trailing-slash guard. When this app is served at a subpath (e.g.
+         /droplets/sat-traffic-lights/web), `serve` and many static hosts do
+         NOT auto-redirect to add the trailing slash, so the browser treats
+         `web` as a file and resolves `./app.css` against the parent directory
+         (404). Force the slash so relative paths resolve under any host.
+         Runs synchronously before CSS/JS loads — no FOUC. -->
+    <script>
+      (function () {
+        var p = location.pathname;
+        if (p && !p.endsWith('/') && !/\.[a-z0-9]+$/i.test(p)) {
+          location.replace(p + '/' + location.search + location.hash);
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap"
+    />
+    <!-- Cache-bust app.css whenever it changes. Bump the v= alongside
+         app.js's busbtuster when shipping a style fix so existing tabs
+         pull fresh CSS instead of running on stale rules. The browser
+         keys its cache on the full URL including query string, so a
+         different v= forces a refetch on next navigation. -->
+    <link rel="stylesheet" href="./app.css?v=2026-05-28-sampling" />
+    <!-- KaTeX 0.16.x — the real LaTeX renderer. Replaces the ~400-line
+         regex stack we used to ship for fractions, roots, exponents,
+         and the long tail of \cmd tokens. SRI integrity hash pinned.
+         The CSS preload happens here so first-paint math doesn't flash
+         in fallback fonts; the JS is lazy-loaded the first time
+         formatRich runs (see app.js loadKaTeX()) so the picker boot
+         stays free for users who never enter a quiz. -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+      integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+"
+      crossorigin="anonymous" />
+    <!-- Apply the saved theme BEFORE first paint so light-mode users
+         don't see a dark flash. Reads stl_theme from localStorage; if
+         set to "light", stamps data-theme="light" on <html> which the
+         CSS picks up via :root[data-theme="light"]. Defaults to dark
+         (no attribute set). Runs synchronously in head — must not
+         depend on any other script. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('stl_theme');
+          if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        } catch (_) {}
+        // Table view mode (Classic vs Modern). Classic = SAT-style ruled
+        // grid, the DEFAULT. Modern = the rounded row-separator look.
+        // Stamp data-view on <html> before paint so tables don't flash
+        // the wrong style. Stored in localStorage `stl_table_view`.
+        try {
+          var v = localStorage.getItem('stl_table_view');
+          document.documentElement.setAttribute('data-view', v === 'modern' ? 'modern' : 'classic');
+        } catch (_) {
+          document.documentElement.setAttribute('data-view', 'classic');
+        }
+      })();
+    </script>
+    <!-- Chart.js for figures whose underlying data is structured (line graphs,
+         scatter plots, bar charts). Loaded as a UMD bundle from jsDelivr;
+         registers a global `Chart`. Themed at boot in app.js. ~25 KB gzipped. -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+      integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      defer></script>
+    <!-- Google Identity Services. Loads asynchronously and exposes
+         google.accounts.id on window once ready. We initialize it in
+         app.js after the login screen mounts. -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Hardcoded OAuth Client ID for studysignal.ai. Configured at
+         console.cloud.google.com (project: My First Project). Web
+         application with authorized JavaScript origins
+         https://studysignal.ai and http://localhost:3000. The Client ID
+         is public by design — the security boundary is the authorized-
+         origins check enforced by Google. -->
+    <meta name="google-signin-client_id"
+          content="903404441537-431hslskemb0mgfpchjfsj23aatvrd2b.apps.googleusercontent.com" />
+  </head>
+  <body class="stl-app">
+    <header class="stl-header">
+      <div class="stl-header__left">
+        <a class="stl-header__brand stl-brand" href="/" aria-label="studysignal — home">
+          <svg class="stl-brand__svg" viewBox="0 0 460 90" role="img" aria-label="studysignal">
+            <text x="18" y="62"
+                  font-family='"Geist", -apple-system, system-ui, sans-serif'
+                  font-weight="600" font-size="56" letter-spacing="-0.025em"
+                  textLength="276" lengthAdjust="spacingAndGlyphs"
+                  fill="currentColor">studysignal</text>
+            <circle cx="326" cy="44" r="11" fill="#fb7185"/>
+            <circle cx="358" cy="44" r="11" fill="#facc15"/>
+            <circle cx="390" cy="44" r="11" fill="#4ade80"/>
+          </svg>
+        </a>
+        <!-- Top-level navigation tabs. Buttons (not links) because each
+             one calls into showScreen() rather than navigating a URL. The
+             active tab gets aria-current="page" so the CSS underline
+             indicator lights up. Admin is admin-only — initAuth toggles
+             its hidden attr based on user role. -->
+        <nav class="stl-header__nav" aria-label="Primary">
+          <!-- Each tab pairs a 14×14 Lucide-style icon with its label.
+               Icons are decorative (aria-hidden) — the button text is
+               the accessible name. -->
+          <button type="button" class="stl-header__nav-link" id="btn-history" data-nav="history">
+            <span class="stl-header__nav-icon" aria-hidden="true">
+              <!-- Lucide square-pen — a paper rectangle with a pen
+                   writing into it. Evokes "test paper + writing" so
+                   it pairs naturally with the Test History label. -->
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>
+              </svg>
+            </span>
+            <span>Test History</span>
+          </button>
+          <button type="button" class="stl-header__nav-link" id="btn-analysis" data-nav="analysis">
+            <span class="stl-header__nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/>
+                <path d="M22 5h-4"/>
+                <path d="M4 17v2"/>
+                <path d="M5 18H3"/>
+              </svg>
+            </span>
+            <span>AI Analysis</span>
+          </button>
+          <button type="button" class="stl-header__nav-link" id="btn-admin-go" data-nav="admin" hidden>
+            <span class="stl-header__nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </span>
+            <span>Admin</span>
+          </button>
+          <!-- Sliding active-tab underline. JS positions this via
+               transform+width on every screen change so the bar
+               smoothly slides between tabs instead of fading in/out. -->
+          <span class="stl-header__nav-indicator" id="header-nav-indicator" aria-hidden="true"></span>
+        </nav>
+      </div>
+      <div class="stl-header__actions">
+        <button type="button" class="stl-btn stl-btn--dev" id="btn-dev-test" title="Dev-only: jump to populated results screen with random data" hidden>Test</button>
+        <!-- Math-color toggle. Persists in localStorage; default ON.
+             When OFF, the .stl-quiz__var and .stl-quiz__expr CSS rules
+             revert to the canvas text color so equations read as plain
+             text — same italic for variables, just no purple. -->
+        <button type="button" class="stl-btn stl-btn--ghost stl-toggle" id="btn-toggle-math-color"
+                aria-pressed="true" aria-label="Toggle math color highlighting"
+                title="Highlight equations in purple (toggle off for plain text)">
+          <span class="stl-toggle__dot" aria-hidden="true"></span>
+          <span class="stl-toggle__lbl">Highlight</span>
+        </button>
+        <!-- Theme toggle. Click flips the entire UI between dark and
+             light. Preference persists in localStorage `stl_theme`. The
+             initial value is applied as a data-theme attribute on
+             <html> before paint by an inline script in <head> so we
+             don't flash dark-on-load for light-mode users. The label
+             auto-updates via JS to read "Light mode" while in dark and
+             "Dark mode" while in light. Icon swaps moon ↔ sun. -->
+        <button type="button" class="stl-btn stl-btn--ghost stl-theme-toggle" id="btn-toggle-theme"
+                aria-pressed="false" aria-label="Toggle light mode">
+          <span class="stl-theme-toggle__icon stl-theme-toggle__icon--moon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </span>
+          <span class="stl-theme-toggle__icon stl-theme-toggle__icon--sun" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </span>
+          <span class="stl-toggle__lbl" id="btn-toggle-theme-lbl">Light mode</span>
+        </button>
+        <!-- Table view toggle. Flips tables between Classic (SAT-style
+             ruled grid — the default) and Modern (rounded row-separator
+             look). Preference persists in localStorage `stl_table_view`
+             and is applied as data-view on <html> before paint. The
+             label names the mode you'd switch TO, matching the theme
+             toggle's convention. Icon swaps grid ↔ rows. -->
+        <button type="button" class="stl-btn stl-btn--ghost stl-theme-toggle" id="btn-toggle-view"
+                aria-pressed="false" aria-label="Toggle table view style">
+          <span class="stl-theme-toggle__icon stl-view-toggle__icon--grid" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          </span>
+          <span class="stl-theme-toggle__icon stl-view-toggle__icon--rows" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18"/></svg>
+          </span>
+          <span class="stl-toggle__lbl" id="btn-toggle-view-lbl">Modern view</span>
+        </button>
+        <!-- Feature CTA — sits to the right of the nav tabs, styled
+             distinctly from them so it reads as an action, not a
+             page. Routes to the test selection / score screen so the
+             user can spin up a fresh test from anywhere. Hidden mid-
+             test (showScreen toggles its hidden attr) since starting
+             a new test from inside a quiz would discard the current
+             one. -->
+        <button type="button" class="stl-btn stl-btn--pill-rainbow stl-header__cta" id="btn-new-test" hidden>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+            <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+            <path d="M9 15h6"/>
+            <path d="M12 18v-6"/>
+          </svg>
+          New test
+        </button>
+        <button type="button" class="stl-btn stl-btn--ghost" id="btn-restart" hidden>Restart</button>
+
+        <!-- Auth (right-most). Toggles between Sign in (logged out)
+             and a user-menu trigger pill (logged in). The menu opens
+             a dropdown with the email at top and actions below — set
+             up to absorb more entries (Settings, Profile, etc) over
+             time. -->
+        <span class="stl-header__auth" id="header-auth" hidden>
+          <button type="button" class="stl-btn stl-btn--ghost" id="btn-sign-in" hidden>Sign in</button>
+          <span class="stl-header__usermenu" id="header-user" hidden>
+            <button type="button"
+                    class="stl-header__usermenu-trigger"
+                    id="btn-user-menu"
+                    aria-haspopup="menu"
+                    aria-expanded="false"
+                    aria-controls="user-menu">
+              <span class="stl-header__user-email" id="header-user-email"></span>
+              <svg class="stl-header__usermenu-chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="stl-header__usermenu-panel"
+                 id="user-menu"
+                 role="menu"
+                 aria-labelledby="btn-user-menu"
+                 hidden>
+              <div class="stl-header__usermenu-label" id="header-user-role"></div>
+              <button type="button" class="stl-header__usermenu-item" id="btn-sign-out" role="menuitem">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign out
+              </button>
+            </div>
+          </span>
+        </span>
+      </div>
+    </header>
+
+    <main id="stl-main" class="stl-main">
+      <!-- ============== SCREEN: SPLASH (mobile only) ==============
+           Welcome screen — the first thing a phone visitor sees.
+           Centers the wordmark + Get Started CTA + secondary links.
+           Desktop hides this entirely via CSS; the score screen
+           remains the desktop landing.
+      -->
+      <section class="stl-screen stl-screen--splash" data-screen="splash" hidden>
+        <div class="stl-splash">
+          <div class="stl-splash__hero">
+            <div class="stl-splash__mark" aria-hidden="true">
+              <svg class="stl-splash__mark-svg" viewBox="0 0 460 90" role="img" aria-label="studysignal">
+                <text x="18" y="62"
+                      font-family='"Geist", -apple-system, system-ui, sans-serif'
+                      font-weight="600" font-size="56" letter-spacing="-0.025em"
+                      textLength="276" lengthAdjust="spacingAndGlyphs"
+                      fill="currentColor">studysignal</text>
+                <circle cx="326" cy="44" r="11" fill="#fb7185"/>
+                <circle cx="358" cy="44" r="11" fill="#facc15"/>
+                <circle cx="390" cy="44" r="11" fill="#4ade80"/>
+              </svg>
+            </div>
+            <p class="stl-splash__tagline">SAT/ACT practice with a confidence signal on every question.</p>
+          </div>
+
+          <div class="stl-splash__actions">
+            <button type="button" class="stl-btn stl-btn--primary stl-splash__cta" id="btn-splash-start">
+              Get started
+            </button>
+            <div class="stl-splash__secondary">
+              <button type="button" class="stl-btn stl-btn--ghost" data-splash-action="history">History</button>
+              <button type="button" class="stl-btn stl-btn--ghost" data-splash-action="analysis">AI Analysis</button>
+              <button type="button" class="stl-btn stl-btn--ghost" data-splash-action="signin" hidden>Sign in</button>
+              <button type="button" class="stl-btn stl-btn--ghost" data-splash-action="signout" hidden>Sign out</button>
+              <button type="button" class="stl-btn stl-btn--ghost" data-splash-action="admin" hidden>Admin</button>
+              <button type="button" class="stl-btn stl-btn--ghost stl-btn--dev" data-splash-action="test" hidden>Test</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: SCORE ============== -->
+      <!-- ============== SCREEN: TEST PICKER ==============
+           Shown when more than one test type is Active. Each tile is a
+           click-to-start shortcut — no Confirm step, picking a test
+           sets selectedTest in localStorage and routes to the score
+           screen, which auto-templates its headline and score range
+           for that test. When only one test is Active, the picker is
+           bypassed entirely and visitors land directly on score. -->
+      <section class="stl-screen" data-screen="picker" hidden>
+        <header class="stl-mobile-bar" data-screen-bar="picker">
+          <span class="stl-mobile-bar__btn" aria-hidden="true"></span>
+          <span class="stl-mobile-bar__title">Choose a test</span>
+          <span class="stl-mobile-bar__accessory"></span>
+        </header>
+        <div class="stl-card stl-card--hero stl-picker">
+          <h1 class="stl-h1">Which test are you preparing for?</h1>
+          <p class="stl-sub">
+            We'll generate AI, custom-tailored questions for you.
+          </p>
+          <div class="stl-picker__grid" id="picker-grid" role="list">
+            <!-- Tiles rendered by initPicker() in app.js — one per
+                 entry in TEST_TYPES that's currently Active. -->
+          </div>
+        </div>
+      </section>
+
+      <section class="stl-screen" data-screen="score" hidden>
+        <!-- Mobile-only back bar. Desktop hides it. data-mobile-back
+             is updated dynamically by initScore() — defaults to splash
+             but flips to picker when 2+ tests are Active. -->
+        <header class="stl-mobile-bar" data-screen-bar="score">
+          <button type="button" class="stl-mobile-bar__btn" data-mobile-back="splash" id="score-mobile-back" aria-label="Back">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <span class="stl-mobile-bar__title">New test</span>
+          <span class="stl-mobile-bar__accessory"></span>
+        </header>
+        <div class="stl-card stl-card--hero stl-score">
+          <!-- Headline template: "What [TEST] score are you aiming for?"
+               The [TEST] token is replaced with the selectedTest's name
+               wrapped in .stl-grad-text (lavender→blue gradient). When
+               only one test is active, the headline reads identically
+               to the legacy "What SAT score are you aiming for?" -->
+          <h1 class="stl-h1">What <span class="stl-grad-text" id="score-test-name">SAT</span> questions do you want to study?</h1>
+          <p class="stl-sub" id="score-sub">
+            We custom-tailor questions to your goal so you spend time on problems that move
+            the needle.
+          </p>
+
+          <!-- Inline empty state, shown when the selected test has no
+               live questions. renderScoreScreenForTest() toggles its
+               visibility + rebuilds its content. -->
+          <div id="score-empty" class="stl-score__empty" role="status" aria-live="polite" hidden></div>
+
+          <form id="score-form" class="stl-score__form" novalidate>
+            <!-- ============== Subjects (first decision) ==============
+                 Pill row of subjects available for the selected test
+                 (e.g. ACT: English, Math, Reading, Science). Toggling
+                 a pill includes/excludes that subject from this run.
+                 Hidden entirely when only one subject is enabled by
+                 admin (renderScoreScreenForTest sets [hidden]).
+                 State persists per-test in localStorage. -->
+            <section class="stl-score__section stl-score__subjects" id="score-subjects-wrap" hidden>
+              <header class="stl-score__section-head">
+                <span class="stl-label">Subjects</span>
+              </header>
+              <div class="stl-score__subjects-row" role="group" aria-label="Subjects to include in this test" id="score-subjects">
+                <!-- rendered in JS -->
+              </div>
+              <p class="stl-hint" id="score-subjects-hint" aria-live="polite"></p>
+            </section>
+
+            <!-- ============== Difficulty (second decision) ==============
+                 Tier pills, the include-lower toggle, AND the target
+                 score input live together so the difficulty surface
+                 reads as one connected control rather than three
+                 stacked items. The toggle modifies how the pool is
+                 sliced; the target score grounds the slice; the pills
+                 are a quick-pick for the most common values. -->
+            <section class="stl-score__section stl-score__difficulty">
+              <header class="stl-score__section-head">
+                <span class="stl-label">Difficulty</span>
+                <!-- "Set custom score" reveals the target-score number
+                     input on demand. By default the selected tier IS
+                     the target — so most users never need to see this
+                     control. Power users (a specific 580, not "Medium")
+                     click to expand. -->
+                <button type="button" class="stl-link stl-score__custom-toggle" id="score-custom-toggle"
+                        aria-expanded="false" aria-controls="score-target-wrap">Set custom score</button>
+              </header>
+              <div class="stl-score__tiers" role="group" aria-label="Score range shortcuts" id="score-tiers">
+                <!-- rendered in JS -->
+              </div>
+              <!-- Target score input — hidden by default. The selected
+                   tier sets target automatically; this input only shows
+                   if the user explicitly opts into a precise score. -->
+              <label class="stl-field stl-score__target" id="score-target-wrap" hidden>
+                <span class="stl-label">Target score</span>
+                <input
+                  id="score-input"
+                  type="number"
+                  min="200"
+                  max="800"
+                  step="10"
+                  inputmode="numeric"
+                  placeholder="650"
+                  autocomplete="off"
+                  class="stl-input"
+                />
+                <span class="stl-hint" id="score-hint">200–800, in 10-point steps.</span>
+              </label>
+              <div class="stl-score__mix">
+                <button type="button" class="stl-switch stl-score__mix-switch"
+                        id="score-strict-switch"
+                        role="switch" aria-checked="true"
+                        aria-describedby="score-strict-hint"
+                        aria-label="Include lower difficulty questions">
+                  <span class="stl-switch__track"><span class="stl-switch__thumb"></span></span>
+                  <span class="stl-switch__lbl">Include lower difficulty questions</span>
+                </button>
+                <p class="stl-score__mix-hint stl-hint" id="score-strict-hint">
+                  Test includes questions at and below your target tier.
+                </p>
+              </div>
+            </section>
+
+            <!-- Button label is rewritten per-render by renderScoreScreenForTest()
+                 to reflect the selected test's real-exam length and
+                 the user's subject filter. Uses the rainbow-pill outline
+                 style (matches the twin CTAs on Results + the AI CTAs on
+                 History / Analysis); .stl-radar__cta gives it the hero
+                 padding + full-width treatment. -->
+            <button type="submit" class="stl-btn stl-btn--pill-rainbow stl-btn--arrow stl-radar__cta" id="score-start-test">
+              Start test
+            </button>
+
+            <!-- Back-to-picker link sits below the primary CTA so the
+                 score screen leads with the action and tucks the
+                 secondary navigation underneath. Centered, muted —
+                 reads as a footer link, not competing with the start
+                 button. Visible only when picker is the entry screen
+                 (2+ tests Active); renderScoreScreenForTest toggles. -->
+            <button type="button" class="stl-back-link stl-score__back-foot" id="score-back-to-picker" hidden>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+              <span>Back to test selection</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: QUIZ ============== -->
+      <section class="stl-screen" data-screen="quiz" hidden>
+        <!-- Mobile focus-mode bar (≤640px only): close X, counter, timer.
+             Desktop shows the wider .stl-quiz__top below this. -->
+        <header class="stl-mobile-bar" data-screen-bar="quiz">
+          <button type="button" class="stl-mobile-bar__btn" id="btn-quiz-close" aria-label="End test">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6l-12 12"/>
+            </svg>
+          </button>
+          <span class="stl-mobile-bar__title" id="quiz-mobile-counter">Question 1 of 30</span>
+          <span class="stl-mobile-bar__accessory" id="quiz-mobile-timer">0:00</span>
+        </header>
+        <header class="stl-quiz__top">
+          <div class="stl-quiz__meta">
+            <span class="stl-quiz__counter" id="quiz-counter">Question 1 of 30</span>
+            <!-- Test-type badge — same component as the review screen,
+                 populated in renderQuestion() with the current question's
+                 testType. Sits between the counter and the difficulty
+                 pill so each meta row reads: counter → test → difficulty
+                 → topic → timer. -->
+            <span id="quiz-test-badge" aria-hidden="true"></span>
+            <span class="stl-pill" id="quiz-difficulty">easy</span>
+            <span class="stl-pill" id="quiz-topic">algebra</span>
+            <!-- Live elapsed-time pill — was in the navbar; moved
+                 inline with the rest of the question meta so all four
+                 facts (counter / difficulty / topic / time) share
+                 one row. Same .stl-pill chrome as siblings. -->
+            <span class="stl-pill stl-pill--timer" id="quiz-timer" aria-label="Elapsed time">
+              <span id="quiz-timer-text">0:00</span>
+            </span>
+          </div>
+          <div class="stl-quiz__progress" aria-hidden="true">
+            <span class="stl-quiz__progress-fill" id="quiz-progress-fill"></span>
+          </div>
+        </header>
+
+        <article class="stl-card stl-card--hero stl-quiz__card">
+          <figure class="stl-quiz__figure" id="quiz-figure" hidden></figure>
+          <p class="stl-quiz__passage" id="quiz-passage" hidden></p>
+          <h2 class="stl-quiz__stem" id="quiz-stem">Loading…</h2>
+
+          <fieldset class="stl-quiz__choices" id="quiz-choices">
+            <legend class="sr-only">Choices</legend>
+          </fieldset>
+
+          <div class="stl-choice-grid" id="quiz-choice-grid" hidden></div>
+
+          <div class="stl-quiz__gridin" id="quiz-gridin" hidden>
+            <label class="stl-quiz__gridin-label" for="quiz-gridin-input">Your answer</label>
+            <input
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              class="stl-quiz__gridin-input"
+              id="quiz-gridin-input"
+              placeholder="Type a number, fraction, or decimal"
+            />
+            <p class="stl-quiz__gridin-hint">Press Enter to lock it in, or use the signal buttons below.</p>
+          </div>
+        </article>
+
+        <footer class="stl-quiz__signal">
+          <p class="stl-quiz__signal-help">
+            How sure are you? Pick one — that locks in your answer and moves on.
+          </p>
+          <div class="stl-signal" role="group" aria-label="Confidence">
+            <button type="button" class="stl-signal__btn stl-signal__btn--green" data-signal="green">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Green</span>
+              <span class="stl-signal__sub">I understood it</span>
+            </button>
+            <button type="button" class="stl-signal__btn stl-signal__btn--yellow" data-signal="yellow">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Yellow</span>
+              <span class="stl-signal__sub">Educated guess</span>
+            </button>
+            <button type="button" class="stl-signal__btn stl-signal__btn--red" data-signal="red">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Red</span>
+              <span class="stl-signal__sub">No idea</span>
+            </button>
+          </div>
+          <button type="button" class="stl-skip" id="btn-skip-question">
+            Skip this question
+          </button>
+        </footer>
+      </section>
+
+      <!-- ============== SCREEN: RESULTS ============== -->
+      <section class="stl-screen" data-screen="results" hidden>
+        <header class="stl-mobile-bar" data-screen-bar="results">
+          <button type="button" class="stl-mobile-bar__btn" data-mobile-back="splash" aria-label="Back home">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <span class="stl-mobile-bar__title">Results</span>
+          <span class="stl-mobile-bar__accessory"></span>
+        </header>
+        <div class="stl-card stl-card--hero stl-results">
+          <!-- Banner shown only when ?a= loaded a friend's attempt. -->
+          <aside class="stl-shared-banner" id="shared-banner" hidden>
+            <span class="stl-shared-banner__dot" aria-hidden="true"></span>
+            <span class="stl-shared-banner__text">You're viewing a shared attempt.</span>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-shared-take">Take this test yourself</button>
+          </aside>
+          <div class="stl-results__head-row">
+            <!-- Single pill row: test badge first (the page's leading
+                 identity chip), then static pacing pills, then "X ago"
+                 so the user sees test → time taken → recency in one
+                 left-to-right read. The badge is populated by
+                 writeStats() from the attempt's testType. -->
+            <div class="stl-results__pacing" aria-label="Test context">
+              <span class="stl-results__test-badge" id="results-test-badge" aria-hidden="true"></span>
+              <span class="stl-pill stl-pill--time">
+                <strong id="stat-total-time" class="stl-pill__num">0:00</strong>
+                <span class="stl-pill__unit">total</span>
+              </span>
+              <span class="stl-pill stl-pill--time">
+                <strong id="stat-avg-time" class="stl-pill__num">0s</strong>
+                <span class="stl-pill__unit">per question</span>
+              </span>
+              <span class="stl-pill stl-pill--time">
+                <strong id="stat-when" class="stl-pill__num">Just now</strong>
+              </span>
+            </div>
+          </div>
+          <!-- (Old #results-headline + #results-sub removed — the score
+               below now reads "N/T correct" inline so the title would
+               just repeat itself. app.js writes to those IDs defensively
+               via optional chains.) -->
+
+          <!-- Top zone — 2-column grid: merged Overview (score + meter
+               + ledger, one bordered card with a hairline divider
+               between the score block and the ledger rows) on the left,
+               the per-topic radar in its own joined container on the
+               right. Collapses to a single column on narrow widths. -->
+          <div class="stl-results__top">
+            <!-- LEFT column: merged overview card stacked over the
+                 share / start-fresh actions block. The two stack
+                 vertically inside .stl-results__left-col so the
+                 share buttons live directly under the overview rather
+                 than spanning the full width below the chart. -->
+            <div class="stl-results__left-col">
+            <!-- LEFT: Merged overview. Hero (score + meter) sits flush
+                 above the ledger inside one hairline-bordered card; the
+                 .stl-results__overview-divider draws the hairline rule
+                 between them. -->
+            <div class="stl-results__overview" data-merged="true">
+              <div class="stl-results__hero">
+                <div class="stl-results__hero-top">
+                  <div class="stl-results__score">
+                    <span class="stl-results__score-num" id="stat-correct">0/0</span>
+                    <span class="stl-results__score-word">correct</span>
+                  </div>
+                  <div class="stl-results__hero-meta">
+                    <span id="stat-accuracy">0%</span> accuracy
+                  </div>
+                </div>
+                <div class="stl-results__meter" aria-hidden="true">
+                  <span class="stl-results__meter-seg stl-results__meter-seg--mastery"
+                        id="meter-seg-mastery" style="flex: 0;"></span>
+                  <span class="stl-results__meter-seg stl-results__meter-seg--lucky"
+                        id="meter-seg-lucky" style="flex: 0;"></span>
+                  <span class="stl-results__meter-seg stl-results__meter-seg--review"
+                        id="meter-seg-review" style="flex: 0;"></span>
+                </div>
+              </div>
+
+              <div class="stl-results__overview-divider" aria-hidden="true"></div>
+
+              <div class="stl-results__ledger">
+                <button type="button"
+                        class="stl-results__row stl-results__row--mastery"
+                        data-bucket="trueMastery" id="stat-card-true-mastery">
+                  <span class="stl-results__row-label">
+                    <span class="stl-results__row-title">True mastery</span>
+                    <span class="stl-results__row-hint">green + correct</span>
+                  </span>
+                  <span class="stl-results__row-stats">
+                    <span class="stl-results__row-num" id="stat-true-mastery">0</span>
+                    <span class="stl-results__row-pct" id="stat-true-mastery-pct">0%</span>
+                  </span>
+                </button>
+                <button type="button"
+                        class="stl-results__row stl-results__row--lucky"
+                        data-bucket="lucky" id="stat-card-lucky">
+                  <span class="stl-results__row-label">
+                    <span class="stl-results__row-title">Lucky</span>
+                    <span class="stl-results__row-hint">unsure but correct</span>
+                  </span>
+                  <span class="stl-results__row-stats">
+                    <span class="stl-results__row-num" id="stat-lucky">0</span>
+                    <span class="stl-results__row-pct" id="stat-lucky-pct">0%</span>
+                  </span>
+                </button>
+                <button type="button"
+                        class="stl-results__row stl-results__row--review"
+                        data-bucket="toReview" id="stat-card-review">
+                  <span class="stl-results__row-label">
+                    <span class="stl-results__row-title">To review</span>
+                    <span class="stl-results__row-hint">missed or skipped</span>
+                  </span>
+                  <span class="stl-results__row-stats">
+                    <span class="stl-results__row-num" id="stat-review">0</span>
+                    <span class="stl-results__row-pct" id="stat-review-pct">0%</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+              <!-- Single unlabeled action row under the overview:
+                   share image / copy link / save PDF / new randomized
+                   test. No section labels, no divider above (the gap
+                   to the overview card is enough). The divider belongs
+                   BELOW this whole 2-col grid, separating it from the
+                   primary CTAs. -->
+              <div class="stl-results__actions">
+                <div class="stl-results__group-row">
+                  <button type="button" class="stl-btn" id="btn-share-score">
+                    <span class="stl-btn__icon" aria-hidden="true">↑</span>
+                    Share image
+                  </button>
+                  <button type="button" class="stl-btn" id="btn-copy-link">
+                    Copy link
+                  </button>
+                  <button type="button" class="stl-btn" id="btn-save-trouble">
+                    Save PDF
+                  </button>
+                  <button type="button" class="stl-btn" id="btn-results-fresh">
+                    New randomized test
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT: Radar in its own joined container — chart on top,
+                 hairline divider, "Focus next" pills below. Shrunk via
+                 .stl-radar-section--attempt overrides so the chart fits
+                 inside the narrower right column. -->
+            <section class="stl-radar-section stl-radar-section--attempt" aria-labelledby="results-radar-title">
+              <div class="stl-radar-section__joined">
+                <div class="stl-radar-section__chart-zone">
+                  <div class="stl-radar-section__chart-head">
+                    <h3 class="stl-eyebrow" id="results-radar-title">Per-topic mastery</h3>
+                  </div>
+                  <div class="stl-radar-section__canvas-host">
+                    <!-- data-compact=true → the radar plugin skips its
+                         custom label drawing (the polygon would
+                         otherwise be tiny inside a constrained 2-col
+                         layout). The "Focus next" pills directly
+                         below provide the legend instead. -->
+                    <canvas id="results-radar" data-compact="true" aria-label="Per-topic mastery radar chart"></canvas>
+                  </div>
+                </div>
+                <div class="stl-radar-section__divider" aria-hidden="true"></div>
+                <div class="stl-radar-section__sw-zone">
+                  <section class="stl-radar__focus-block">
+                    <p class="stl-eyebrow stl-radar__focus-label">Focus next</p>
+                    <ul class="stl-radar__focus stl-radar__focus--row" id="results-radar-focus">
+                      <li class="stl-radar__focus-item">—</li>
+                    </ul>
+                  </section>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Twin CTAs — Walk through review + Start new AI-tailored
+               test, both as rainbow-pill outlines, side by side. On
+               narrow widths they stack via the row's flex-wrap. -->
+          <div class="stl-results__cta-row">
+            <button type="button" class="stl-btn stl-btn--pill-rainbow stl-btn--arrow stl-radar__cta" id="btn-start-review">
+              Walk through review <span class="stl-btn__count" id="review-count-pill" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="stl-btn stl-btn--pill-rainbow stl-btn--arrow stl-radar__cta stl-radar__cta--inchart" id="btn-results-tailored">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/>
+                <path d="M22 5h-4"/>
+                <path d="M4 17v2"/>
+                <path d="M5 18H3"/>
+              </svg>
+              Start new AI-tailored test
+            </button>
+          </div>
+          <p class="stl-radar__cta-hint">Weighted toward your weakest topics from this attempt.</p>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: REVIEW ============== -->
+      <section class="stl-screen" data-screen="review" hidden>
+        <header class="stl-mobile-bar" data-screen-bar="review">
+          <button type="button" class="stl-mobile-bar__btn" data-mobile-back="results" aria-label="Back to results">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <span class="stl-mobile-bar__title">Review</span>
+          <span class="stl-mobile-bar__accessory"></span>
+        </header>
+        <header class="stl-quiz__top">
+          <div class="stl-quiz__meta">
+            <!-- Color-coded test-type badge — populated by renderReview()
+                 so the user always knows which test the question they're
+                 reviewing belongs to. -->
+            <!-- renderTestBadge() injects a full <span class="stl-test-badge">
+                 here, so this wrapper is a plain container — DO NOT add
+                 stl-test-badge to it (otherwise the pill renders nested
+                 inside another pill). -->
+            <span id="review-test-badge" aria-hidden="true"></span>
+            <span class="stl-quiz__counter" id="review-counter">Review 1 of 1</span>
+            <span class="stl-pill" id="review-result">missed</span>
+            <span class="stl-pill" id="review-topic">topic</span>
+          </div>
+        </header>
+
+        <!-- Bucket-filter tab strip. Click a tab to re-order the queue
+             so that bucket leads. Counts inside the pills come from
+             reviewBucketCounts; active state mirrors state.activeReviewBucket.
+             Empty buckets render disabled so clicking is a no-op. -->
+        <nav class="stl-review-tabs" role="tablist" aria-label="Re-order review by category">
+          <button type="button" class="stl-review-tab" role="tab" data-review-bucket="trueMastery">
+            <span class="stl-review-tab__dot stl-review-tab__dot--mastery" aria-hidden="true"></span>
+            <span class="stl-review-tab__label">True mastery</span>
+            <span class="stl-review-tab__count" id="review-tab-count-mastery">0</span>
+          </button>
+          <button type="button" class="stl-review-tab" role="tab" data-review-bucket="lucky">
+            <span class="stl-review-tab__dot stl-review-tab__dot--lucky" aria-hidden="true"></span>
+            <span class="stl-review-tab__label">Lucky</span>
+            <span class="stl-review-tab__count" id="review-tab-count-lucky">0</span>
+          </button>
+          <button type="button" class="stl-review-tab" role="tab" data-review-bucket="toReview">
+            <span class="stl-review-tab__dot stl-review-tab__dot--review" aria-hidden="true"></span>
+            <span class="stl-review-tab__label">Missed</span>
+            <span class="stl-review-tab__count" id="review-tab-count-review">0</span>
+          </button>
+        </nav>
+
+        <article class="stl-card stl-card--hero stl-quiz__card">
+          <figure class="stl-quiz__figure" id="review-figure" hidden></figure>
+          <p class="stl-quiz__passage" id="review-passage" hidden></p>
+          <h2 class="stl-quiz__stem" id="review-stem"></h2>
+          <ul class="stl-review__choices" id="review-choices"></ul>
+          <div class="stl-choice-grid" id="review-choice-grid" hidden></div>
+          <div class="stl-review__explain">
+            <p class="stl-eyebrow">Explanation</p>
+            <p id="review-explanation"></p>
+          </div>
+        </article>
+
+        <footer class="stl-review__nav">
+          <button type="button" class="stl-btn stl-btn--ghost" id="btn-review-prev">Previous</button>
+          <button type="button" class="stl-btn stl-btn--rainbow-outline" id="btn-review-next">Next</button>
+        </footer>
+      </section>
+
+      <!-- ============== SCREEN: REGEN ============== -->
+      <section class="stl-screen" data-screen="regen" hidden>
+        <div class="stl-card stl-card--hero stl-results">
+          <p class="stl-eyebrow">What's next</p>
+          <h2 class="stl-h1">Pick your next round</h2>
+          <p class="stl-sub" id="regen-sub">
+            Drill the topics you just struggled with, take a fresh randomized test, or
+            start over with a new score.
+          </p>
+          <div class="stl-results__actions">
+            <button type="button" class="stl-btn stl-btn--primary" id="btn-regen-tailored">
+              Custom tailored test
+            </button>
+            <button type="button" class="stl-btn" id="btn-regen-fresh">
+              New regular test
+            </button>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-regen-no">
+              Start over with a new score
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: HISTORY ==============
+           Past-attempts list ONLY. The all-time per-topic radar +
+           Strengths/Weaknesses live on the sibling Analysis screen so
+           each page has a single, focused purpose. Both pages share
+           the test-type filter chips and the "Start new AI-tailored
+           test" CTA. -->
+      <section class="stl-screen" data-screen="history" hidden>
+        <header class="stl-mobile-bar" data-screen-bar="history">
+          <button type="button" class="stl-mobile-bar__btn" data-mobile-back="splash" aria-label="Back home">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <span class="stl-mobile-bar__title">Test History</span>
+          <span class="stl-mobile-bar__accessory"></span>
+        </header>
+        <div class="stl-card stl-card--hero stl-history">
+          <div class="stl-history__head">
+            <div class="stl-history__head-text">
+              <h2 class="stl-h1">Test History</h2>
+              <p class="stl-sub" id="history-sub">Review every test you've taken — click any row to revisit the results.</p>
+            </div>
+            <!-- Top-right bulk actions. Lives in the head so the page
+                 ends cleanly on the AI CTA instead of trailing into a
+                 separate footer toolbar. -->
+            <div class="stl-history__bulk" role="group" aria-label="Bulk actions">
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-history-export">Export all</button>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-history-clear">Clear all</button>
+            </div>
+          </div>
+
+          <!-- Test-type filter chips. The "All" chip is always present;
+               per-test chips show their attempt count. The chip
+               selection is shared state with the Analysis page. -->
+          <div class="stl-history__chips" id="history-chips" role="group" aria-label="Filter attempts by test" hidden>
+            <!-- Chips rendered by renderHistoryChips() in app.js. -->
+          </div>
+
+          <ul class="stl-history__list" id="history-list" aria-live="polite"></ul>
+
+          <div class="stl-history__empty" id="history-empty" hidden>
+            <p class="stl-sub" style="margin: 0;">
+              No saved attempts yet. Take a 30-question test and it'll show up here.
+            </p>
+          </div>
+
+          <!-- AI-tailored CTA — same naked treatment as the Analysis
+               page so the two screens feel like siblings. The button
+               IS the surface, no outer container. -->
+          <button type="button" class="stl-btn stl-btn--pill-rainbow stl-btn--arrow stl-radar__cta stl-radar__cta--inchart" id="btn-history-tailored">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+              <path d="M20 3v4"/>
+              <path d="M22 5h-4"/>
+              <path d="M4 17v2"/>
+              <path d="M5 18H3"/>
+            </svg>
+            Start new AI-tailored test
+          </button>
+          <p class="stl-radar__cta-hint">Question mix scales with your topic mastery — weakest areas dominate.</p>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: ANALYSIS ==============
+           All-time per-topic mastery radar + Strengths/Weaknesses.
+           Sibling to the History screen — same chip filter, same AI
+           CTA, no list. The B6 layout: joined chart + SW container
+           with a hairline divider; the CTA sits naked below. -->
+      <section class="stl-screen" data-screen="analysis" hidden>
+        <header class="stl-mobile-bar" data-screen-bar="analysis">
+          <button type="button" class="stl-mobile-bar__btn" data-mobile-back="splash" aria-label="Back home">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <span class="stl-mobile-bar__title">AI Analysis</span>
+          <span class="stl-mobile-bar__accessory"></span>
+        </header>
+        <div class="stl-card stl-card--hero stl-history stl-analysis">
+          <div class="stl-history__head">
+            <h2 class="stl-h1">AI Analysis</h2>
+            <p class="stl-sub" id="analysis-sub">See where you're sharpest and where you're shaky — across every test you've taken.</p>
+          </div>
+
+          <!-- Same chip group as History — filter selection is shared
+               so toggling here also scopes the History list. -->
+          <div class="stl-history__chips" id="analysis-chips" role="group" aria-label="Filter analysis by test" hidden>
+            <!-- Chips rendered by renderHistoryChips() in app.js. -->
+          </div>
+
+          <section class="stl-radar-section stl-radar-section--history" id="analysis-radar-section" aria-labelledby="analysis-radar-title" hidden>
+            <!-- Joined chart + SW container -->
+            <div class="stl-radar-section__joined">
+              <!-- chart zone (top half) -->
+              <div class="stl-radar-section__chart-zone">
+                <div class="stl-radar-section__chart-head">
+                  <h3 class="stl-eyebrow" id="analysis-radar-title">All-time per-topic mastery</h3>
+                  <!-- Expand toggle — top-right of chart zone, visible
+                       only when there are more topics than the cap. -->
+                  <div class="stl-radar-section__expand" id="analysis-radar-expand-wrap" hidden>
+                    <button type="button" class="stl-link" id="btn-analysis-radar-expand"
+                            aria-pressed="false" aria-controls="analysis-radar">
+                      <span data-when="collapsed">Show all topics</span>
+                      <span data-when="expanded" hidden>Collapse</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="stl-radar-section__canvas-host">
+                  <canvas id="analysis-radar" aria-label="All-time per-topic mastery radar chart"></canvas>
+                </div>
+              </div>
+              <!-- hairline divider -->
+              <div class="stl-radar-section__divider" aria-hidden="true"></div>
+              <!-- SW zone (bottom half) — dual Strengths/Weaknesses
+                   stacked sections, no toggle. Strengths first. -->
+              <div class="stl-radar-section__sw-zone" id="analysis-radar-aside">
+                <section class="stl-radar__focus-block stl-radar__focus-block--strengths">
+                  <p class="stl-eyebrow stl-radar__focus-label">Strengths</p>
+                  <ul class="stl-radar__focus stl-radar__focus--row" id="analysis-radar-strengths">
+                    <li class="stl-radar__focus-item">—</li>
+                  </ul>
+                </section>
+                <section class="stl-radar__focus-block stl-radar__focus-block--weaknesses">
+                  <p class="stl-eyebrow stl-radar__focus-label">Weaknesses</p>
+                  <ul class="stl-radar__focus stl-radar__focus--row" id="analysis-radar-weaknesses">
+                    <li class="stl-radar__focus-item">—</li>
+                  </ul>
+                </section>
+              </div>
+            </div>
+          </section>
+
+          <div class="stl-history__empty" id="analysis-empty" hidden>
+            <p class="stl-sub" style="margin: 0;">
+              Take a few tests and we'll plot your topic mastery here.
+            </p>
+          </div>
+
+          <!-- Naked CTA — same treatment as the History page. -->
+          <button type="button" class="stl-btn stl-btn--pill-rainbow stl-btn--arrow stl-radar__cta stl-radar__cta--inchart" id="btn-analysis-tailored">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+              <path d="M20 3v4"/>
+              <path d="M22 5h-4"/>
+              <path d="M4 17v2"/>
+              <path d="M5 18H3"/>
+            </svg>
+            Start new AI-tailored test
+          </button>
+          <p class="stl-radar__cta-hint">Question mix scales with your topic mastery — weakest areas dominate.</p>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: LOGIN ============== -->
+      <section class="stl-screen stl-screen--auth" data-screen="login" hidden>
+        <div class="stl-auth-card stl-login">
+          <div class="stl-auth-brand">
+            <svg class="stl-brand__svg stl-brand__svg--lg" viewBox="0 0 460 90" role="img" aria-label="studysignal">
+              <text x="18" y="62"
+                    font-family='"Geist", -apple-system, system-ui, sans-serif'
+                    font-weight="600" font-size="56" letter-spacing="-0.025em"
+                    textLength="276" lengthAdjust="spacingAndGlyphs"
+                    fill="currentColor">studysignal</text>
+              <circle cx="326" cy="44" r="11" fill="#fb7185"/>
+              <circle cx="358" cy="44" r="11" fill="#facc15"/>
+              <circle cx="390" cy="44" r="11" fill="#4ade80"/>
+            </svg>
+          </div>
+
+          <div class="stl-auth-card__body">
+            <h2 class="stl-auth-h1">Sign in</h2>
+
+            <!-- Social sign-in options. Google Identity Services renders
+                 the official "Sign in with Google" button into the host
+                 div below; our backend (/api/auth/google) verifies the
+                 returned ID token against Google's JWKs and mints the
+                 same stl_session cookie magic-link users get. -->
+            <div class="stl-login__social">
+              <div id="google-signin-host" class="stl-login__social-host" aria-label="Sign in with Google"></div>
+              <p class="stl-login__social-fallback" id="google-signin-fallback" hidden>
+                Google sign-in isn't loading — check your connection or use email instead.
+              </p>
+            </div>
+
+            <div class="stl-login__divider" aria-hidden="true">
+              <span>or use email</span>
+            </div>
+
+            <form id="login-form" class="stl-login__form" novalidate>
+              <label class="stl-field">
+                <span class="stl-label">Email</span>
+                <input type="email" id="login-email" class="stl-input" autocomplete="email"
+                       placeholder="you@example.com" required />
+                <span class="stl-hint" id="login-hint">We never share or sell your email.</span>
+              </label>
+              <!-- Submit morphs in place on success: gradient lavender →
+                   green, label "Send magic link" → "✓ Sent". The morph
+                   is a CSS transition driven by data-state, not a
+                   re-render, so focus + position are preserved. -->
+              <button type="submit" class="stl-btn stl-btn--primary stl-btn--hero stl-login__submit" id="btn-login-submit" data-state="idle">
+                <span class="stl-login__submit-label" data-when="idle">Send magic link</span>
+                <span class="stl-login__submit-label" data-when="sent" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12.5l5 5L20 6.5"/>
+                  </svg>
+                  Sent
+                </span>
+              </button>
+            </form>
+
+            <!-- Post-send block: appears below the button on success.
+                 Contains the spam-guidance copy, optional fallback
+                 link (if email failed), and resend / edit-email
+                 controls. Hidden by default; flipped on by JS. -->
+            <div class="stl-login__post" id="login-post" hidden>
+              <p class="stl-login__sent-tip">
+                We sent a magic link to
+                <span class="stl-login__sent-email" id="login-sent-email">your email</span>.
+                Open it on this device — the link expires in <strong>15 minutes</strong>.
+                If you don't see it within a minute, check spam or promotions for an email
+                from <code>noreply@studysignal.ai</code>.
+              </p>
+
+              <!-- Fallback (email service misconfigured / send failed). -->
+              <div class="stl-login__demo" id="login-demo" hidden>
+                <p class="stl-eyebrow" style="color: var(--stl-yellow-text);">Email pending</p>
+                <p class="stl-auth-sub" style="margin-bottom: var(--s-3);">Email delivery isn't fully wired up yet, so click the link below to sign in.</p>
+                <a href="#" class="stl-btn stl-btn--primary" id="login-demo-link">Open the magic link</a>
+              </div>
+
+              <div class="stl-login__sent-actions">
+                <button type="button" class="stl-btn" id="btn-login-resend" disabled>
+                  <span id="login-resend-label">Resend in 30s</span>
+                </button>
+                <button type="button" class="stl-btn stl-btn--ghost" id="btn-login-back">Use a different email</button>
+              </div>
+            </div>
+          </div>
+
+          <p class="stl-login__mode" id="login-mode-tag" hidden></p>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: 401 / not-authorized ============== -->
+      <section class="stl-screen stl-screen--auth" data-screen="forbidden" hidden>
+        <div class="stl-auth-card">
+          <div class="stl-auth-brand">
+            <svg class="stl-brand__svg stl-brand__svg--lg" viewBox="0 0 460 90" role="img" aria-label="studysignal">
+              <text x="18" y="62"
+                    font-family='"Geist", -apple-system, system-ui, sans-serif'
+                    font-weight="600" font-size="56" letter-spacing="-0.025em"
+                    textLength="276" lengthAdjust="spacingAndGlyphs"
+                    fill="currentColor">studysignal</text>
+              <circle cx="326" cy="44" r="11" fill="#fb7185"/>
+              <circle cx="358" cy="44" r="11" fill="#facc15"/>
+              <circle cx="390" cy="44" r="11" fill="#4ade80"/>
+            </svg>
+          </div>
+          <div class="stl-auth-card__body">
+            <h2 class="stl-auth-h1">Admin only</h2>
+            <p class="stl-auth-sub" id="forbidden-sub">This area is restricted to administrators. Sign in with an admin email to continue.</p>
+            <div class="stl-auth-card__actions">
+              <button type="button" class="stl-btn stl-btn--primary stl-btn--hero" id="btn-forbidden-signin">Sign in</button>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-forbidden-back">Back to start</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: ADMIN ==============
+           Wider than the rest of the app (see .stl-main:has([data-screen=admin]…)).
+           Layout: header → KPI strip → filter bar → sticky-header table → footer.
+           Role-gated: only users with role==='admin' can render this screen.
+        -->
+      <section class="stl-screen stl-screen--admin" data-screen="admin" hidden>
+        <!-- Tab nav doubles as the page header. The old .stl-admin__page-head
+             (eyebrow + H1 + page actions row) was removed — the tab labels
+             themselves identify the active section, and the right-side
+             actions group below carries the contextual buttons. Actions
+             show/hide per active tab via data-tab-action; "Back to start"
+             is always present. -->
+        <nav class="stl-admin__tabs" role="tablist" aria-label="Admin sections">
+          <button type="button" class="stl-admin__tab" role="tab" data-tab="users" aria-selected="false">
+            <span class="stl-admin__tab-lbl">Users</span>
+            <span class="stl-admin__tab-count" id="tab-count-users">—</span>
+          </button>
+          <button type="button" class="stl-admin__tab" role="tab" data-tab="questions" aria-selected="true">
+            <span class="stl-admin__tab-lbl">Questions</span>
+            <span class="stl-admin__tab-count" id="tab-count-questions">—</span>
+          </button>
+          <button type="button" class="stl-admin__tab" role="tab" data-tab="imports" aria-selected="false">
+            <span class="stl-admin__tab-lbl">Imports</span>
+            <span class="stl-admin__tab-count" id="tab-count-imports">—</span>
+          </button>
+          <button type="button" class="stl-admin__tab" role="tab" data-tab="tests" aria-selected="false">
+            <span class="stl-admin__tab-lbl">Tests</span>
+            <span class="stl-admin__tab-count" id="tab-count-tests">—</span>
+          </button>
+          <!-- Right-rail actions. Pushed to the trailing edge via
+               margin-left:auto. Tab-scoped buttons carry data-tab-action
+               and are toggled by setAdminTab(); generic buttons (Back to
+               start) stay always-on. -->
+          <div class="stl-admin__tabs-actions" id="admin-page-actions">
+            <!-- Review queue CTAs: each opens the same review modal but
+                 with a different queue source. Counts refresh on every
+                 bank-updated event. Hidden when the matching count is
+                 zero. data-tab-action="questions" hides these on other
+                 tabs. -->
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-admin-review-archived" data-tab-action="questions" hidden>
+              Review archived <span class="stl-btn__count" id="btn-admin-review-archived-count">0</span>
+            </button>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-admin-review" data-tab-action="questions" hidden>
+              Review queue <span class="stl-btn__count" id="btn-admin-review-count">0</span>
+            </button>
+            <!-- Add questions CTA — visible on Questions AND Imports tabs.
+                 The data-tab-action attribute is a comma-list now, parsed
+                 by setAdminTab to allow multi-tab visibility. -->
+            <button type="button" class="stl-btn stl-btn--pill-rainbow" id="btn-admin-add" data-tab-action="questions,imports">Add questions</button>
+          </div>
+        </nav>
+
+        <!-- ───────── USERS TAB PANE ───────── -->
+        <div class="stl-admin__pane" data-pane="users" hidden>
+          <div class="stl-admin__kpis" role="group" aria-label="Users summary">
+            <div class="stl-admin__kpi" data-kind="total">
+              <p class="stl-admin__kpi-lbl">Total users</p>
+              <p class="stl-admin__kpi-num" id="kpi-users-total">—</p>
+            </div>
+            <div class="stl-admin__kpi" data-kind="live">
+              <p class="stl-admin__kpi-lbl">Signed in</p>
+              <p class="stl-admin__kpi-num" id="kpi-users-signed-in">—</p>
+            </div>
+            <div class="stl-admin__kpi" data-kind="needs-review">
+              <p class="stl-admin__kpi-lbl">Guests</p>
+              <p class="stl-admin__kpi-num" id="kpi-users-guests">—</p>
+            </div>
+            <div class="stl-admin__kpi" data-kind="ai">
+              <p class="stl-admin__kpi-lbl">Admins</p>
+              <p class="stl-admin__kpi-num" id="kpi-users-admins">—</p>
+            </div>
+            <div class="stl-admin__kpi" data-kind="human">
+              <p class="stl-admin__kpi-lbl">Tests taken</p>
+              <p class="stl-admin__kpi-num" id="kpi-users-tests">—</p>
+            </div>
+            <div class="stl-admin__kpi" data-kind="unpublished">
+              <p class="stl-admin__kpi-lbl">Active 7d</p>
+              <p class="stl-admin__kpi-num" id="kpi-users-active">—</p>
+            </div>
+          </div>
+
+          <div class="stl-admin__panel">
+            <div class="stl-admin__filters" role="group" aria-label="Filter users">
+              <label class="stl-admin__field stl-admin__field--search">
+                <span class="stl-admin__field-lbl">Search</span>
+                <input type="search" id="users-search" class="stl-admin__input" placeholder="Email or guest #…" autocomplete="off" />
+              </label>
+              <label class="stl-admin__field">
+                <span class="stl-admin__field-lbl">Type</span>
+                <select id="users-filter-type" class="stl-admin__select">
+                  <option value="all">All types</option>
+                  <option value="user">Signed-in users</option>
+                  <option value="admin">Admins</option>
+                  <option value="guest">Guests</option>
+                </select>
+              </label>
+              <div class="stl-admin__field stl-admin__field--actions">
+                <span class="stl-admin__field-lbl">&nbsp;</span>
+                <button type="button" class="stl-btn stl-btn--ghost" id="btn-users-clear">Reset</button>
+              </div>
+            </div>
+
+            <p class="stl-admin__filter-summary" id="users-summary">Loading…</p>
+
+            <div class="stl-admin__table-wrap">
+              <table class="stl-admin__table" id="users-table">
+                <thead>
+                  <tr>
+                    <th class="stl-admin__th--sortable" data-users-sort="user">User</th>
+                    <th class="stl-admin__th--sortable" data-users-sort="type">Type</th>
+                    <th class="stl-admin__th--sortable" data-users-sort="tests">Tests</th>
+                    <th class="stl-admin__th--sortable" data-users-sort="best">Best score</th>
+                    <th class="stl-admin__th--sortable" data-users-sort="accuracy">Accuracy</th>
+                    <th class="stl-admin__th--sortable" data-users-sort="lastSeen">Last seen</th>
+                  </tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+              <p class="stl-admin__empty" id="users-empty" hidden>No users match your filters.</p>
+            </div>
+
+            <footer class="stl-admin__footer">
+              <span class="stl-admin__hint">Tip · click a row to see that user's tests, strengths, and weaknesses.</span>
+            </footer>
+          </div>
+        </div>
+
+        <!-- ───────── QUESTIONS TAB PANE ───────── -->
+        <div class="stl-admin__pane" data-pane="questions">
+
+        <!-- KPI strip — top-line counts that double as filter
+             shortcuts. Tap a tile to scope the table to that slice;
+             the active tile gets an aria-pressed halo. Tap "Total" to
+             reset to the default Active view. -->
+        <div class="stl-admin__kpis" role="group" aria-label="Database summary — tap a tile to filter">
+          <button type="button" class="stl-admin__kpi" data-kind="total" aria-pressed="true" aria-label="Show all questions (default Active view)">
+            <span class="stl-admin__kpi-lbl">Total</span>
+            <span class="stl-admin__kpi-num" id="kpi-total">—</span>
+          </button>
+          <button type="button" class="stl-admin__kpi" data-kind="live" aria-pressed="false" aria-label="Filter to Live questions only">
+            <span class="stl-admin__kpi-lbl">Live</span>
+            <span class="stl-admin__kpi-num" id="kpi-live">—</span>
+          </button>
+          <button type="button" class="stl-admin__kpi" data-kind="needs-review" aria-pressed="false" aria-label="Filter to Needs review">
+            <span class="stl-admin__kpi-lbl">Needs review</span>
+            <span class="stl-admin__kpi-num" id="kpi-review">—</span>
+          </button>
+          <button type="button" class="stl-admin__kpi" data-kind="unpublished" aria-pressed="false" aria-label="Filter to Unpublished">
+            <span class="stl-admin__kpi-lbl">Unpublished</span>
+            <span class="stl-admin__kpi-num" id="kpi-unpublished">—</span>
+          </button>
+          <button type="button" class="stl-admin__kpi" data-kind="archived" aria-pressed="false" aria-label="Filter to Archived">
+            <span class="stl-admin__kpi-lbl">Archived</span>
+            <span class="stl-admin__kpi-num" id="kpi-archived">—</span>
+          </button>
+          <button type="button" class="stl-admin__kpi" data-kind="ai" aria-pressed="false" aria-label="Filter to AI-generated questions">
+            <span class="stl-admin__kpi-lbl">AI-generated</span>
+            <span class="stl-admin__kpi-num" id="kpi-ai">—</span>
+          </button>
+          <button type="button" class="stl-admin__kpi" data-kind="human" aria-pressed="false" aria-label="Filter to Human-curated questions">
+            <span class="stl-admin__kpi-lbl">Human-curated</span>
+            <span class="stl-admin__kpi-num" id="kpi-human">—</span>
+          </button>
+        </div>
+
+        <div class="stl-admin__panel">
+          <!-- Filter bar — wider columns, search spans the row -->
+          <div class="stl-admin__filters" role="group" aria-label="Filter questions">
+            <label class="stl-admin__field stl-admin__field--search">
+              <span class="stl-admin__field-lbl">Search</span>
+              <input type="search" id="admin-search" class="stl-admin__input" placeholder="ID, stem, or topic…" autocomplete="off" />
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">State</span>
+              <select id="admin-filter-state" class="stl-admin__select">
+                <option value="active" selected>Active</option>
+                <option value="all">All (incl. archived)</option>
+                <option value="live">Live</option>
+                <option value="unpublished">Unpublished</option>
+                <option value="needs-review">Needs review</option>
+                <option value="archived">Archived</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">Test</span>
+              <select id="admin-filter-test" class="stl-admin__select">
+                <option value="all" selected>All tests</option>
+                <option value="SAT">SAT</option>
+                <option value="PSAT">PSAT</option>
+                <option value="ACT">ACT</option>
+                <option value="ISEE">ISEE</option>
+                <option value="SSAT">SSAT</option>
+                <option value="HSPT">HSPT</option>
+              </select>
+            </label>
+            <!-- Source filter was here; removed 2026-05-25 because the
+                 Human / AI-generated KPI tiles above cover the same
+                 cut and the row was getting crowded. The data field
+                 (q.source) is still rendered in the Source column. -->
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">Difficulty</span>
+              <select id="admin-filter-difficulty" class="stl-admin__select">
+                <option value="all">All</option>
+                <option value="easy">≤ 500 · easy</option>
+                <option value="medium">501–600 · medium</option>
+                <option value="hard">601–700 · hard</option>
+                <option value="insane">701–800 · insane</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <!-- Subject filter — populated by populateSubjectFilter()
+                   from the active TEST_TYPES catalog. Selecting a
+                   subject narrows the Topic dropdown to topics that
+                   actually appear in that subject. -->
+              <span class="stl-admin__field-lbl">Subject</span>
+              <select id="admin-filter-subject" class="stl-admin__select">
+                <option value="all">All subjects</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">Topic</span>
+              <select id="admin-filter-topic" class="stl-admin__select">
+                <option value="all">All topics</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <!-- Date filter — windows are relative-to-now ranges,
+                   plus a "No date" option for legacy / undated rows. -->
+              <span class="stl-admin__field-lbl">Date</span>
+              <select id="admin-filter-date" class="stl-admin__select">
+                <option value="all">All dates</option>
+                <option value="today">Today</option>
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+                <option value="no-date">No date</option>
+              </select>
+            </label>
+            <div class="stl-admin__field stl-admin__field--toggle">
+              <!-- Boolean filter — when on, narrows the table to rows
+                   that have a non-empty `note` field. The note lives on
+                   the override (see saveQuestionNote / getQuestionNote
+                   in app.js). aria-pressed drives the toggle's visual
+                   state; JS flips adminFilters.hasNote on click. -->
+              <span class="stl-admin__field-lbl">Has note</span>
+              <button type="button" class="stl-admin__pill-toggle" id="admin-filter-has-note"
+                      role="switch" aria-checked="false" aria-pressed="false">
+                <span class="stl-admin__pill-toggle__dot" aria-hidden="true"></span>
+                <span class="stl-admin__pill-toggle__text">Off</span>
+              </button>
+            </div>
+            <div class="stl-admin__field stl-admin__field--actions">
+              <span class="stl-admin__field-lbl">&nbsp;</span>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-admin-clear-filters">Reset</button>
+            </div>
+          </div>
+
+          <p class="stl-admin__filter-summary" id="admin-summary">Loading…</p>
+
+          <div class="stl-admin__table-wrap">
+            <table class="stl-admin__table" id="admin-table">
+              <!-- Explicit column widths so changing test type or
+                   filters never reshuffles column widths based on
+                   the row contents the filter happens to surface.
+                   Pairs with `table-layout: fixed` in the CSS. -->
+              <colgroup>
+                <col class="stl-admin__col stl-admin__col--id" />
+                <col class="stl-admin__col stl-admin__col--state" />
+                <col class="stl-admin__col stl-admin__col--source" />
+                <col class="stl-admin__col stl-admin__col--subj" />
+                <col class="stl-admin__col stl-admin__col--diff" />
+                <col class="stl-admin__col stl-admin__col--date" />
+                <col class="stl-admin__col stl-admin__col--stats" />
+                <col class="stl-admin__col stl-admin__col--actions" />
+              </colgroup>
+              <thead>
+                <!-- data-sort marks a column as sortable; JS toggles
+                     [data-sort-active] and [data-sort-dir] in response
+                     to clicks. The Actions column is intentionally
+                     not sortable. -->
+                <tr>
+                  <th class="stl-admin__th-id stl-admin__th--sortable" data-sort="id">Question</th>
+                  <th class="stl-admin__th--sortable" data-sort="state">State</th>
+                  <th class="stl-admin__th--sortable" data-sort="source">Source</th>
+                  <th class="stl-admin__th--sortable" data-sort="topic">Subject / Topic</th>
+                  <th class="stl-admin__th--sortable" data-sort="difficulty">Diff</th>
+                  <th class="stl-admin__th--sortable" data-sort="date">Date</th>
+                  <th class="stl-admin__th-stats stl-admin__th--sortable" data-sort="stats">Signal stats</th>
+                  <th class="stl-admin__th-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-tbody"></tbody>
+            </table>
+            <p class="stl-admin__empty" id="admin-empty" hidden>No questions to show.</p>
+          </div>
+
+          <footer class="stl-admin__footer">
+            <span class="stl-admin__hint">Tip · ⌘/Ctrl+click a row's ID to copy it.</span>
+          </footer>
+        </div>
+        </div><!-- /pane[questions] -->
+
+        <!-- ===== IMPORTS PANE =====
+             Each `questions-*.js` file emitted by the offline converter
+             self-registers in window.STL_IMPORTS (id, label, source,
+             generatedAt, file, count). This pane reads that registry,
+             shows one card per import, and lets the operator drill into
+             the import's questions or delete the whole import (cascade-
+             archives every question with that importId — see
+             assembleBank() and STL_IMPORTS_DELETED_KEY in app.js). -->
+        <div class="stl-admin__pane" data-pane="imports" hidden>
+          <!-- Default view: card grid of every registered import. -->
+          <div id="imports-list-view">
+            <p class="stl-eyebrow">Imports</p>
+            <h2 class="stl-admin__h2">Question imports</h2>
+            <p class="stl-sub" style="max-width: 64ch;">
+              Each row is one offline-converted batch that landed in the bank.
+              Open one to browse the questions in it. Deleting an import
+              cascade-removes every question that came in via that batch — they
+              stay on disk but are excluded from the assembled bank until you
+              restore.
+            </p>
+            <div class="stl-admin__panel" style="margin-top: 16px;">
+              <div class="stl-imports__grid" id="imports-grid" role="list">
+                <!-- Cards rendered by renderImportsList() in app.js. -->
+              </div>
+              <p class="stl-admin__empty" id="imports-empty" hidden>
+                No imports registered yet. Run <code>web/tools/convert_upload_questions.py</code>
+                to generate one, then add its &lt;script&gt; tag to index.html.
+              </p>
+            </div>
+          </div>
+
+          <!-- Drill-down view: one import's questions. Reuses the same
+               row markup as the Questions tab (built by renderImportDetail()
+               which delegates per-row rendering to the questions code). -->
+          <div id="imports-detail-view" hidden>
+            <div class="stl-admin__import-head">
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-imports-back" aria-label="Back to imports list">← Back to imports</button>
+              <div class="stl-admin__import-meta">
+                <p class="stl-eyebrow" id="import-detail-eyebrow">Import</p>
+                <h2 class="stl-admin__h2" id="import-detail-title">—</h2>
+                <p class="stl-sub" id="import-detail-sub">—</p>
+              </div>
+              <div class="stl-admin__import-actions">
+                <button type="button" class="stl-btn stl-btn--ghost" id="btn-import-restore" hidden>Restore import</button>
+                <button type="button" class="stl-btn stl-btn--danger" id="btn-import-delete">Delete import</button>
+              </div>
+            </div>
+            <div class="stl-admin__panel">
+              <p class="stl-admin__filter-summary" id="import-detail-summary">—</p>
+              <div class="stl-admin__table-wrap">
+                <table class="stl-admin__table" id="import-detail-table">
+                  <thead>
+                    <tr>
+                      <th>ID / stem</th>
+                      <th>Subject</th>
+                      <th>Difficulty</th>
+                      <th>Signal stats</th>
+                      <th class="stl-admin__th--actions">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="import-detail-tbody"></tbody>
+                </table>
+                <p class="stl-admin__empty" id="import-detail-empty" hidden>
+                  This import has no questions in the bank (or they were all archived).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== TESTS PANE =====
+             Controls which test types are exposed to users (Active) vs.
+             stored in the database but not selectable (Hidden). The
+             user-facing entry flow auto-routes based on Active count:
+             1 active → score input directly, 2+ → picker grid. -->
+        <div class="stl-admin__pane" data-pane="tests" hidden>
+          <p class="stl-eyebrow">Test types</p>
+          <h2 class="stl-admin__h2">Active vs Hidden</h2>
+          <p class="stl-sub" style="max-width: 56ch;">
+            Active tests appear to users on the entry screen and serve their question pool. Hidden tests stay in the database (admins can still filter and edit their questions) but never reach test-takers. Toggle anytime — changes take effect immediately.
+          </p>
+          <div class="stl-tests-panel" id="tests-panel" role="list">
+            <!-- Rendered by renderTestsPanel() in app.js — one row per
+                 entry in TEST_TYPES, with wordmark + name + question
+                 count + Active/Hidden toggle. -->
+          </div>
+        </div>
+
+        <!-- ===== USER DETAIL MODAL ===== -->
+        <div class="stl-admin-modal" id="user-detail-modal" hidden role="dialog" aria-modal="true" aria-labelledby="user-detail-title">
+          <div class="stl-admin-modal__backdrop" data-modal-close="user"></div>
+          <div class="stl-admin-modal__panel" role="document" style="max-width: 720px;">
+            <header class="stl-admin-modal__head">
+              <p class="stl-eyebrow" id="user-detail-eyebrow">User detail</p>
+              <h3 class="stl-admin-modal__title" id="user-detail-title">—</h3>
+              <button type="button" class="stl-admin-modal__close" data-modal-close="user" aria-label="Close">×</button>
+            </header>
+
+            <div class="stl-user-detail">
+              <div class="stl-user-detail__stats" id="user-detail-stats">
+                <!-- 4 mini-stats rendered by JS -->
+              </div>
+
+              <section class="stl-user-detail__section">
+                <p class="stl-eyebrow stl-user-detail__h">Strengths</p>
+                <ul class="stl-user-detail__topics" id="user-detail-strengths">
+                  <li class="stl-user-detail__empty">Need more attempts to surface strengths.</li>
+                </ul>
+              </section>
+
+              <section class="stl-user-detail__section">
+                <p class="stl-eyebrow stl-user-detail__h">Weaknesses</p>
+                <ul class="stl-user-detail__topics" id="user-detail-weaknesses">
+                  <li class="stl-user-detail__empty">Need more attempts to surface weaknesses.</li>
+                </ul>
+              </section>
+
+              <section class="stl-user-detail__section">
+                <p class="stl-eyebrow stl-user-detail__h">Tests</p>
+                <div class="stl-user-detail__tests" id="user-detail-tests"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== REVIEW QUEUE MODAL ==============
+           Full-page overlay for triaging every question in state='needs-review'.
+           One question at a time — stem, choices (correct answer highlighted),
+           figure if any, explanation. Per-card actions:
+             • Approve  → state becomes 'live'      (or hotkey A / →)
+             • Deny     → state becomes 'archived'  (or hotkey D / ←)
+             • Skip     → leave state unchanged     (or hotkey S)
+             • Esc closes the modal entirely.
+           Auto-advances on each action. Counter in the header tracks position
+           in the queue. Internal logic lives in openReviewQueue() / advance()
+           in app.js. -->
+      <div class="stl-admin-modal stl-review-modal" id="review-modal" hidden role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+        <div class="stl-admin-modal__backdrop" data-modal-close="review"></div>
+        <div class="stl-admin-modal__panel stl-review-modal__panel" role="document">
+          <header class="stl-review-modal__head">
+            <div class="stl-review-modal__head-left">
+              <p class="stl-eyebrow" id="review-modal-eyebrow">Review queue</p>
+              <h3 class="stl-admin-modal__title" id="review-modal-title">— of —</h3>
+            </div>
+            <div class="stl-review-modal__head-meta" id="review-modal-meta">
+              <!-- Filled by JS: state badge + id -->
+            </div>
+            <!-- Participant view link — opens a new tab rendering ONLY the
+                 current question in the live quiz UI, so the reviewer
+                 sees exactly what a student will see (math rendering,
+                 figure layout, answer feedback, traffic-light signal).
+                 href is rewritten by JS on each card render. -->
+            <a class="stl-review-modal__participant" id="btn-review-participant"
+               href="#" target="_blank" rel="noopener"
+               title="Open this question in a new tab as a participant would see it"
+               aria-label="Open participant view in a new tab">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Participant view
+            </a>
+            <button type="button" class="stl-admin-modal__close" data-modal-close="review" aria-label="Close review queue (Esc)">×</button>
+          </header>
+
+          <div class="stl-review-modal__body" id="review-modal-body">
+            <!-- Filled by JS: stem, figure, table, choices, explanation, note, meta. -->
+          </div>
+
+          <footer class="stl-review-modal__foot">
+            <div class="stl-review-modal__nav">
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-review-prev" aria-label="Previous (←)">← Prev</button>
+              <span class="stl-review-modal__shortcuts" aria-hidden="true">
+                <kbd>A</kbd> approve · <kbd>K</kbd> keep · <kbd>X</kbd> archive · <kbd>⌫</kbd> delete · <kbd>S</kbd> skip · <kbd>Esc</kbd> close
+              </span>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-review-skip">Skip →</button>
+            </div>
+            <div class="stl-review-modal__decisions">
+              <button type="button" class="stl-btn stl-btn--danger"        id="btn-review-delete"  aria-keyshortcuts="Delete Backspace">Delete</button>
+              <button type="button" class="stl-btn stl-btn--ghost"         id="btn-review-archive" aria-keyshortcuts="x">Archive</button>
+              <button type="button" class="stl-btn stl-btn--ghost"         id="btn-review-keep"    aria-keyshortcuts="k">Keep in review</button>
+              <button type="button" class="stl-btn stl-btn--pill-rainbow"  id="btn-review-approve" aria-keyshortcuts="a">Approve</button>
+            </div>
+          </footer>
+
+          <!-- Empty-state shown when the queue is exhausted. -->
+          <div class="stl-review-modal__done" id="review-modal-done" hidden>
+            <p class="stl-eyebrow">Queue cleared</p>
+            <h3>All caught up.</h3>
+            <p class="stl-sub">Every question in this queue has been triaged. Approved items are Live; archived items move to State: Archived; deleted items are filtered out of the bank entirely (recoverable from localStorage if needed).</p>
+            <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="review">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============== EDIT MODAL ==============
+           Drawer-style overlay for editing a question's content. Writes
+           land in stl_question_overrides via updateOverrides(). -->
+      <div class="stl-admin-modal" id="admin-modal" hidden role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+        <div class="stl-admin-modal__backdrop" data-modal-close="1"></div>
+        <div class="stl-admin-modal__panel" role="document">
+          <header class="stl-admin-modal__head">
+            <p class="stl-eyebrow">Edit question</p>
+            <h3 class="stl-admin-modal__title" id="admin-modal-title">q-—</h3>
+            <button type="button" class="stl-admin-modal__close" data-modal-close="1" aria-label="Close">×</button>
+          </header>
+
+          <form id="admin-edit-form" class="stl-admin-modal__form" novalidate>
+            <label class="stl-field">
+              <span class="stl-label">Stem</span>
+              <textarea id="edit-stem" class="stl-admin__input stl-admin__textarea" rows="3"></textarea>
+            </label>
+
+            <fieldset class="stl-admin__field-group" id="edit-choices-fs">
+              <legend class="stl-label">Choices</legend>
+              <p class="stl-hint" id="edit-choices-hint">Multiple choice: edit each option. Grid-in: leave choices blank and put the answer in the field below.</p>
+              <div id="edit-choices-list"></div>
+            </fieldset>
+
+            <div class="stl-admin__row-2">
+              <label class="stl-field">
+                <span class="stl-label">Answer</span>
+                <input type="text" id="edit-answer" class="stl-admin__input" autocomplete="off" />
+                <span class="stl-hint">MC: index 0–3. Grid-in: typed answer string.</span>
+              </label>
+              <label class="stl-field">
+                <span class="stl-label">Topic</span>
+                <!-- Dropdown of known topics + an "Other…" escape that
+                     reveals a freeform input. Existing values are
+                     preserved across topic changes — the modal only
+                     persists on Save. -->
+                <select id="edit-topic" class="stl-admin__select"></select>
+                <input type="text" id="edit-topic-other" class="stl-admin__input"
+                       placeholder="New topic (lowercase, dash-separated)" hidden />
+              </label>
+            </div>
+
+            <div class="stl-admin__row-2">
+              <label class="stl-field">
+                <span class="stl-label">Difficulty (SAT score)</span>
+                <input type="number" id="edit-difficulty" class="stl-admin__input"
+                       min="200" max="800" step="10" />
+                <span class="stl-hint" id="edit-difficulty-hint">
+                  200–800. Tier shown in the table is computed: ≤500 easy · 501–600 medium · 601–700 hard · 701+ insane.
+                </span>
+              </label>
+              <label class="stl-field">
+                <span class="stl-label">State</span>
+                <select id="edit-state" class="stl-admin__select">
+                  <option value="live">Live</option>
+                  <option value="unpublished">Unpublished</option>
+                  <option value="needs-review">Needs review</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="stl-field">
+              <span class="stl-label">Explanation</span>
+              <textarea id="edit-explanation" class="stl-admin__input stl-admin__textarea" rows="3"></textarea>
+            </label>
+
+            <!-- ============= FIGURE EDITOR =============
+                 Lets the admin attach or edit imagery for a question.
+                 Five kinds, each with its own field set:
+                   • none           — no figure (default)
+                   • image          — URL + alt text
+                   • svg            — inline SVG XML
+                   • chart          — Chart.js config as JSON
+                   • choiceCharts   — JSON array of 4 chart configs
+                 The preview pane renders the current state on every
+                 keystroke so the admin can iterate without saving. -->
+            <fieldset class="stl-admin__field-group" id="edit-figure-fs">
+              <legend class="stl-label">Figure</legend>
+              <p class="stl-hint">Attach a chart, diagram, or image. Empty = text-only question.</p>
+
+              <label class="stl-field">
+                <span class="stl-label stl-label--sub">Kind</span>
+                <select id="edit-figure-kind" class="stl-admin__select">
+                  <option value="none">None (text-only)</option>
+                  <option value="image">Image (URL)</option>
+                  <option value="svg">Inline SVG</option>
+                  <option value="chart">Chart (Chart.js config)</option>
+                  <option value="choiceCharts">Choice charts (one per choice)</option>
+                </select>
+              </label>
+
+              <!-- IMAGE fields -->
+              <div class="stl-admin__row-2" data-figure-kind="image" hidden>
+                <label class="stl-field">
+                  <span class="stl-label stl-label--sub">URL</span>
+                  <input type="url" id="edit-figure-image-url" class="stl-admin__input" placeholder="https://example.com/figure.png" />
+                </label>
+                <label class="stl-field">
+                  <span class="stl-label stl-label--sub">Alt text</span>
+                  <input type="text" id="edit-figure-image-alt" class="stl-admin__input" placeholder="Brief description for screen readers" />
+                </label>
+              </div>
+
+              <!-- SVG field -->
+              <label class="stl-field" data-figure-kind="svg" hidden>
+                <span class="stl-label stl-label--sub">SVG source</span>
+                <textarea id="edit-figure-svg" class="stl-admin__input stl-admin__textarea" rows="6" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 400 240&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;&gt;..."></textarea>
+                <span class="stl-hint">Use <code>currentColor</code> for stroke/fill so it picks up the dark canvas color. Add <code>class="stl-svg-var"</code> to <code>&lt;text&gt;</code> nodes for italic lavender variable letters.</span>
+              </label>
+
+              <!-- CHART JSON field -->
+              <label class="stl-field" data-figure-kind="chart" hidden>
+                <span class="stl-label stl-label--sub">Chart config (JSON)</span>
+                <textarea id="edit-figure-chart" class="stl-admin__input stl-admin__textarea" rows="10" spellcheck="false" placeholder='{ "type": "scatter", "xLabel": "x", "yLabel": "y", "datasets": [...] }'></textarea>
+                <span class="stl-hint">Schema: <code>{ type, xLabel, yLabel, xMin, xMax, yMin, yMax, datasets: [{ kind, data }] }</code>. Kinds: <code>points</code>, <code>line</code>, <code>best-fit</code>, <code>bars</code>.</span>
+                <span class="stl-hint stl-hint--err" id="edit-figure-chart-err" hidden></span>
+              </label>
+
+              <!-- CHOICE CHARTS JSON field -->
+              <label class="stl-field" data-figure-kind="choiceCharts" hidden>
+                <span class="stl-label stl-label--sub">Choice charts (JSON array, 4 entries)</span>
+                <textarea id="edit-figure-choice-charts" class="stl-admin__input stl-admin__textarea" rows="10" spellcheck="false" placeholder='[ { "type": "scatter", ... }, { ... }, { ... }, { ... } ]'></textarea>
+                <span class="stl-hint">Same schema as a single chart. Replaces the choice text with mini-charts as the actual choices.</span>
+                <span class="stl-hint stl-hint--err" id="edit-figure-choice-charts-err" hidden></span>
+              </label>
+
+              <!-- LIVE PREVIEW pane -->
+              <div class="stl-admin__figure-preview" data-figure-kind="image,svg,chart,choiceCharts" hidden>
+                <p class="stl-eyebrow">Preview</p>
+                <figure id="edit-figure-preview" class="stl-quiz__figure" hidden></figure>
+                <div id="edit-figure-choice-preview" class="stl-admin__choice-preview" hidden></div>
+              </div>
+            </fieldset>
+
+            <!-- Per-question note + image attachments. Rendered into
+                 #edit-note-section by openEditModal() via
+                 buildNoteSectionHtml(). Shares the same persistence
+                 + handlers as the review modal so notes attached from
+                 either surface land on the same override row. -->
+            <fieldset class="stl-admin__field-group">
+              <legend class="stl-label">Note</legend>
+              <p class="stl-hint">Internal note + image attachments for this question. Visible to every admin; saves automatically.</p>
+              <div id="edit-note-section"></div>
+            </fieldset>
+
+            <div class="stl-admin-modal__meta" id="edit-meta"></div>
+
+            <footer class="stl-admin-modal__actions">
+              <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="1">Cancel</button>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-edit-revert">Revert overrides</button>
+              <button type="submit" class="stl-btn stl-btn--primary" id="btn-edit-save">Save changes</button>
+            </footer>
+          </form>
+        </div>
+      </div>
+
+      <!-- ============== ADD QUESTIONS MODAL ==============
+           Card-picker → drill-in (Option B). Drag a file anywhere
+           inside the modal to auto-route to the matching flow:
+             • image (.png/.jpg/.gif/.webp/.heic) → Image flow
+             • spreadsheet (.csv)                  → CSV flow
+           Manual flow has no drag-and-drop affordance.            -->
+      <div class="stl-admin-modal stl-add-modal" id="add-modal" hidden role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
+        <div class="stl-admin-modal__backdrop" data-modal-close="add"></div>
+        <div class="stl-admin-modal__panel stl-add-modal__panel" role="document">
+          <header class="stl-admin-modal__head">
+            <button type="button" class="stl-add-modal__back" id="add-modal-back" aria-label="Back to options" hidden>←</button>
+            <p class="stl-eyebrow" id="add-modal-eyebrow">Add questions</p>
+            <h3 class="stl-admin-modal__title" id="add-modal-title">How would you like to add?</h3>
+            <button type="button" class="stl-admin-modal__close" data-modal-close="add" aria-label="Close">×</button>
+          </header>
+
+          <!-- ──────────── PICKER (default view) ──────────── -->
+          <div class="stl-add-modal__view" data-view="picker">
+            <div class="stl-add-picker">
+              <button type="button" class="stl-add-picker__card" data-route="manual">
+                <span class="stl-add-picker__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 4v16M4 12h16"/>
+                  </svg>
+                </span>
+                <span class="stl-add-picker__h">From scratch</span>
+                <span class="stl-add-picker__sub">Type the question, choices, and answer manually.</span>
+              </button>
+              <button type="button" class="stl-add-picker__card" data-route="image">
+                <span class="stl-add-picker__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5L5 19"/>
+                  </svg>
+                </span>
+                <span class="stl-add-picker__h">Upload image</span>
+                <span class="stl-add-picker__sub">Convert one question or generate similar ones from a source image.</span>
+              </button>
+              <button type="button" class="stl-add-picker__card" data-route="json">
+                <span class="stl-add-picker__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/><path d="M8 13c0 1.5-1 2 0 3 0 0 1-.5 1.5-.5s1 .5 1.5.5c1-1 0-1.5 0-3 0-1.5 1-2 0-3-.5 0-1 .5-1.5.5s-1-.5-1.5-.5c-1 1 0 1.5 0 3z"/>
+                  </svg>
+                </span>
+                <span class="stl-add-picker__h">Upload JSON</span>
+                <span class="stl-add-picker__sub">Paste or drop JSON to bulk-add. <a href="#" id="add-json-template-link">Download template</a></span>
+              </button>
+              <button type="button" class="stl-add-picker__card" data-route="generate">
+                <span class="stl-add-picker__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l3.5 7L24 12l-7.5 2L13 21l-3.5-7L2 12l7.5-2z"/>
+                  </svg>
+                </span>
+                <span class="stl-add-picker__h">Generate with AI</span>
+                <span class="stl-add-picker__sub">Describe what you want and AI drafts a batch. Review each before publishing.</span>
+              </button>
+            </div>
+            <p class="stl-add-modal__hint">Tip · drop a file anywhere in this window and we'll route it.</p>
+          </div>
+
+          <!-- ──────────── MANUAL ──────────── -->
+          <div class="stl-add-modal__view" data-view="manual" hidden>
+            <form id="add-manual-form" class="stl-admin-modal__form" novalidate>
+              <label class="stl-field">
+                <span class="stl-label">Stem</span>
+                <textarea id="add-stem" class="stl-admin__input stl-admin__textarea" rows="3" required></textarea>
+              </label>
+
+              <fieldset class="stl-admin__field-group">
+                <legend class="stl-label">Choices</legend>
+                <p class="stl-hint">Multiple choice: fill A–D. Grid-in: leave choices blank and put the answer below.</p>
+                <div id="add-choices-list">
+                  <div class="stl-admin__choice-row">
+                    <span class="stl-admin__choice-letter">A</span>
+                    <input type="text" class="stl-admin__input" data-choice-idx="0" />
+                  </div>
+                  <div class="stl-admin__choice-row">
+                    <span class="stl-admin__choice-letter">B</span>
+                    <input type="text" class="stl-admin__input" data-choice-idx="1" />
+                  </div>
+                  <div class="stl-admin__choice-row">
+                    <span class="stl-admin__choice-letter">C</span>
+                    <input type="text" class="stl-admin__input" data-choice-idx="2" />
+                  </div>
+                  <div class="stl-admin__choice-row">
+                    <span class="stl-admin__choice-letter">D</span>
+                    <input type="text" class="stl-admin__input" data-choice-idx="3" />
+                  </div>
+                </div>
+              </fieldset>
+
+              <!-- Test + Subject — required so the question lands in
+                   the right pool. Test populates Subject; Subject
+                   narrows Topic. Both default to the user's currently
+                   selected test + its first subject for the common
+                   case (open modal, type stem, click save). -->
+              <div class="stl-admin__row-2">
+                <label class="stl-field">
+                  <span class="stl-label">Test</span>
+                  <select id="add-test" class="stl-admin__select"></select>
+                </label>
+                <label class="stl-field">
+                  <span class="stl-label">Subject</span>
+                  <select id="add-subject" class="stl-admin__select"></select>
+                </label>
+              </div>
+
+              <div class="stl-admin__row-2">
+                <label class="stl-field">
+                  <span class="stl-label">Answer</span>
+                  <input type="text" id="add-answer" class="stl-admin__input" autocomplete="off" required />
+                  <span class="stl-hint">MC: index 0–3. Grid-in: typed answer string.</span>
+                </label>
+                <label class="stl-field">
+                  <span class="stl-label">Topic</span>
+                  <select id="add-topic" class="stl-admin__select"></select>
+                  <input type="text" id="add-topic-other" class="stl-admin__input" placeholder="New topic (lowercase, dash-separated)" hidden />
+                </label>
+              </div>
+
+              <div class="stl-admin__row-2">
+                <label class="stl-field">
+                  <!-- Label + min/max/step/hint are all rebuilt by
+                       applyTestScaleToManualForm() whenever the Test
+                       selector changes, so an ACT 1–36 question can't
+                       be added with an SAT 200–800 difficulty by
+                       accident. -->
+                  <span class="stl-label" id="add-difficulty-label">Difficulty</span>
+                  <input type="number" id="add-difficulty" class="stl-admin__input" min="200" max="800" step="10" value="580" />
+                  <span class="stl-hint" id="add-difficulty-hint"></span>
+                </label>
+                <label class="stl-field">
+                  <span class="stl-label">State</span>
+                  <select id="add-state" class="stl-admin__select">
+                    <option value="live">Live</option>
+                    <option value="needs-review">Needs review</option>
+                    <option value="unpublished">Unpublished</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="stl-field">
+                <span class="stl-label">Explanation</span>
+                <textarea id="add-explanation" class="stl-admin__input stl-admin__textarea" rows="3"></textarea>
+              </label>
+
+              <footer class="stl-admin-modal__actions">
+                <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+                <button type="submit" class="stl-btn stl-btn--primary" id="btn-add-manual-save">Add question</button>
+              </footer>
+            </form>
+          </div>
+
+          <!-- ──────────── IMAGE (tabbed: Convert / Generate similar) ──────────── -->
+          <!-- Two distinct flows share the dropzone in step 1:
+                 • Convert        → single question extraction (existing flow)
+                 • Generate similar → AI drafts N similar questions
+               The active tab determines what happens after image upload.
+               For the similar flow, step 2 shows an auto-populated form
+               based on what convert-image returned from the source. -->
+          <div class="stl-add-modal__view" data-view="image" hidden>
+
+            <!-- Tab pills — switch mode for the post-upload step. The
+                 dropzone below is shared; only the post-upload behavior
+                 differs. -->
+            <div class="stl-add-image__tabs" role="tablist" aria-label="Upload image mode">
+              <button type="button" class="stl-add-image__tab is-active" role="tab"
+                      aria-selected="true" data-image-tab="convert">Convert one</button>
+              <button type="button" class="stl-add-image__tab" role="tab"
+                      aria-selected="false" data-image-tab="similar">Generate similar</button>
+            </div>
+
+            <p class="stl-auth-sub" id="add-image-mode-blurb">Upload a screenshot or photo of a question. AI extracts the stem, choices, answer, and explanation; you'll review before saving.</p>
+
+            <!-- ─── STEP 1: image upload (shared between both tabs) ─── -->
+            <div class="stl-add-image__step" data-step="upload">
+              <div class="stl-dropzone" id="add-image-dropzone" data-accept="image">
+                <input type="file" id="add-image-file" accept="image/png,image/jpeg,image/gif,image/webp,image/heic" hidden />
+                <div class="stl-dropzone__inner">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <p class="stl-dropzone__h">Drop an image here</p>
+                  <p class="stl-dropzone__sub">or <button type="button" class="stl-link" id="add-image-pick">choose a file</button></p>
+                </div>
+              </div>
+
+              <div class="stl-add-image__preview" id="add-image-preview" hidden>
+                <img id="add-image-preview-img" alt="Selected image preview" />
+                <div class="stl-add-image__meta">
+                  <p class="stl-eyebrow">Selected</p>
+                  <p class="stl-add-image__name" id="add-image-name">filename.png</p>
+                  <button type="button" class="stl-link" id="add-image-clear">Pick a different image</button>
+                </div>
+              </div>
+
+              <div class="stl-add-image__status" id="add-image-status" hidden>
+                <span class="stl-add-image__spinner" aria-hidden="true"></span>
+                <span id="add-image-status-text">Asking AI to extract the question…</span>
+              </div>
+
+              <footer class="stl-admin-modal__actions">
+                <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+                <button type="button" class="stl-btn stl-btn--primary" id="btn-add-image-go" disabled>Convert with AI</button>
+              </footer>
+            </div>
+
+            <!-- ─── STEP 2: form (similar flow only — auto-populated from image) ─── -->
+            <div class="stl-add-image__step" data-step="similar-form" hidden>
+              <p class="stl-eyebrow">Source detected</p>
+              <div class="stl-add-image__preview">
+                <img id="add-sim-source-thumb" alt="Source question reference" />
+                <div class="stl-add-image__meta">
+                  <p class="stl-add-image__name" id="add-sim-source-meta">…</p>
+                  <button type="button" class="stl-link" id="add-sim-back-to-upload">Pick a different image</button>
+                </div>
+              </div>
+
+              <form id="add-similar-form" class="stl-admin-modal__form" novalidate>
+                <div class="stl-admin__row-2">
+                  <label class="stl-field">
+                    <span class="stl-label">Test</span>
+                    <select id="add-sim-test" class="stl-admin__select"></select>
+                  </label>
+                  <label class="stl-field">
+                    <span class="stl-label">Subject</span>
+                    <select id="add-sim-subject" class="stl-admin__select"></select>
+                  </label>
+                </div>
+
+                <div class="stl-admin__row-2">
+                  <label class="stl-field">
+                    <span class="stl-label">Topic</span>
+                    <input type="text" id="add-sim-topic" class="stl-admin__input" placeholder="lowercase-dash-topic" />
+                    <span class="stl-hint">Auto-detected from the image. Edit if AI guessed wrong.</span>
+                  </label>
+                  <label class="stl-field">
+                    <span class="stl-label">Source difficulty</span>
+                    <input type="number" id="add-sim-source-difficulty" class="stl-admin__input" min="0" step="10" />
+                    <span class="stl-hint">AI's estimate from the image.</span>
+                  </label>
+                </div>
+
+                <div class="stl-admin__row-2">
+                  <label class="stl-field">
+                    <span class="stl-label">How many to generate?</span>
+                    <input type="number" id="add-sim-count" class="stl-admin__input" min="1" max="20" step="1" value="5" />
+                    <span class="stl-hint">1–20 per batch.</span>
+                  </label>
+                  <label class="stl-field">
+                    <span class="stl-label">Default state</span>
+                    <select id="add-sim-state" class="stl-admin__select">
+                      <option value="live" selected>Live</option>
+                      <option value="needs-review">Needs review</option>
+                      <option value="unpublished">Unpublished</option>
+                    </select>
+                    <span class="stl-hint">Inline review on this screen replaces the needs-review queue.</span>
+                  </label>
+                </div>
+
+                <fieldset class="stl-admin__field-group">
+                  <legend class="stl-label">Difficulty</legend>
+                  <div class="stl-radio-row" id="add-sim-diff-mode">
+                    <label class="stl-radio"><input type="radio" name="add-sim-diff-mode" value="match" checked /> Match the source</label>
+                    <label class="stl-radio"><input type="radio" name="add-sim-diff-mode" value="band" /> Vary within the same band</label>
+                    <label class="stl-radio"><input type="radio" name="add-sim-diff-mode" value="custom" /> Custom range</label>
+                  </div>
+                  <div class="stl-admin__row-2" id="add-sim-diff-custom" hidden>
+                    <label class="stl-field">
+                      <span class="stl-label stl-label--sub">Min</span>
+                      <input type="number" id="add-sim-diff-min" class="stl-admin__input" min="200" max="800" step="10" value="500" />
+                    </label>
+                    <label class="stl-field">
+                      <span class="stl-label stl-label--sub">Max</span>
+                      <input type="number" id="add-sim-diff-max" class="stl-admin__input" min="200" max="800" step="10" value="700" />
+                    </label>
+                  </div>
+                  <p class="stl-hint" id="add-sim-diff-hint">"Match" reuses the source's exact difficulty number.</p>
+                </fieldset>
+
+                <label class="stl-field">
+                  <span class="stl-label">Keep it on point (optional)</span>
+                  <textarea id="add-sim-notes" class="stl-admin__input stl-admin__textarea" rows="3" placeholder="e.g. focus on systems of two linear equations, keep numbers under 100, vary the unknown variable's letter"></textarea>
+                  <span class="stl-hint">Extra constraints AI should honor while staying similar to the source.</span>
+                </label>
+
+                <div class="stl-add-image__status" id="add-sim-status" hidden>
+                  <span class="stl-add-image__spinner" aria-hidden="true"></span>
+                  <span id="add-sim-status-text">Drafting similar questions…</span>
+                </div>
+
+                <footer class="stl-admin-modal__actions">
+                  <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+                  <button type="submit" class="stl-btn stl-btn--primary" id="btn-add-sim-go">Generate</button>
+                </footer>
+              </form>
+            </div>
+
+            <!-- ─── STEP 3: review list (similar flow only) ─── -->
+            <div class="stl-add-image__step stl-add-gen__preview" data-step="similar-review" hidden>
+              <div class="stl-add-gen__preview-head">
+                <p class="stl-eyebrow"><span id="add-sim-preview-count">0</span> drafted · <span id="add-sim-preview-skipped">0</span> skipped (validation)</p>
+                <button type="button" class="stl-link" id="add-sim-back-to-form">Back to options</button>
+              </div>
+              <div class="stl-add-sim__source" id="add-sim-source-preview">
+                <p class="stl-eyebrow">Source question</p>
+                <img id="add-sim-source-img" alt="Source question reference" />
+              </div>
+              <div class="stl-add-gen__list" id="add-sim-list"></div>
+              <footer class="stl-admin-modal__actions">
+                <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+                <button type="button" class="stl-btn stl-btn--primary" id="btn-add-sim-save" disabled>Save selected</button>
+              </footer>
+            </div>
+          </div>
+
+          <!-- ──────────── JSON (replaces the older CSV import) ──────────── -->
+          <div class="stl-add-modal__view" data-view="json" hidden>
+            <p class="stl-auth-sub">Drop a .json file or paste below. Same schema the AI generators emit — covers every field (passage, choices, answer, explanation, topic, difficulty, state, source, plus optional figure: svg/image/chart/table). <a href="#" class="stl-link" id="add-json-template-link-2">Download a complete example</a>.</p>
+
+            <div class="stl-dropzone" id="add-json-dropzone" data-accept="json">
+              <input type="file" id="add-json-file" accept=".json,application/json" hidden />
+              <div class="stl-dropzone__inner">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/>
+                </svg>
+                <p class="stl-dropzone__h">Drop a JSON file here</p>
+                <p class="stl-dropzone__sub">or <button type="button" class="stl-link" id="add-json-pick">choose a file</button>, or paste below</p>
+              </div>
+            </div>
+
+            <label class="stl-field">
+              <span class="stl-label">Or paste JSON</span>
+              <textarea id="add-json-paste" class="stl-admin__input stl-admin__textarea" rows="6" placeholder='[{"id":"q-custom-001","testType":"SAT","section":"math",...}, ...]'></textarea>
+              <span class="stl-hint">Accepts a single question object or an array of questions.</span>
+            </label>
+
+            <div class="stl-add-json__preview" id="add-json-preview" hidden>
+              <p class="stl-eyebrow"><span id="add-json-valid-count">0</span> ready · <span id="add-json-invalid-count">0</span> rejected</p>
+              <div class="stl-add-json__errors" id="add-json-errors"></div>
+            </div>
+
+            <footer class="stl-admin-modal__actions">
+              <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+              <button type="button" class="stl-btn stl-btn--primary" id="btn-add-json-confirm" disabled>Add all valid</button>
+            </footer>
+          </div>
+
+          <!-- ──────────── GENERATE WITH AI ──────────── -->
+          <div class="stl-add-modal__view" data-view="generate" hidden>
+            <p class="stl-auth-sub">Describe the questions you want. AI drafts them and you review each before saving.</p>
+
+            <form id="add-generate-form" class="stl-admin-modal__form" novalidate>
+              <!-- Test + Subject for the batch — controls which pool
+                   the generated questions land in AND informs the AI
+                   prompt so it knows whether to write SAT Math or
+                   ACT Reading content. Defaults match the user's
+                   currently selected test + first subject. -->
+              <div class="stl-admin__row-2">
+                <label class="stl-field">
+                  <span class="stl-label">Test</span>
+                  <select id="add-gen-test" class="stl-admin__select"></select>
+                </label>
+                <label class="stl-field">
+                  <span class="stl-label">Subject</span>
+                  <select id="add-gen-subject" class="stl-admin__select"></select>
+                </label>
+              </div>
+
+              <div class="stl-admin__row-2">
+                <label class="stl-field">
+                  <span class="stl-label">How many?</span>
+                  <input type="number" id="add-gen-count" class="stl-admin__input" min="1" max="20" step="1" value="5" />
+                  <span class="stl-hint">1–20 per batch.</span>
+                </label>
+                <label class="stl-field">
+                  <span class="stl-label">Default state</span>
+                  <select id="add-gen-state" class="stl-admin__select">
+                    <option value="needs-review" selected>Needs review</option>
+                    <option value="live">Live</option>
+                    <option value="unpublished">Unpublished</option>
+                  </select>
+                  <span class="stl-hint">AI output should usually start as needs-review.</span>
+                </label>
+              </div>
+
+              <fieldset class="stl-admin__field-group">
+                <legend class="stl-label" id="add-gen-diff-label">Difficulty range</legend>
+                <div class="stl-admin__row-2">
+                  <label class="stl-field">
+                    <span class="stl-label stl-label--sub">Min</span>
+                    <input type="number" id="add-gen-diff-min" class="stl-admin__input" min="200" max="800" step="10" value="500" />
+                  </label>
+                  <label class="stl-field">
+                    <span class="stl-label stl-label--sub">Max</span>
+                    <input type="number" id="add-gen-diff-max" class="stl-admin__input" min="200" max="800" step="10" value="700" />
+                  </label>
+                </div>
+                <p class="stl-hint" id="add-gen-diff-hint"></p>
+              </fieldset>
+
+              <fieldset class="stl-admin__field-group">
+                <legend class="stl-label">Question types</legend>
+                <div class="stl-checkbox-grid" id="add-gen-types">
+                  <label class="stl-checkbox"><input type="checkbox" value="multiple-choice" checked /> Multiple choice</label>
+                  <label class="stl-checkbox"><input type="checkbox" value="grid-in" /> Grid-in (free response)</label>
+                  <label class="stl-checkbox"><input type="checkbox" value="word-problem" /> Word problem</label>
+                  <label class="stl-checkbox"><input type="checkbox" value="data-analysis" /> Data analysis</label>
+                  <label class="stl-checkbox"><input type="checkbox" value="algebra" /> Algebra</label>
+                  <label class="stl-checkbox"><input type="checkbox" value="geometry" /> Geometry</label>
+                </div>
+                <p class="stl-hint">Leave all unchecked for "any type". Multiple is fine — AI will mix.</p>
+              </fieldset>
+
+              <label class="stl-field">
+                <span class="stl-label">Topic focus (optional)</span>
+                <select id="add-gen-topic" class="stl-admin__select">
+                  <option value="">All topics</option>
+                </select>
+                <span class="stl-hint">Restrict to one existing topic, or leave on "All topics".</span>
+              </label>
+
+              <label class="stl-field">
+                <span class="stl-label">Extra instructions (optional)</span>
+                <textarea id="add-gen-notes" class="stl-admin__input stl-admin__textarea" rows="2" placeholder="e.g. focus on percent-change problems, avoid coordinate geometry, all answers must be integers"></textarea>
+              </label>
+
+              <div class="stl-add-image__status" id="add-gen-status" hidden>
+                <span class="stl-add-image__spinner" aria-hidden="true"></span>
+                <span id="add-gen-status-text">Asking AI to draft questions…</span>
+              </div>
+
+              <footer class="stl-admin-modal__actions">
+                <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+                <button type="submit" class="stl-btn stl-btn--primary" id="btn-add-gen-go">Generate</button>
+              </footer>
+            </form>
+
+            <!-- Preview shows after a successful generation; user reviews + saves -->
+            <div class="stl-add-gen__preview" id="add-gen-preview" hidden>
+              <div class="stl-add-gen__preview-head">
+                <p class="stl-eyebrow"><span id="add-gen-preview-count">0</span> drafted · <span id="add-gen-preview-skipped">0</span> skipped (validation)</p>
+                <button type="button" class="stl-link" id="add-gen-back-to-form">Generate again</button>
+              </div>
+              <div class="stl-add-gen__list" id="add-gen-list"></div>
+              <footer class="stl-admin-modal__actions">
+                <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="add">Cancel</button>
+                <button type="button" class="stl-btn stl-btn--primary" id="btn-add-gen-save" disabled>Save selected</button>
+              </footer>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast for transient confirmations ("Link copied", etc.) -->
+    <div class="stl-toast" id="stl-toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Bank load: Supabase-backed.
+         bank-loader.js fetches /api/questions, populates the
+         window.STL_QUESTIONS_* + window.STL_IMPORTS + test-config
+         globals, then appends app.js. Replaces the 53 static
+         <script src="questions-*.js"> tags that lived here before
+         the Supabase migration (2026-05-25). The old files remain
+         on disk for one release in case we need to revert. -->
+    <script src="./test-icons.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./bank-loader.js?v=2026-05-25-supabase-boot"></script>
+  </body>
+</html>

@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="SAT practice with a green/yellow/red confidence signal — surface the topics you guessed right on, not just the ones you got wrong."
+    />
+    <title>SAT Traffic Lights</title>
+    <meta name="theme-color" content="#050509" />
+    <!-- Trailing-slash guard. When this app is served at a subpath (e.g.
+         /droplets/sat-traffic-lights/web), `serve` and many static hosts do
+         NOT auto-redirect to add the trailing slash, so the browser treats
+         `web` as a file and resolves `./app.css` against the parent directory
+         (404). Force the slash so relative paths resolve under any host.
+         Runs synchronously before CSS/JS loads — no FOUC. -->
+    <script>
+      (function () {
+        var p = location.pathname;
+        if (p && !p.endsWith('/') && !/\.[a-z0-9]+$/i.test(p)) {
+          location.replace(p + '/' + location.search + location.hash);
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="./app.css" />
+    <!-- Chart.js for figures whose underlying data is structured (line graphs,
+         scatter plots, bar charts). Loaded as a UMD bundle from jsDelivr;
+         registers a global `Chart`. Themed at boot in app.js. ~25 KB gzipped. -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+      integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      defer></script>
+  </head>
+  <body class="stl-app">
+    <header class="stl-header">
+      <div class="stl-header__brand">
+        <span class="stl-logo" aria-hidden="true">
+          <span class="stl-logo__dot stl-logo__dot--g"></span>
+          <span class="stl-logo__dot stl-logo__dot--y"></span>
+          <span class="stl-logo__dot stl-logo__dot--r"></span>
+        </span>
+        <div class="stl-header__titles">
+          <span class="stl-header__name">SAT Traffic Lights</span>
+        </div>
+      </div>
+      <div class="stl-header__actions">
+        <span class="stl-header__timer" id="quiz-timer" aria-label="Elapsed time" hidden>0:00</span>
+        <button type="button" class="stl-btn stl-btn--ghost" id="btn-history">History</button>
+        <button type="button" class="stl-btn stl-btn--ghost" id="btn-restart" hidden>Restart</button>
+
+        <!-- Auth pill (right-most). Toggles between Sign in (logged out)
+             and a user-email + sign-out (logged in). The role badge
+             shows when the user is an admin. -->
+        <span class="stl-header__auth" id="header-auth" hidden>
+          <button type="button" class="stl-btn stl-btn--ghost" id="btn-sign-in" hidden>Sign in</button>
+          <span class="stl-header__user" id="header-user" hidden>
+            <span class="stl-header__user-email" id="header-user-email"></span>
+            <span class="stl-header__role" id="header-user-role"></span>
+            <button type="button" class="stl-btn stl-btn--ghost stl-header__signout" id="btn-sign-out">Sign out</button>
+          </span>
+        </span>
+      </div>
+    </header>
+
+    <main id="stl-main" class="stl-main">
+      <!-- ============== SCREEN: SCORE ============== -->
+      <section class="stl-screen" data-screen="score">
+        <div class="stl-card stl-card--hero stl-score">
+          <p class="stl-eyebrow">Step 1 of 3</p>
+          <h1 class="stl-h1">What score are you aiming for?</h1>
+          <p class="stl-sub">
+            We tune the question pool to your goal so you spend time on problems that move
+            the needle. Anywhere from 200 to 800.
+          </p>
+
+          <form id="score-form" class="stl-score__form" novalidate>
+            <label class="stl-field">
+              <span class="stl-label">Target score</span>
+              <input
+                id="score-input"
+                type="number"
+                min="200"
+                max="800"
+                step="10"
+                inputmode="numeric"
+                placeholder="650"
+                autocomplete="off"
+                class="stl-input"
+              />
+              <span class="stl-hint" id="score-hint">200–800, in 10-point steps.</span>
+            </label>
+
+            <!-- Tier shortcuts. The score input is still the source of
+                 truth, but tapping a tier fills the input with the top
+                 of that tier's range (500/600/700/800) — the natural
+                 aspirational target — and updates the active state. -->
+            <div class="stl-score__tiers" role="group" aria-label="Score range shortcuts">
+              <button type="button" class="stl-tier" data-tier="easy"   data-score="500" aria-label="Set target to 500 — easy questions only">≤500 · easy</button>
+              <button type="button" class="stl-tier" data-tier="medium" data-score="600" aria-label="Set target to 600 — adds medium questions">501–600 · + medium</button>
+              <button type="button" class="stl-tier" data-tier="hard"   data-score="700" aria-label="Set target to 700 — adds hard questions">601–700 · + hard</button>
+              <button type="button" class="stl-tier" data-tier="insane" data-score="800" aria-label="Set target to 800 — adds insane questions">701–800 · + insane</button>
+            </div>
+
+            <button type="submit" class="stl-btn stl-btn--primary">
+              Start 30-question test
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: QUIZ ============== -->
+      <section class="stl-screen" data-screen="quiz" hidden>
+        <header class="stl-quiz__top">
+          <div class="stl-quiz__meta">
+            <span class="stl-quiz__counter" id="quiz-counter">Question 1 of 30</span>
+            <span class="stl-pill" id="quiz-difficulty">easy</span>
+            <span class="stl-pill" id="quiz-topic">algebra</span>
+          </div>
+          <div class="stl-quiz__progress" aria-hidden="true">
+            <span class="stl-quiz__progress-fill" id="quiz-progress-fill"></span>
+          </div>
+        </header>
+
+        <article class="stl-card stl-card--hero stl-quiz__card">
+          <figure class="stl-quiz__figure" id="quiz-figure" hidden></figure>
+          <p class="stl-quiz__passage" id="quiz-passage" hidden></p>
+          <h2 class="stl-quiz__stem" id="quiz-stem">Loading…</h2>
+
+          <fieldset class="stl-quiz__choices" id="quiz-choices">
+            <legend class="sr-only">Choices</legend>
+          </fieldset>
+
+          <div class="stl-choice-grid" id="quiz-choice-grid" hidden></div>
+
+          <div class="stl-quiz__gridin" id="quiz-gridin" hidden>
+            <label class="stl-quiz__gridin-label" for="quiz-gridin-input">Your answer</label>
+            <input
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              class="stl-quiz__gridin-input"
+              id="quiz-gridin-input"
+              placeholder="Type a number, fraction, or decimal"
+            />
+            <p class="stl-quiz__gridin-hint">Press Enter to lock it in, or use the signal buttons below.</p>
+          </div>
+        </article>
+
+        <footer class="stl-quiz__signal">
+          <p class="stl-quiz__signal-help">
+            How sure are you? Pick one — that locks in your answer and moves on.
+          </p>
+          <div class="stl-signal" role="group" aria-label="Confidence">
+            <button type="button" class="stl-signal__btn stl-signal__btn--green" data-signal="green">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Green</span>
+              <span class="stl-signal__sub">I understood it</span>
+            </button>
+            <button type="button" class="stl-signal__btn stl-signal__btn--yellow" data-signal="yellow">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Yellow</span>
+              <span class="stl-signal__sub">Educated guess</span>
+            </button>
+            <button type="button" class="stl-signal__btn stl-signal__btn--red" data-signal="red">
+              <span class="stl-signal__chip"></span>
+              <span class="stl-signal__lbl">Red</span>
+              <span class="stl-signal__sub">No idea</span>
+            </button>
+          </div>
+          <button type="button" class="stl-skip" id="btn-skip-question">
+            Skip this question
+          </button>
+        </footer>
+      </section>
+
+      <!-- ============== SCREEN: RESULTS ============== -->
+      <section class="stl-screen" data-screen="results" hidden>
+        <div class="stl-card stl-card--hero stl-results">
+          <!-- Banner shown only when ?a= loaded a friend's attempt. -->
+          <aside class="stl-shared-banner" id="shared-banner" hidden>
+            <span class="stl-shared-banner__dot" aria-hidden="true"></span>
+            <span class="stl-shared-banner__text">You're viewing a shared attempt.</span>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-shared-take">Take this test yourself</button>
+          </aside>
+          <p class="stl-eyebrow">Results</p>
+          <h2 class="stl-h1" id="results-headline">Nice work.</h2>
+          <p class="stl-sub" id="results-sub">Here's the breakdown.</p>
+
+          <p class="stl-results__meta" aria-label="Test pacing">
+            <span class="stl-results__meta-dot" aria-hidden="true"></span>
+            <span class="stl-results__meta-num" id="stat-total-time">0:00</span>
+            <span class="stl-results__meta-lbl">total</span>
+            <span class="stl-results__meta-sep" aria-hidden="true">·</span>
+            <span class="stl-results__meta-num" id="stat-avg-time">0s</span>
+            <span class="stl-results__meta-lbl">per question</span>
+          </p>
+
+          <div class="stl-results__grid">
+            <button type="button" class="stl-stat stl-stat--featured stl-stat--mastery" data-bucket="trueMastery" id="stat-card-true-mastery">
+              <span class="stl-stat__num" id="stat-true-mastery">0</span>
+              <span class="stl-stat__lbl">True mastery <small>green + correct</small></span>
+            </button>
+            <button type="button" class="stl-stat stl-stat--correct" data-bucket="correct" id="stat-card-correct">
+              <span class="stl-stat__num" id="stat-correct">0</span>
+              <span class="stl-stat__lbl">Correct</span>
+            </button>
+            <button type="button" class="stl-stat stl-stat--lucky" data-bucket="lucky" id="stat-card-lucky">
+              <span class="stl-stat__num" id="stat-lucky">0</span>
+              <span class="stl-stat__lbl">Lucky <small>correct, not green</small></span>
+            </button>
+            <button type="button" class="stl-stat stl-stat--review" data-bucket="toReview" id="stat-card-review">
+              <span class="stl-stat__num" id="stat-review">0</span>
+              <span class="stl-stat__lbl">To review</span>
+            </button>
+          </div>
+
+          <!-- Three-tier action layout. The walk-through is the hero CTA.
+               Below it, two labeled groups split share/export from
+               start-another-test so users see intent before reading
+               labels. Each group's row wraps to 1-col on narrow phones.
+            -->
+          <div class="stl-results__actions">
+            <button type="button" class="stl-btn stl-btn--primary stl-btn--hero" id="btn-start-review">
+              Walk through review <span class="stl-btn__count" id="review-count-pill" aria-hidden="true"></span>
+            </button>
+
+            <section class="stl-results__group" aria-labelledby="grp-share-label">
+              <p class="stl-results__group-label" id="grp-share-label">Share this attempt</p>
+              <div class="stl-results__group-row">
+                <button type="button" class="stl-btn" id="btn-share-score">
+                  <span class="stl-btn__icon" aria-hidden="true">↑</span>
+                  Share image
+                </button>
+                <button type="button" class="stl-btn" id="btn-copy-link">
+                  Copy link
+                </button>
+                <button type="button" class="stl-btn" id="btn-save-trouble">
+                  Save PDF
+                </button>
+              </div>
+            </section>
+
+            <section class="stl-results__group" aria-labelledby="grp-next-label">
+              <p class="stl-results__group-label" id="grp-next-label">Take another</p>
+              <div class="stl-results__group-row">
+                <button type="button" class="stl-btn" id="btn-results-tailored">
+                  Custom tailored
+                </button>
+                <button type="button" class="stl-btn" id="btn-results-fresh">
+                  New regular
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: REVIEW ============== -->
+      <section class="stl-screen" data-screen="review" hidden>
+        <header class="stl-quiz__top">
+          <div class="stl-quiz__meta">
+            <span class="stl-quiz__counter" id="review-counter">Review 1 of 1</span>
+            <span class="stl-pill" id="review-result">missed</span>
+            <span class="stl-pill" id="review-topic">topic</span>
+          </div>
+        </header>
+
+        <article class="stl-card stl-card--hero stl-quiz__card">
+          <figure class="stl-quiz__figure" id="review-figure" hidden></figure>
+          <p class="stl-quiz__passage" id="review-passage" hidden></p>
+          <h2 class="stl-quiz__stem" id="review-stem"></h2>
+          <ul class="stl-review__choices" id="review-choices"></ul>
+          <div class="stl-choice-grid" id="review-choice-grid" hidden></div>
+          <div class="stl-review__explain">
+            <p class="stl-eyebrow">Explanation</p>
+            <p id="review-explanation"></p>
+          </div>
+        </article>
+
+        <footer class="stl-review__nav">
+          <button type="button" class="stl-btn stl-btn--ghost" id="btn-review-prev">Previous</button>
+          <button type="button" class="stl-btn stl-btn--primary" id="btn-review-next">Next</button>
+        </footer>
+      </section>
+
+      <!-- ============== SCREEN: REGEN ============== -->
+      <section class="stl-screen" data-screen="regen" hidden>
+        <div class="stl-card stl-card--hero stl-results">
+          <p class="stl-eyebrow">What's next</p>
+          <h2 class="stl-h1">Pick your next round</h2>
+          <p class="stl-sub" id="regen-sub">
+            Drill the topics you just struggled with, take a fresh randomized test, or
+            start over with a new score.
+          </p>
+          <div class="stl-results__actions">
+            <button type="button" class="stl-btn stl-btn--primary" id="btn-regen-tailored">
+              Custom tailored test
+            </button>
+            <button type="button" class="stl-btn" id="btn-regen-fresh">
+              New regular test
+            </button>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-regen-no">
+              Start over with a new score
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: HISTORY ============== -->
+      <section class="stl-screen" data-screen="history" hidden>
+        <div class="stl-card stl-card--hero stl-history">
+          <div class="stl-history__head">
+            <p class="stl-eyebrow">History</p>
+            <h2 class="stl-h1">Past attempts</h2>
+            <p class="stl-sub" id="history-sub">Open one to revisit the results and walk through review again.</p>
+          </div>
+
+          <ul class="stl-history__list" id="history-list" aria-live="polite"></ul>
+
+          <div class="stl-history__empty" id="history-empty" hidden>
+            <p class="stl-sub" style="margin: 0;">
+              No saved attempts yet. Take a 30-question test and it'll show up here.
+            </p>
+          </div>
+
+          <footer class="stl-history__footer">
+            <button type="button" class="stl-btn stl-btn--primary" id="btn-history-back">Back to start</button>
+            <span class="stl-history__bulk">
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-history-export">Export all</button>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-history-clear">Clear all</button>
+            </span>
+          </footer>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: LOGIN ============== -->
+      <section class="stl-screen" data-screen="login" hidden>
+        <div class="stl-card stl-card--hero stl-login">
+          <p class="stl-eyebrow">Sign in</p>
+          <h2 class="stl-h1">Welcome back</h2>
+          <p class="stl-sub">Enter your email — we'll send you a magic link.</p>
+
+          <form id="login-form" class="stl-login__form" novalidate>
+            <label class="stl-field">
+              <span class="stl-label">Email</span>
+              <input type="email" id="login-email" class="stl-input" autocomplete="email"
+                     placeholder="you@example.com" required />
+              <span class="stl-hint" id="login-hint">We never share or sell your email.</span>
+            </label>
+            <button type="submit" class="stl-btn stl-btn--primary stl-btn--hero" id="btn-login-submit">
+              Send magic link
+            </button>
+          </form>
+
+          <!-- Sent-state confirmation. In demo mode the magic link is
+               shown right here (no email is sent). -->
+          <div class="stl-login__sent" id="login-sent" hidden>
+            <p class="stl-eyebrow">Link sent</p>
+            <h3 class="stl-login__sent-h">Check your inbox</h3>
+            <p class="stl-sub" id="login-sent-sub">We sent a link to your email. It expires in 15 minutes.</p>
+            <div class="stl-login__demo" id="login-demo" hidden>
+              <p class="stl-eyebrow" style="color: var(--stl-yellow-text);">Demo mode</p>
+              <p class="stl-sub" style="margin-bottom: var(--s-3);">No backend yet, so no email was sent. Click below to log in:</p>
+              <a href="#" class="stl-btn stl-btn--primary" id="login-demo-link">Open the magic link</a>
+            </div>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-login-back">Use a different email</button>
+          </div>
+
+          <p class="stl-login__mode" id="login-mode-tag"></p>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: 401 / not-authorized ============== -->
+      <section class="stl-screen" data-screen="forbidden" hidden>
+        <div class="stl-card stl-card--hero">
+          <p class="stl-eyebrow">Admin only</p>
+          <h2 class="stl-h1">You don't have access to this page.</h2>
+          <p class="stl-sub" id="forbidden-sub">This area is restricted to administrators. Sign in with an admin email to continue.</p>
+          <div class="stl-results__actions" style="gap: var(--s-2);">
+            <button type="button" class="stl-btn stl-btn--primary stl-btn--hero" id="btn-forbidden-signin">Sign in</button>
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-forbidden-back">Back to start</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SCREEN: ADMIN ==============
+           Wider than the rest of the app (see .stl-main:has([data-screen=admin]…)).
+           Layout: header → KPI strip → filter bar → sticky-header table → footer.
+           Role-gated: only users with role==='admin' can render this screen.
+        -->
+      <section class="stl-screen stl-screen--admin" data-screen="admin" hidden>
+        <header class="stl-admin__page-head">
+          <div class="stl-admin__page-titles">
+            <p class="stl-eyebrow">Admin · Questions</p>
+            <h2 class="stl-admin__h1">Questions database</h2>
+          </div>
+          <div class="stl-admin__page-actions">
+            <button type="button" class="stl-btn stl-btn--ghost" id="btn-admin-back">Back to start</button>
+          </div>
+        </header>
+
+        <!-- KPI strip — top-line counts at a glance -->
+        <div class="stl-admin__kpis" role="group" aria-label="Database summary">
+          <div class="stl-admin__kpi" data-kind="total">
+            <p class="stl-admin__kpi-lbl">Total</p>
+            <p class="stl-admin__kpi-num" id="kpi-total">—</p>
+          </div>
+          <div class="stl-admin__kpi" data-kind="live">
+            <p class="stl-admin__kpi-lbl">Live</p>
+            <p class="stl-admin__kpi-num" id="kpi-live">—</p>
+          </div>
+          <div class="stl-admin__kpi" data-kind="needs-review">
+            <p class="stl-admin__kpi-lbl">Needs review</p>
+            <p class="stl-admin__kpi-num" id="kpi-review">—</p>
+          </div>
+          <div class="stl-admin__kpi" data-kind="unpublished">
+            <p class="stl-admin__kpi-lbl">Unpublished</p>
+            <p class="stl-admin__kpi-num" id="kpi-unpublished">—</p>
+          </div>
+          <div class="stl-admin__kpi" data-kind="ai">
+            <p class="stl-admin__kpi-lbl">AI-generated</p>
+            <p class="stl-admin__kpi-num" id="kpi-ai">—</p>
+          </div>
+          <div class="stl-admin__kpi" data-kind="human">
+            <p class="stl-admin__kpi-lbl">Human-curated</p>
+            <p class="stl-admin__kpi-num" id="kpi-human">—</p>
+          </div>
+        </div>
+
+        <div class="stl-admin__panel">
+          <!-- Filter bar — wider columns, search spans the row -->
+          <div class="stl-admin__filters" role="group" aria-label="Filter questions">
+            <label class="stl-admin__field stl-admin__field--search">
+              <span class="stl-admin__field-lbl">Search</span>
+              <input type="search" id="admin-search" class="stl-admin__input" placeholder="ID, stem, or topic…" autocomplete="off" />
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">State</span>
+              <select id="admin-filter-state" class="stl-admin__select">
+                <option value="all">All states</option>
+                <option value="live">Live</option>
+                <option value="unpublished">Unpublished</option>
+                <option value="needs-review">Needs review</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">Source</span>
+              <select id="admin-filter-source" class="stl-admin__select">
+                <option value="all">All sources</option>
+                <option value="human-curated">Human-curated</option>
+                <option value="ai-generated">AI-generated</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">Difficulty</span>
+              <select id="admin-filter-difficulty" class="stl-admin__select">
+                <option value="all">All</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="insane">Insane</option>
+              </select>
+            </label>
+            <label class="stl-admin__field">
+              <span class="stl-admin__field-lbl">Topic</span>
+              <select id="admin-filter-topic" class="stl-admin__select">
+                <option value="all">All topics</option>
+              </select>
+            </label>
+            <div class="stl-admin__field stl-admin__field--actions">
+              <span class="stl-admin__field-lbl">&nbsp;</span>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-admin-clear-filters">Reset</button>
+            </div>
+          </div>
+
+          <p class="stl-admin__filter-summary" id="admin-summary">Loading…</p>
+
+          <div class="stl-admin__table-wrap">
+            <table class="stl-admin__table" id="admin-table">
+              <thead>
+                <tr>
+                  <th class="stl-admin__th-id">Question</th>
+                  <th>State</th>
+                  <th>Source</th>
+                  <th>Topic</th>
+                  <th>Diff</th>
+                  <th class="stl-admin__th-stats">Signal stats</th>
+                  <th class="stl-admin__th-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-tbody"></tbody>
+            </table>
+            <p class="stl-admin__empty" id="admin-empty" hidden>No questions match your filters.</p>
+          </div>
+
+          <footer class="stl-admin__footer">
+            <span class="stl-admin__hint">Tip · ⌘/Ctrl+click a row's ID to copy it.</span>
+          </footer>
+        </div>
+      </section>
+
+      <!-- ============== EDIT MODAL ==============
+           Drawer-style overlay for editing a question's content. Writes
+           land in stl_question_overrides via updateOverrides(). -->
+      <div class="stl-admin-modal" id="admin-modal" hidden role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+        <div class="stl-admin-modal__backdrop" data-modal-close="1"></div>
+        <div class="stl-admin-modal__panel" role="document">
+          <header class="stl-admin-modal__head">
+            <p class="stl-eyebrow">Edit question</p>
+            <h3 class="stl-admin-modal__title" id="admin-modal-title">q-—</h3>
+            <button type="button" class="stl-admin-modal__close" data-modal-close="1" aria-label="Close">×</button>
+          </header>
+
+          <form id="admin-edit-form" class="stl-admin-modal__form" novalidate>
+            <label class="stl-field">
+              <span class="stl-label">Stem</span>
+              <textarea id="edit-stem" class="stl-admin__input stl-admin__textarea" rows="3"></textarea>
+            </label>
+
+            <fieldset class="stl-admin__field-group" id="edit-choices-fs">
+              <legend class="stl-label">Choices</legend>
+              <p class="stl-hint" id="edit-choices-hint">Multiple choice: edit each option. Grid-in: leave choices blank and put the answer in the field below.</p>
+              <div id="edit-choices-list"></div>
+            </fieldset>
+
+            <div class="stl-admin__row-2">
+              <label class="stl-field">
+                <span class="stl-label">Answer</span>
+                <input type="text" id="edit-answer" class="stl-admin__input" autocomplete="off" />
+                <span class="stl-hint">MC: index 0–3. Grid-in: typed answer string.</span>
+              </label>
+              <label class="stl-field">
+                <span class="stl-label">Topic</span>
+                <input type="text" id="edit-topic" class="stl-admin__input" autocomplete="off" />
+              </label>
+            </div>
+
+            <div class="stl-admin__row-2">
+              <label class="stl-field">
+                <span class="stl-label">Difficulty</span>
+                <select id="edit-difficulty" class="stl-admin__select">
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                  <option value="insane">Insane</option>
+                </select>
+              </label>
+              <label class="stl-field">
+                <span class="stl-label">State</span>
+                <select id="edit-state" class="stl-admin__select">
+                  <option value="live">Live</option>
+                  <option value="unpublished">Unpublished</option>
+                  <option value="needs-review">Needs review</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="stl-field">
+              <span class="stl-label">Explanation</span>
+              <textarea id="edit-explanation" class="stl-admin__input stl-admin__textarea" rows="3"></textarea>
+            </label>
+
+            <div class="stl-admin-modal__meta" id="edit-meta"></div>
+
+            <footer class="stl-admin-modal__actions">
+              <button type="button" class="stl-btn stl-btn--ghost" data-modal-close="1">Cancel</button>
+              <button type="button" class="stl-btn stl-btn--ghost" id="btn-edit-revert">Revert overrides</button>
+              <button type="submit" class="stl-btn stl-btn--primary" id="btn-edit-save">Save changes</button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast for transient confirmations ("Link copied", etc.) -->
+    <div class="stl-toast" id="stl-toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Two-bank load. questions.js is the human-curated bank;
+         questions-generated.js is the AI-generated bank. app.js merges
+         them into the single STL_QUESTIONS array consumed by the rest
+         of the runtime. auth.js is the auth client (demo + prod modes). -->
+    <script src="./questions.js"></script>
+    <script src="./questions-generated.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

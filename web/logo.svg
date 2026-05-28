@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 90" role="img" aria-label="studysignal">
+  <!-- Wordmark: textLength locks rendered width so the dots' x-positions are stable
+       across browsers regardless of Geist font loading state. currentColor lets the
+       host page set the text color via CSS. -->
+  <text x="18" y="62"
+        font-family='"Geist", -apple-system, system-ui, sans-serif'
+        font-weight="600" font-size="56" letter-spacing="-0.025em"
+        textLength="276" lengthAdjust="spacingAndGlyphs"
+        fill="currentColor">studysignal</text>
+  <!-- Three signal dots — visual center at y=44 (lifted 4px from x-height midline
+       to optically align with the wordmark's mass center given mixed asc/desc letters). -->
+  <circle cx="326" cy="44" r="11" fill="#fb7185"/>
+  <circle cx="358" cy="44" r="11" fill="#facc15"/>
+  <circle cx="390" cy="44" r="11" fill="#4ade80"/>
+</svg>

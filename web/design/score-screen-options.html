@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Score-screen redesign options · Study Signal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <style>
+    :root {
+      --bg-deep: #050509;
+      --bg: #0a0b12;
+      --surface: #0e1018;
+      --surface-2: #14171f;
+      --surface-3: #1c1f2c;
+      --hairline: #1c1f2c;
+      --hairline-hi: #262a39;
+      --text: #ecedef;
+      --text-muted: #a8b0c4;
+      --text-subtle: #6b7288;
+      --text-faint: #494f60;
+      --accent: #8b86ff;
+      --accent-2: #5d8dff;
+      --accent-soft: rgba(139, 134, 255, 0.12);
+      --accent-line: rgba(139, 134, 255, 0.4);
+      --green: #4ade80;
+      --yellow: #facc15;
+      --red: #fb7185;
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 16px;
+      --r-pill: 999px;
+      --s-1: 4px;
+      --s-2: 8px;
+      --s-3: 12px;
+      --s-4: 16px;
+      --s-5: 24px;
+      --s-6: 32px;
+      --s-7: 48px;
+      --font-body: "Geist", -apple-system, system-ui, sans-serif;
+      --font-display: "Space Grotesk", "Geist", system-ui, sans-serif;
+      --font-mono: "Geist Mono", ui-monospace, SF Mono, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100dvh;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page-head {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px 24px;
+    }
+    .page-head h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+    .page-head p {
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(540px, 1fr));
+      gap: 32px;
+      max-width: 1400px;
+      margin: 32px auto 96px;
+      padding: 0 24px;
+    }
+    .opt {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    .opt__head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--surface-2);
+    }
+    .opt__tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      margin-bottom: 4px;
+    }
+    .opt__name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .opt__notes {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 8px 0 0;
+    }
+    .opt__body {
+      padding: 24px;
+      background: linear-gradient(180deg, transparent, rgba(139, 134, 255, 0.025));
+    }
+
+    /* ========= Shared mockup primitives ========= */
+    .m-card {
+      background: var(--bg);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      position: relative;
+    }
+    .m-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .m-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--text-subtle);
+      margin: 0 0 12px;
+    }
+    .m-eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(139, 134, 255, 0.55);
+    }
+    .m-h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+      line-height: 1.15;
+    }
+    .m-h1 .grad {
+      background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .m-sub {
+      color: var(--text-muted);
+      margin: 0 0 20px;
+      font-size: 13.5px;
+    }
+    .m-label {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .m-cta {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--r-md);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: linear-gradient(140deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: var(--bg);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.005em;
+    }
+    .m-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px 7px 11px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--hairline);
+      background: var(--surface);
+      color: var(--text-subtle);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .m-pill.is-on {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+    .m-pill svg { width: 14px; height: 14px; }
+    .m-pill.is-on svg { color: var(--accent); filter: drop-shadow(0 0 4px rgba(139, 134, 255, 0.45)); }
+    .m-tier {
+      padding: 12px 14px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--hairline);
+      background: var(--surface);
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      color: var(--text-muted);
+    }
+    .m-tier .name {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .m-tier .range {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-subtle);
+      margin-top: 2px;
+    }
+    .m-tier.is-active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+    .m-input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg-deep);
+      border: 1px solid var(--hairline-hi);
+      border-radius: var(--r-md);
+    }
+    .m-switch {
+      display: inline-flex; align-items: center; gap: 10px;
+      font: inherit; color: var(--text);
+      cursor: pointer;
+      padding: 4px 10px 4px 4px;
+      border-radius: var(--r-pill);
+      background: transparent; border: 0;
+    }
+    .m-switch__track {
+      position: relative;
+      width: 38px; height: 22px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--hairline);
+    }
+    .m-switch__thumb {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+    .m-switch.is-on .m-switch__track {
+      background: rgba(139, 134, 255, 0.25);
+      border-color: rgba(139, 134, 255, 0.6);
+    }
+    .m-switch.is-on .m-switch__thumb {
+      background: var(--accent);
+      transform: translateX(16px);
+    }
+    .m-switch__lbl {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+    .m-hint { font-size: 12px; color: var(--text-subtle); margin: 4px 0 0; }
+    .m-link {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      cursor: pointer;
+      background: none; border: 0; padding: 0;
+    }
+
+    /* ========= Option A: Compact ========= */
+    .a-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .a-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .a-segmented {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--surface-2);
+      border-radius: var(--r-md);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+    .a-seg {
+      padding: 10px;
+      text-align: center;
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font: inherit;
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+    .a-seg.is-on {
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+    .a-seg .num {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-subtle);
+      margin-top: 2px;
+    }
+    .a-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); margin-bottom: 16px; }
+    .a-score { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+    .a-score-input { width: 120px; padding: 10px 12px; font-size: 1.1rem; font-family: var(--font-mono); background: var(--bg-deep); border: 1px solid var(--hairline-hi); border-radius: var(--r-sm); color: var(--text); text-align: right; }
+
+    /* ========= Option B: Two-Column ========= */
+    .b-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+    .b-col {
+      padding: 16px;
+      background: var(--surface-2);
+      border-radius: var(--r-md);
+      border: 1px solid var(--hairline);
+    }
+    .b-col__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    .b-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .b-tiers { display: grid; gap: 6px; }
+    .b-tier {
+      padding: 10px 12px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--hairline);
+      background: var(--bg);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      color: var(--text-muted);
+    }
+    .b-tier.is-active { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+    .b-tier .range { font-family: var(--font-mono); font-size: 11px; color: var(--text-subtle); }
+    .b-bottom { display: flex; align-items: center; justify-content: space-between; padding: 14px 0 18px; border-top: 1px solid var(--hairline); margin-bottom: 12px; gap: 16px; }
+    .b-score-input { width: 120px; padding: 8px 10px; font-size: 0.95rem; font-family: var(--font-mono); background: var(--bg-deep); border: 1px solid var(--hairline-hi); border-radius: var(--r-sm); color: var(--text); text-align: right; }
+
+    /* ========= Option C: Slider-driven ========= */
+    .c-slider-wrap { padding: 32px 0 16px; margin-bottom: 16px; }
+    .c-score {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .c-score-num {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .c-tier-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: var(--r-pill);
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent-line);
+    }
+    .c-slider {
+      position: relative;
+      height: 6px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      margin: 24px 0 12px;
+    }
+    .c-slider-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 65%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 999px;
+    }
+    .c-slider-thumb {
+      position: absolute;
+      left: 65%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 6px rgba(139, 134, 255, 0.18);
+    }
+    .c-ticks { display: flex; justify-content: space-between; padding: 0 0 4px; font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); }
+    .c-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; margin-bottom: 18px; }
+    .c-toggle-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 8px 0; }
+
+    /* ========= Option D: Wizard ========= */
+    .d-stepper { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+    .d-step { display: flex; align-items: center; gap: 8px; }
+    .d-step__dot {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: var(--font-mono); font-size: 11px;
+      background: var(--surface-2); color: var(--text-subtle);
+      border: 1px solid var(--hairline);
+    }
+    .d-step.is-active .d-step__dot {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(139, 134, 255, 0.4);
+    }
+    .d-step.is-done .d-step__dot {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--green);
+      border-color: rgba(74, 222, 128, 0.4);
+    }
+    .d-step__lbl {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .d-step.is-active .d-step__lbl { color: var(--text); }
+    .d-step__sep { color: var(--hairline-hi); font-size: 12px; }
+    .d-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .d-prompt { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 8px; }
+    .d-prompt-sub { color: var(--text-muted); font-size: 13.5px; margin: 0 0 20px; }
+    .d-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .d-actions .m-cta { flex: 2; }
+    .d-back-btn { flex: 1; background: transparent; border: 1px solid var(--hairline-hi); color: var(--text-muted); font: inherit; font-weight: 500; border-radius: var(--r-md); cursor: pointer; }
+
+    /* ========= Option E: Conversational ========= */
+    .e-sentence {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.4vw, 1.8rem);
+      font-weight: 500;
+      line-height: 1.55;
+      letter-spacing: -0.015em;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    .e-token {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      margin: 0 2px;
+      border-radius: var(--r-pill);
+      border: 1px dashed var(--accent-line);
+      background: var(--accent-soft);
+      color: var(--text);
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95em;
+      cursor: pointer;
+      vertical-align: baseline;
+    }
+    .e-token::after { content: "▾"; font-size: 0.7em; color: var(--accent); margin-left: 2px; }
+    .e-token--score { border-style: solid; }
+    .e-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--hairline); }
+    .e-row:first-of-type { border-top: 0; }
+    .e-row__lbl { display: flex; flex-direction: column; gap: 2px; }
+    .e-row__lbl strong { font-size: 14px; color: var(--text); font-weight: 500; }
+    .e-row__lbl small { font-size: 11.5px; color: var(--text-subtle); font-family: var(--font-mono); }
+    .e-summary { padding: 14px 16px; border: 1px dashed var(--hairline-hi); border-radius: var(--r-md); background: var(--surface); margin-top: 18px; margin-bottom: 16px; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .e-summary strong { color: var(--text); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* Comparison table at bottom */
+    .compare {
+      max-width: 1400px;
+      margin: 64px auto 96px;
+      padding: 0 24px;
+    }
+    .compare h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; margin: 0 0 16px; }
+    .compare table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+    }
+    .compare th, .compare td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 13px;
+      vertical-align: top;
+    }
+    .compare th {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      background: var(--surface-2);
+      font-weight: 500;
+    }
+    .compare tr:last-child td { border-bottom: 0; }
+    .compare td:first-child { font-weight: 600; color: var(--text); width: 18%; }
+    .compare td:nth-child(2) { color: var(--text-muted); width: 22%; }
+    .compare td:nth-child(3) { color: var(--text-muted); width: 30%; }
+    .compare td:nth-child(4) { color: var(--text-muted); width: 30%; }
+  </style>
+</head>
+<body>
+
+  <header class="page-head">
+    <h1>Score-screen redesign · 5 options</h1>
+    <p>Same content (subjects + difficulty + target score + start), five different ways to compose it. Mockups are static — no JS, just look-and-feel. Each option uses the same visual language as the live app so we're comparing structure, not styling.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- ============== Option A: Compact ============== -->
+    <section class="opt">
+      <header class="opt__head">
+        <span class="opt__tag">Option A</span>
+        <h2 class="opt__name">Compact — segmented difficulty</h2>
+        <p class="opt__notes">Same vertical order as today, but tighter. The four difficulty tiles collapse to a single segmented control (iOS-style), halving the difficulty surface. Target score is a small inline number, not a full input row.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="a-row"><span class="m-label">Subjects</span><button class="m-link">None</button></div>
+          <div class="a-pills">
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+          </div>
+
+          <div class="a-row"><span class="m-label">Difficulty</span></div>
+          <div class="a-segmented">
+            <button class="a-seg is-on">Easy <span class="num">≤500</span></button>
+            <button class="a-seg">Medium <span class="num">510–600</span></button>
+            <button class="a-seg">Hard <span class="num">610–700</span></button>
+            <button class="a-seg">Insane <span class="num">710–800</span></button>
+          </div>
+
+          <div class="a-toggle-row">
+            <button class="m-switch is-on">
+              <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+              <span class="m-switch__lbl">Mix in lower tiers</span>
+            </button>
+            <span class="m-hint" style="margin: 0;">Easy + Medium</span>
+          </div>
+
+          <div class="a-score">
+            <span class="m-label">Target</span>
+            <input type="number" class="a-score-input" value="500" />
+            <span class="m-hint" style="margin: 0;">200–800</span>
+          </div>
+
+          <button class="m-cta">Start 30-question test →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option B: Two-column ============== -->
+    <section class="opt">
+      <header class="opt__head">
+        <span class="opt__tag">Option B</span>
+        <h2 class="opt__name">Two-column — Subjects ‖ Difficulty</h2>
+        <p class="opt__notes">The two decisions sit side by side as labeled boxes — the user can compare/edit either without scrolling. Tier list stacks vertically inside its column for a cleaner read. Score input + toggle move to a single shared bottom row.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="b-grid">
+            <div class="b-col">
+              <div class="b-col__head"><span class="m-label">Subjects</span><button class="m-link">None</button></div>
+              <div class="b-pills">
+                <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+                <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+              </div>
+            </div>
+
+            <div class="b-col">
+              <div class="b-col__head"><span class="m-label">Difficulty</span></div>
+              <div class="b-tiers">
+                <button class="b-tier is-active"><span>Easy</span><span class="range">≤500</span></button>
+                <button class="b-tier"><span>Medium</span><span class="range">510–600</span></button>
+                <button class="b-tier"><span>Hard</span><span class="range">610–700</span></button>
+                <button class="b-tier"><span>Insane</span><span class="range">710–800</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="b-bottom">
+            <button class="m-switch is-on">
+              <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+              <span class="m-switch__lbl">Include lower tiers</span>
+            </button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="m-label">Target</span>
+              <input type="number" class="b-score-input" value="500" />
+            </div>
+          </div>
+
+          <button class="m-cta">Start 30-question test →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option C: Slider-driven ============== -->
+    <section class="opt">
+      <header class="opt__head">
+        <span class="opt__tag">Option C</span>
+        <h2 class="opt__name">Score-first — slider drives difficulty</h2>
+        <p class="opt__notes">Lead with the goal. A slider controls target score; the difficulty tier is implicit (computed from the slider position) and shown as a live tag. Subjects drop below as a quick chip row. One control replaces tiles + input + toggle.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">Drag the slider to your target score — we'll pick the matching difficulty automatically.</p>
+
+          <div class="c-slider-wrap">
+            <div class="c-score">
+              <span class="c-score-num">630</span>
+              <span class="c-tier-label">Hard tier</span>
+            </div>
+            <div class="c-slider">
+              <div class="c-slider-fill"></div>
+              <div class="c-slider-thumb"></div>
+            </div>
+            <div class="c-ticks">
+              <span>200</span><span>500 · easy</span><span>600 · medium</span><span>700 · hard</span><span>800</span>
+            </div>
+          </div>
+
+          <div class="c-toggle-line">
+            <button class="m-switch is-on">
+              <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+              <span class="m-switch__lbl">Include easier questions</span>
+            </button>
+            <span class="m-hint" style="margin: 0;">Currently: easy + medium + hard</span>
+          </div>
+
+          <span class="m-label" style="display: block; margin-bottom: 8px;">Subjects</span>
+          <div class="c-pills">
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+          </div>
+
+          <button class="m-cta">Start 30-question test →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option D: Wizard ============== -->
+    <section class="opt">
+      <header class="opt__head">
+        <span class="opt__tag">Option D</span>
+        <h2 class="opt__name">Wizard — honor the "Step 1 of 3"</h2>
+        <p class="opt__notes">The eyebrow currently says Step 1 of 3 but the screen has all the steps stacked. This option breaks them apart for real: pick subjects, then difficulty, then confirm. Each step is short, focused, and one decision at a time.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+
+          <div class="d-stepper">
+            <div class="d-step is-active"><span class="d-step__dot">1</span><span class="d-step__lbl">Subjects</span></div>
+            <span class="d-step__sep">———</span>
+            <div class="d-step"><span class="d-step__dot">2</span><span class="d-step__lbl">Difficulty</span></div>
+            <span class="d-step__sep">———</span>
+            <div class="d-step"><span class="d-step__dot">3</span><span class="d-step__lbl">Review</span></div>
+          </div>
+
+          <h2 class="d-prompt">Pick your <span class="grad" style="background: linear-gradient(120deg,var(--accent),var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent;">SAT</span> subjects</h2>
+          <p class="d-prompt-sub">Choose the sections you want this run to cover.</p>
+
+          <div class="d-pills">
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+          </div>
+
+          <p class="m-hint">Both subjects selected · 870 questions in pool</p>
+
+          <div class="d-actions">
+            <button class="d-back-btn">Back</button>
+            <button class="m-cta">Next: choose difficulty →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Option E: Conversational ============== -->
+    <section class="opt">
+      <header class="opt__head">
+        <span class="opt__tag">Option E</span>
+        <h2 class="opt__name">Conversational — sentence with editable tokens</h2>
+        <p class="opt__notes">The setup reads as a sentence. Each underlined token opens a small picker (subject pills, tier choice, score number). A summary card below confirms the slice. Reads as intent, not as a form. Best on desktop.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+
+          <p class="e-sentence">
+            I'm studying for the <span class="grad" style="background: linear-gradient(120deg,var(--accent),var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 600;">SAT</span>.
+            Let me practice <span class="e-token">Math, Reading &amp; Writing</span>
+            at <span class="e-token">Hard</span> difficulty,
+            aiming for <span class="e-token e-token--score">630</span>.
+          </p>
+
+          <div class="e-row">
+            <div class="e-row__lbl"><strong>Mix in easier tiers</strong><small>So I see review-level questions too</small></div>
+            <button class="m-switch is-on">
+              <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+            </button>
+          </div>
+
+          <div class="e-summary">
+            <span><strong>Pool</strong> · 30 of 870 questions · easy + medium + hard SAT</span>
+            <span class="m-hint" style="margin: 0;">~25 min</span>
+          </div>
+
+          <button class="m-cta">Start →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== Bonus Option F: Hybrid (current + slider) ============== -->
+    <section class="opt">
+      <header class="opt__head">
+        <span class="opt__tag">Option F · Hybrid</span>
+        <h2 class="opt__name">Hybrid — keep tiles, drop the input</h2>
+        <p class="opt__notes">Closest to the current screen, but removes the redundant Target Score input. The selected tier IS your target — picking Medium auto-sets target to the band's top. Power users who want a precise score click "Set custom" to reveal the input on demand.</p>
+      </header>
+      <div class="opt__body">
+        <div class="m-card">
+          <div class="m-back">‹ Back to test selection</div>
+          <p class="m-eyebrow">Step 1 of 3</p>
+          <h1 class="m-h1">What <span class="grad">SAT</span> questions do you want to study?</h1>
+          <p class="m-sub">We tune the question pool to your goal so you spend time on problems that move the needle.</p>
+
+          <div class="a-row"><span class="m-label">Subjects</span><button class="m-link">None</button></div>
+          <div class="a-pills">
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><circle cx="8" cy="14" r="0.5" fill="currentColor"/><circle cx="12" cy="14" r="0.5" fill="currentColor"/><circle cx="16" cy="14" r="0.5" fill="currentColor"/></svg> Math</button>
+            <button class="m-pill is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7.5 20.5 2 22l1.5-5.5Z"/></svg> Reading &amp; Writing</button>
+          </div>
+
+          <div class="a-row"><span class="m-label">Difficulty</span><button class="m-link">Set custom score</button></div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+            <button class="m-tier"><span class="name">Easy</span><span class="range">≤500</span></button>
+            <button class="m-tier is-active"><span class="name">Medium</span><span class="range">510–600</span></button>
+            <button class="m-tier"><span class="name">Hard</span><span class="range">610–700</span></button>
+            <button class="m-tier"><span class="name">Insane</span><span class="range">710–800</span></button>
+          </div>
+
+          <div class="a-toggle-row">
+            <button class="m-switch is-on">
+              <span class="m-switch__track"><span class="m-switch__thumb"></span></span>
+              <span class="m-switch__lbl">Include lower tiers</span>
+            </button>
+            <span class="m-hint" style="margin: 0;">Easy + Medium</span>
+          </div>
+
+          <button class="m-cta">Start 30-question test →</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <section class="compare">
+    <h2>Tradeoffs at a glance</h2>
+    <table>
+      <thead>
+        <tr><th>Option</th><th>Best for</th><th>Pros</th><th>Cons</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A · Compact</td>
+          <td>Mobile-first; users who already know what they want</td>
+          <td>Halves vertical space. Segmented control reads as one decision. Familiar iOS pattern.</td>
+          <td>Smaller tap targets on the segments. Loses the visual weight of the difficulty tiles.</td>
+        </tr>
+        <tr>
+          <td>B · Two-column</td>
+          <td>Desktop; users who edit decisions independently</td>
+          <td>Both decisions visible at once. Cleaner separation. Bottom row pulls toggle + score together.</td>
+          <td>Falls back to stacked on narrow viewports (could become A's worse cousin). More chrome to render.</td>
+        </tr>
+        <tr>
+          <td>C · Slider-first</td>
+          <td>New users who think in terms of goal scores, not tiers</td>
+          <td>One control replaces three. Live tier label teaches the mapping. Score is the lead, not a footnote.</td>
+          <td>Less precise (sliders are fiddly at 10-point steps). Subjects feel demoted to bottom.</td>
+        </tr>
+        <tr>
+          <td>D · Wizard</td>
+          <td>First-timers; brand-new users who'd freeze at the full form</td>
+          <td>Honors the "Step 1 of 3" copy. Each step is short. Can show pool size + estimate per step.</td>
+          <td>Three clicks to start vs one. Returning users will hate it. Hard to back-edit without unwinding.</td>
+        </tr>
+        <tr>
+          <td>E · Conversational</td>
+          <td>Brand-distinctive; works as a marketing differentiator</td>
+          <td>Reads naturally. Memorable. Summary card answers "what am I about to do?" before clicking start.</td>
+          <td>Token pickers are custom UI to build + maintain. Awkward on phones. Could feel cute-not-functional.</td>
+        </tr>
+        <tr>
+          <td>F · Hybrid</td>
+          <td>Lowest-risk evolution of the current screen</td>
+          <td>Smallest delta from today. Removes the only redundancy (tier vs target). Retains the four-tile grid users have learned.</td>
+          <td>Doesn't address the longer screen issue. Toggle wording still abstract.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</body>
+</html>

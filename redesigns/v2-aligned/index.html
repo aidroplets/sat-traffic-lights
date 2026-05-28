@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050509" />
+    <title>SAT Traffic Lights — aligned / dark</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <style>
+      /* ============================================================
+         v2 — aligned / dark
+         Mirrors homepage v4-refined (the version Joshua picked as
+         primary): Geist + Geist Mono, dark canvas with single
+         calibrated lavender accent, restrained card chrome, real
+         meta. Visually consistent with the shipping site.
+         ============================================================ */
+      :root {
+        --bg-deep: #050509;
+        --bg: #0a0b12;
+        --surf-1: rgba(255, 255, 255, 0.035);
+        --surf-2: rgba(255, 255, 255, 0.055);
+        --surf-3: rgba(255, 255, 255, 0.075);
+        --br: rgba(255, 255, 255, 0.07);
+        --br-strong: rgba(255, 255, 255, 0.12);
+        --txt: #f0f2f7;
+        --txt-2: #a8b0c4;
+        --txt-3: #6b7288;
+        --txt-4: #494f60;
+
+        --accent: #8b86ff;
+        --accent-2: #5d8dff;
+        --accent-soft: rgba(139, 134, 255, 0.12);
+        --accent-line: rgba(139, 134, 255, 0.4);
+
+        --green: #4ade80;
+        --yellow: #facc15;
+        --red: #fb7185;
+
+        --sans: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, SF Mono, monospace;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      html { scrollbar-gutter: stable; }
+      body {
+        background: var(--bg-deep);
+        color: var(--txt);
+        font-family: var(--sans);
+        font-size: 15px;
+        line-height: 1.55;
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100dvh;
+        position: relative;
+        overflow-x: hidden;
+      }
+      a { color: inherit; text-decoration: none; }
+      button { font: inherit; cursor: pointer; }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: -300px; right: -200px;
+        width: 800px; height: 800px;
+        background: radial-gradient(closest-side, rgba(139, 134, 255, 0.16), transparent 70%);
+        filter: blur(40px);
+        pointer-events: none; z-index: 0;
+      }
+      body > * { position: relative; z-index: 1; }
+
+      .wrap { max-width: 760px; margin: 0 auto; padding: 0 28px; }
+
+      /* === nav === */
+      .nav {
+        position: sticky; top: 0; z-index: 50;
+        border-bottom: 1px solid var(--br);
+        background: rgba(10, 11, 18, 0.72);
+        backdrop-filter: saturate(180%) blur(14px);
+        -webkit-backdrop-filter: saturate(180%) blur(14px);
+      }
+      .nav__row {
+        display: flex; align-items: center; justify-content: space-between;
+        height: 60px;
+      }
+      .brand {
+        display: inline-flex; align-items: center; gap: 12px;
+        font-weight: 600; font-size: 14.5px;
+        letter-spacing: -0.02em; color: var(--txt);
+      }
+      .brand__dots {
+        display: inline-flex; gap: 4px;
+        padding: 5px 7px; border-radius: 9999px;
+        background: var(--surf-2);
+        border: 1px solid var(--br);
+      }
+      .brand__dots i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+      .brand__dots i.g { background: var(--green); box-shadow: 0 0 6px rgba(74, 222, 128, 0.5); }
+      .brand__dots i.y { background: var(--yellow); box-shadow: 0 0 6px rgba(250, 204, 21, 0.5); }
+      .brand__dots i.r { background: var(--red);    box-shadow: 0 0 6px rgba(251, 113, 133, 0.5); }
+      .brand__sub {
+        font-family: var(--mono); font-size: 11px;
+        color: var(--txt-3); letter-spacing: 0.04em;
+        margin-left: 4px;
+      }
+      .nav__cta {
+        font-size: 13px; font-weight: 500; color: var(--txt);
+        background: var(--surf-2);
+        border: 1px solid var(--br-strong);
+        padding: 6px 14px; border-radius: 8px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+      .nav__cta:hover { background: rgba(255, 255, 255, 0.08); }
+
+      /* === marker === */
+      .marker {
+        display: flex; align-items: center; gap: 14px;
+        margin: 80px 0 18px;
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--txt-4);
+      }
+      .marker::before, .marker::after {
+        content: ""; flex: 1; height: 1px; background: var(--br);
+      }
+      .marker__num {
+        font-family: var(--mono); font-size: 11px;
+        color: var(--txt-3);
+        background: var(--surf-1);
+        border: 1px solid var(--br);
+        padding: 3px 8px; border-radius: 6px;
+      }
+
+      /* === card === */
+      .card {
+        background: var(--surf-1);
+        border: 1px solid var(--br);
+        border-radius: 14px;
+        padding: 32px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+
+      /* === eyebrow === */
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: var(--mono); font-size: 11px;
+        color: var(--txt-3); letter-spacing: 0.04em;
+        margin: 0 0 18px;
+      }
+      .eyebrow__dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 8px rgba(139, 134, 255, 0.5);
+      }
+      .h1 {
+        font-size: clamp(34px, 5vw, 48px);
+        line-height: 1.05;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        margin: 0 0 18px;
+        max-width: 18ch;
+        color: var(--txt);
+      }
+      .h1__accent {
+        background: linear-gradient(110deg, var(--accent) 0%, var(--accent-2) 100%);
+        -webkit-background-clip: text; background-clip: text;
+        color: transparent;
+      }
+      .lede {
+        font-size: 15.5px; line-height: 1.6;
+        color: var(--txt-2); max-width: 56ch;
+        margin: 0 0 24px;
+      }
+
+      /* === score form === */
+      .score-form { display: grid; gap: 18px; margin-top: 8px; }
+      .field { display: grid; gap: 8px; }
+      .field__lbl {
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--txt-3);
+      }
+      .field__input {
+        width: 100%;
+        padding: 14px 16px;
+        font-family: var(--sans);
+        font-size: 22px; font-weight: 500;
+        color: var(--txt);
+        background: var(--bg);
+        border: 1px solid var(--br-strong);
+        border-radius: 10px;
+        outline: none;
+        font-variant-numeric: tabular-nums;
+      }
+      .field__input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+        background: #0d0e18;
+      }
+      .field__hint { font-size: 13px; color: var(--txt-3); }
+
+      .tiers { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tier {
+        font-family: var(--mono); font-size: 11px;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--txt-3);
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 5px 11px; border-radius: 9999px;
+      }
+      .tier.is-on {
+        color: var(--txt);
+        background: var(--accent-soft);
+        border-color: var(--accent-line);
+      }
+
+      /* === buttons === */
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 13.5px; font-weight: 500;
+        padding: 9px 16px;
+        border-radius: 9px;
+        border: 1px solid var(--br-strong);
+        background: var(--surf-1);
+        color: var(--txt);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+      .btn:hover { background: var(--surf-2); }
+      .btn--primary {
+        background: linear-gradient(140deg, var(--accent) 0%, var(--accent-2) 100%);
+        border-color: rgba(255, 255, 255, 0.16);
+        color: #0a0b12;
+        font-weight: 600;
+      }
+      .btn--primary:hover { filter: brightness(1.08); }
+      .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+      /* === quiz === */
+      .quiz-meta {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .quiz-counter {
+        font-family: var(--mono); font-size: 11px;
+        color: var(--txt-3); letter-spacing: 0.04em;
+      }
+      .pill {
+        font-family: var(--mono); font-size: 10.5px;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--txt-3);
+        padding: 3px 9px;
+        border: 1px solid var(--br);
+        border-radius: 9999px;
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .pill::before {
+        content: ""; width: 5px; height: 5px; border-radius: 50%;
+        background: var(--txt-4);
+      }
+      .pill[data-d="hard"]::before { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+      .pill[data-d="alg"]::before  { background: var(--accent-2); box-shadow: 0 0 6px var(--accent-2); }
+
+      .progress {
+        height: 3px; background: var(--surf-1);
+        border-radius: 9999px; overflow: hidden;
+        margin-bottom: 24px;
+      }
+      .progress__fill {
+        display: block; height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        width: 33%;
+      }
+      .stem {
+        font-size: 19px;
+        line-height: 1.45;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        margin: 0 0 22px;
+        color: var(--txt);
+      }
+      .stem em { font-style: italic; color: var(--accent); }
+
+      .choices {
+        display: grid; gap: 6px;
+        list-style: none; padding: 0; margin: 0 0 28px;
+      }
+      .choice {
+        display: flex; align-items: center; gap: 12px;
+        padding: 11px 14px;
+        border: 1px solid var(--br);
+        border-radius: 10px;
+        background: var(--surf-1);
+        font-size: 14.5px; line-height: 1.4;
+        color: var(--txt);
+      }
+      .choice__letter {
+        flex: 0 0 auto;
+        width: 22px; height: 22px;
+        border-radius: 6px;
+        background: var(--surf-2);
+        border: 1px solid var(--br-strong);
+        display: grid; place-items: center;
+        font-family: var(--mono);
+        font-size: 11px; font-weight: 500;
+        color: var(--txt-3);
+      }
+      .choice.is-on {
+        background: var(--accent-soft);
+        border-color: var(--accent-line);
+      }
+      .choice.is-on .choice__letter {
+        background: var(--accent); color: #0a0b12;
+        border-color: var(--accent);
+      }
+
+      /* === signal === */
+      .signal-help {
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--txt-3);
+        text-align: center;
+        margin: 0 0 12px;
+      }
+      .signal {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+      }
+      .sig-btn {
+        display: grid; gap: 8px;
+        padding: 16px;
+        border: 1px solid var(--br);
+        background: var(--surf-1);
+        border-radius: 12px;
+        text-align: left;
+        color: var(--txt);
+        transition: border-color 200ms ease, background 200ms ease, transform 80ms ease;
+      }
+      .sig-btn:hover { background: var(--surf-2); }
+      .sig-btn:active { transform: translateY(0.5px); }
+      .sig-btn .dot {
+        width: 10px; height: 10px; border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 10px currentColor;
+      }
+      .sig-btn--g { color: var(--green); }
+      .sig-btn--y { color: var(--yellow); }
+      .sig-btn--r { color: var(--red); }
+      .sig-btn--g:hover { border-color: rgba(74, 222, 128, 0.4); }
+      .sig-btn--y:hover { border-color: rgba(250, 204, 21, 0.4); }
+      .sig-btn--r:hover { border-color: rgba(251, 113, 133, 0.4); }
+      .sig-btn .lbl {
+        font-size: 14px; font-weight: 600;
+        letter-spacing: -0.005em;
+        color: var(--txt);
+      }
+      .sig-btn .sub {
+        font-size: 12px; color: var(--txt-3);
+        line-height: 1.35;
+      }
+
+      /* === results === */
+      .stats {
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+        margin: 22px 0;
+      }
+      .stat {
+        padding: 18px;
+        border: 1px solid var(--br);
+        border-radius: 12px;
+        background: var(--surf-1);
+      }
+      .stat--hero {
+        grid-column: span 2;
+        background:
+          linear-gradient(135deg, var(--accent-soft), transparent 60%),
+          var(--surf-2);
+        border-color: var(--accent-line);
+      }
+      .stat__num {
+        font-size: clamp(32px, 5vw, 44px);
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--txt);
+        font-variant-numeric: tabular-nums;
+      }
+      .stat--hero .stat__num span { color: var(--txt-4); }
+      .stat__lbl {
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--txt-3);
+        margin-top: 10px;
+      }
+      .stat__lbl small {
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--txt-4);
+        font-size: 11.5px;
+        font-family: var(--sans);
+      }
+
+      .foot {
+        margin: 80px 0 56px;
+        font-family: var(--mono); font-size: 11px;
+        color: var(--txt-4); letter-spacing: 0.04em;
+        text-align: center;
+      }
+
+      @media (max-width: 640px) {
+        .signal { grid-template-columns: 1fr; }
+        .stats { grid-template-columns: 1fr; }
+        .stat--hero { grid-column: span 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap nav__row">
+        <a class="brand" href="/">
+          <span class="brand__dots" aria-hidden="true"><i class="g"></i><i class="y"></i><i class="r"></i></span>
+          SAT Traffic Lights
+          <span class="brand__sub">aidroplets</span>
+        </a>
+        <a class="nav__cta" href="../../../../homepage/index.html">Homepage ↗</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <!-- ============== 01 · SCORE ============== -->
+      <div class="marker" aria-hidden="true">
+        <span class="marker__num">01</span>
+        <span>Set a target</span>
+      </div>
+      <section class="card">
+        <p class="eyebrow"><span class="eyebrow__dot"></span>Step 1 of 3</p>
+        <h1 class="h1">What score are you <span class="h1__accent">aiming for?</span></h1>
+        <p class="lede">
+          We tune the question pool to your goal so you spend time on problems that
+          move the needle. Anywhere from 200 to 800.
+        </p>
+
+        <form class="score-form" onsubmit="return false">
+          <label class="field">
+            <span class="field__lbl">Target score</span>
+            <input class="field__input" type="number" value="690" />
+            <span class="field__hint">200–800, in 10-point steps.</span>
+          </label>
+
+          <div class="tiers" aria-hidden="true">
+            <span class="tier">≤500 · easy</span>
+            <span class="tier">501–600 · + medium</span>
+            <span class="tier is-on">601–700 · + hard</span>
+            <span class="tier">701–800 · + insane</span>
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn btn--primary">Start 30-question test →</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ============== 02 · QUIZ ============== -->
+      <div class="marker" aria-hidden="true">
+        <span class="marker__num">02</span>
+        <span>Per-question signal</span>
+      </div>
+      <section class="card">
+        <div class="quiz-meta">
+          <span class="quiz-counter">Question 12 of 30</span>
+          <span class="pill" data-d="hard">Hard</span>
+          <span class="pill" data-d="alg">Algebra</span>
+        </div>
+        <div class="progress" aria-hidden="true"><span class="progress__fill"></span></div>
+
+        <h2 class="stem">
+          If 3<em>x</em> + 2 = 5<em>x</em> − 8, what is the value of <em>x</em>?
+        </h2>
+
+        <ul class="choices">
+          <li class="choice"><span class="choice__letter">A</span><span>−5</span></li>
+          <li class="choice"><span class="choice__letter">B</span><span>−3</span></li>
+          <li class="choice is-on"><span class="choice__letter">C</span><span>5</span></li>
+          <li class="choice"><span class="choice__letter">D</span><span>10</span></li>
+        </ul>
+
+        <p class="signal-help">How sure are you?</p>
+        <div class="signal">
+          <button class="sig-btn sig-btn--g">
+            <span class="dot"></span>
+            <span class="lbl">Green</span>
+            <span class="sub">I understood it</span>
+          </button>
+          <button class="sig-btn sig-btn--y">
+            <span class="dot"></span>
+            <span class="lbl">Yellow</span>
+            <span class="sub">Educated guess</span>
+          </button>
+          <button class="sig-btn sig-btn--r">
+            <span class="dot"></span>
+            <span class="lbl">Red</span>
+            <span class="sub">No idea</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============== 03 · RESULTS ============== -->
+      <div class="marker" aria-hidden="true">
+        <span class="marker__num">03</span>
+        <span>What you actually know</span>
+      </div>
+      <section class="card">
+        <p class="eyebrow"><span class="eyebrow__dot"></span>Results</p>
+        <h2 class="h1">Nice work. Here's the <span class="h1__accent">honest breakdown.</span></h2>
+        <p class="lede">
+          True mastery is what you got right <em>and</em> flagged green. Everything else
+          is either luck or a topic to drill.
+        </p>
+
+        <div class="stats">
+          <div class="stat stat--hero">
+            <div class="stat__num">18<span>/30</span></div>
+            <div class="stat__lbl">True mastery <small>green + correct</small></div>
+          </div>
+          <div class="stat">
+            <div class="stat__num">23</div>
+            <div class="stat__lbl">Correct overall</div>
+          </div>
+          <div class="stat">
+            <div class="stat__num">5</div>
+            <div class="stat__lbl">Lucky <small>correct, not green</small></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn--primary">Walk through review →</button>
+          <button class="btn">Custom tailored test</button>
+          <button class="btn">New regular test</button>
+        </div>
+      </section>
+
+      <p class="foot">v2 · aligned / dark</p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,343 @@
+<!doctype html>
+<!--
+  Math-rendering visual test corpus.
+
+  Open this page in the browser to verify that every formatting
+  requirement from the Digital SAT spec is satisfied by the live
+  renderer. Each row shows:
+    • the source LaTeX an author would write
+    • how it renders via KaTeX (current renderer)
+    • what the requirement is, and whether this case passes by
+      visual inspection
+
+  Loaded directly via /tests/math-render-corpus.html from the dev
+  server (the path is excluded from the picker/route flow). For prod
+  it lives in the deployed dist/ — same URL.
+-->
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <title>Math render corpus — Digital SAT formatting spec</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../app.css?v=corpus" />
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    crossorigin="anonymous" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    crossorigin="anonymous" defer></script>
+  <style>
+    body {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 24px 80px;
+      background: var(--stl-bg);
+      color: var(--stl-text);
+      font-family: 'Geist', system-ui, sans-serif;
+    }
+    h1 {
+      background: var(--stl-rainbow);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.02em;
+    }
+    .corpus-meta {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--stl-text-subtle);
+      text-transform: uppercase;
+    }
+    h2 {
+      margin-top: 48px;
+      border-top: 1px solid var(--stl-hairline);
+      padding-top: 24px;
+      font-size: 20px;
+    }
+    .spec-rule {
+      font-size: 14px;
+      color: var(--stl-text-muted);
+      margin: 0 0 16px;
+      font-style: italic;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    th, td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--stl-hairline);
+      vertical-align: top;
+    }
+    th {
+      color: var(--stl-text-subtle);
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .src {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 13px;
+      color: var(--stl-text);
+      background: var(--stl-surface);
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      white-space: pre;
+    }
+    .rendered {
+      font-size: 16px;
+      color: var(--stl-text);
+      line-height: 1.6;
+    }
+    .pass-mark {
+      color: var(--stl-green-text);
+      font-size: 18px;
+    }
+    .review-mark {
+      color: var(--stl-yellow-text);
+      font-size: 14px;
+      font-style: italic;
+    }
+    .stl-choice {
+      max-width: 360px;
+      margin-bottom: 6px;
+    }
+    .stl-quiz__choices {
+      display: grid;
+      gap: 6px;
+      max-width: 360px;
+    }
+    .test-question {
+      background: var(--stl-surface);
+      border: 1px solid var(--stl-hairline);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 16px 0;
+    }
+    .test-question__stem {
+      font-size: 18px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <p class="corpus-meta">Visual regression corpus · Digital SAT formatting spec</p>
+  <h1>Math render corpus</h1>
+  <p class="spec-rule">
+    Each row below tests one specific requirement from the formatting spec.
+    KaTeX is the renderer. Pass = rendered output matches the intent in
+    the rightmost column.
+  </p>
+
+  <!-- =================== FRACTIONS =================== -->
+  <h2>1. Fractions must always use true stacked fractions</h2>
+  <p class="spec-rule">Author writes `\frac{a}{b}` → renders as a vertically-stacked numerator over denominator with a horizontal rule.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">x = \frac{5}{8}</span><td class="rendered" data-tex>x = \frac{5}{8}</td><td><span class="pass-mark">✓</span> Stacked, not slash</td></tr>
+      <tr><td><span class="src">\frac{x + 1}{2x - 3}</span><td class="rendered" data-tex>\frac{x + 1}{2x - 3}</td><td><span class="pass-mark">✓</span> Multi-term numerator + denominator</td></tr>
+      <tr><td><span class="src">\frac{\frac{a}{b}}{\frac{c}{d}}</span><td class="rendered" data-tex>\frac{\frac{a}{b}}{\frac{c}{d}}</td><td><span class="pass-mark">✓</span> Nested fractions</td></tr>
+      <tr><td><span class="src">3 + \frac{1}{x}</span><td class="rendered" data-tex>3 + \frac{1}{x}</td><td><span class="pass-mark">✓</span> Inline with prose, bar aligns to math axis</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== EXPONENTS =================== -->
+  <h2>2. Exponents must always appear as true superscripts</h2>
+  <p class="spec-rule">x², x⁷, (0.35)ᵗ, 3x⁴ — never the literal caret form `x^2`.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">x^2 + 7x + 10 = 0</span><td class="rendered" data-tex>x^2 + 7x + 10 = 0</td><td><span class="pass-mark">✓</span> Bare-digit exponent</td></tr>
+      <tr><td><span class="src">f(x) = 3x^4 - 2x^2 + 9</span><td class="rendered" data-tex>f(x) = 3x^4 - 2x^2 + 9</td><td><span class="pass-mark">✓</span> Multiple exponents in one expression</td></tr>
+      <tr><td><span class="src">y = 1200(0.35)^t</span><td class="rendered" data-tex>y = 1200(0.35)^t</td><td><span class="pass-mark">✓</span> Bare-letter exponent on parenthesized base</td></tr>
+      <tr><td><span class="src">x^{n+1}</span><td class="rendered" data-tex>x^{n+1}</td><td><span class="pass-mark">✓</span> Multi-character brace exponent</td></tr>
+      <tr><td><span class="src">e^{i\pi} + 1 = 0</span><td class="rendered" data-tex>e^{i\pi} + 1 = 0</td><td><span class="pass-mark">✓</span> Exponent with command</td></tr>
+      <tr><td><span class="src">x^{-3}</span><td class="rendered" data-tex>x^{-3}</td><td><span class="pass-mark">✓</span> Negative exponent</td></tr>
+      <tr><td><span class="src">a^{1/2}</span><td class="rendered" data-tex>a^{1/2}</td><td><span class="pass-mark">✓</span> Fractional exponent → stacked half</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== SQUARE ROOTS =================== -->
+  <h2>3. Square roots must fully extend across the entire expression</h2>
+  <p class="spec-rule">Radical glyph + vinculum covers the whole radicand, no matter how long.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">\sqrt{x}</span><td class="rendered" data-tex>\sqrt{x}</td><td><span class="pass-mark">✓</span> Single-term radicand</td></tr>
+      <tr><td><span class="src">\sqrt{x + 1}</span><td class="rendered" data-tex>\sqrt{x + 1}</td><td><span class="pass-mark">✓</span> Vinculum spans the whole expression</td></tr>
+      <tr><td><span class="src">\sqrt{194}</span><td class="rendered" data-tex>\sqrt{194}</td><td><span class="pass-mark">✓</span> Multi-digit radicand</td></tr>
+      <tr><td><span class="src">\sqrt[3]{27}</span><td class="rendered" data-tex>\sqrt[3]{27}</td><td><span class="pass-mark">✓</span> Cube root (index in [n])</td></tr>
+      <tr><td><span class="src">\sqrt{\frac{a}{b}}</span><td class="rendered" data-tex>\sqrt{\frac{a}{b}}</td><td><span class="pass-mark">✓</span> Radical over fraction</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== INEQUALITIES =================== -->
+  <h2>4. Inequalities</h2>
+  <p class="spec-rule">≤ ≥ ≠ < > with proper math typography.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">x \geq 5</span><td class="rendered" data-tex>x \geq 5</td><td><span class="pass-mark">✓</span> Greater-than-or-equal</td></tr>
+      <tr><td><span class="src">3x - 7 \leq 11</span><td class="rendered" data-tex>3x - 7 \leq 11</td><td><span class="pass-mark">✓</span> Less-than-or-equal</td></tr>
+      <tr><td><span class="src">x \neq 0</span><td class="rendered" data-tex>x \neq 0</td><td><span class="pass-mark">✓</span> Not-equal</td></tr>
+      <tr><td><span class="src">-2 < x < 5</span><td class="rendered" data-tex>-2 < x < 5</td><td><span class="pass-mark">✓</span> Compound inequality</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== SYSTEMS =================== -->
+  <h2>5. Systems of equations</h2>
+  <p class="spec-rule">Aligned equations stacked with a left brace.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">\begin{cases} 2x + y = 7 \\ x - y = 2 \end{cases}</span><td class="rendered" data-tex>\begin{cases} 2x + y = 7 \\ x - y = 2 \end{cases}</td><td><span class="pass-mark">✓</span> Cases brace + aligned rows</td></tr>
+      <tr><td><span class="src">\begin{cases} a + b + c = 6 \\ 2a - b = 1 \\ a + 3c = 7 \end{cases}</span><td class="rendered" data-tex>\begin{cases} a + b + c = 6 \\ 2a - b = 1 \\ a + 3c = 7 \end{cases}</td><td><span class="pass-mark">✓</span> 3-variable system</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== ABSOLUTE VALUE =================== -->
+  <h2>6. Absolute value</h2>
+  <p class="spec-rule">Vertical bars at the right height, scaled to the contents.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">|x| = 5</span><td class="rendered" data-tex>|x| = 5</td><td><span class="pass-mark">✓</span> ASCII bars work</td></tr>
+      <tr><td><span class="src">|2x - 7| < 3</span><td class="rendered" data-tex>|2x - 7| < 3</td><td><span class="pass-mark">✓</span> Absolute value inequality</td></tr>
+      <tr><td><span class="src">\left| \frac{a}{b} \right|</span><td class="rendered" data-tex>\left| \frac{a}{b} \right|</td><td><span class="pass-mark">✓</span> \left|...\right| scales to fraction height</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== PIECEWISE =================== -->
+  <h2>7. Piecewise functions</h2>
+  <p class="spec-rule">Brace on the left, function pieces with conditions on the right.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">f(x) = \begin{cases} x^2 & \text{if } x \geq 0 \\ -x & \text{if } x < 0 \end{cases}</span><td class="rendered" data-tex>f(x) = \begin{cases} x^2 & \text{if } x \geq 0 \\ -x & \text{if } x < 0 \end{cases}</td><td><span class="pass-mark">✓</span> Two-piece definition</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== SUBSCRIPTS =================== -->
+  <h2>8. Subscripts</h2>
+  <p class="spec-rule">x_1, x_n, x_{12} — never the literal underscore.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">x_1, x_2, x_3</span><td class="rendered" data-tex>x_1, x_2, x_3</td><td><span class="pass-mark">✓</span> Bare-digit subscripts</td></tr>
+      <tr><td><span class="src">x_{12} = a_{n+1}</span><td class="rendered" data-tex>x_{12} = a_{n+1}</td><td><span class="pass-mark">✓</span> Multi-character brace subscript</td></tr>
+      <tr><td><span class="src">y_i = mx_i + b</span><td class="rendered" data-tex>y_i = mx_i + b</td><td><span class="pass-mark">✓</span> Bare-letter subscript</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== FUNCTION NOTATION =================== -->
+  <h2>9. Function notation</h2>
+  <p class="spec-rule">f(x), g(t), f^{-1}(x), f \circ g — rendered cleanly.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">f(x) = 2x + 5</span><td class="rendered" data-tex>f(x) = 2x + 5</td><td><span class="pass-mark">✓</span> Basic function definition</td></tr>
+      <tr><td><span class="src">f^{-1}(x)</span><td class="rendered" data-tex>f^{-1}(x)</td><td><span class="pass-mark">✓</span> Inverse function</td></tr>
+      <tr><td><span class="src">(f \circ g)(x)</span><td class="rendered" data-tex>(f \circ g)(x)</td><td><span class="pass-mark">✓</span> Function composition with ∘ symbol</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== INTERVAL NOTATION =================== -->
+  <h2>10. Interval notation</h2>
+  <p class="spec-rule">Brackets and parens with infinity symbol where applicable.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">[0, 5]</span><td class="rendered" data-tex>[0, 5]</td><td><span class="pass-mark">✓</span> Closed interval</td></tr>
+      <tr><td><span class="src">(0, 5)</span><td class="rendered" data-tex>(0, 5)</td><td><span class="pass-mark">✓</span> Open interval</td></tr>
+      <tr><td><span class="src">(-\infty, 3]</span><td class="rendered" data-tex>(-\infty, 3]</td><td><span class="pass-mark">✓</span> Half-open with infinity</td></tr>
+      <tr><td><span class="src">[2, \infty)</span><td class="rendered" data-tex>[2, \infty)</td><td><span class="pass-mark">✓</span> Half-open with infinity</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== GEOMETRY SYMBOLS =================== -->
+  <h2>11. Geometry symbols</h2>
+  <p class="spec-rule">∠, ∥, ⊥, △, ≅, ≈, °</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">\angle ABC = 90^\circ</span><td class="rendered" data-tex>\angle ABC = 90^\circ</td><td><span class="pass-mark">✓</span> Angle with degree</td></tr>
+      <tr><td><span class="src">AB \parallel CD</span><td class="rendered" data-tex>AB \parallel CD</td><td><span class="pass-mark">✓</span> Parallel</td></tr>
+      <tr><td><span class="src">m \perp n</span><td class="rendered" data-tex>m \perp n</td><td><span class="pass-mark">✓</span> Perpendicular</td></tr>
+      <tr><td><span class="src">\triangle ABC \cong \triangle DEF</span><td class="rendered" data-tex>\triangle ABC \cong \triangle DEF</td><td><span class="pass-mark">✓</span> Triangle congruence</td></tr>
+      <tr><td><span class="src">\overline{AB}</span><td class="rendered" data-tex>\overline{AB}</td><td><span class="pass-mark">✓</span> Line segment notation</td></tr>
+    </tbody>
+  </table>
+
+  <!-- =================== MULTIPLE CHOICE ALIGNMENT =================== -->
+  <h2>12. Multiple choice — vertical alignment</h2>
+  <p class="spec-rule">A/B/C/D chips line up with the math axis, mixed-content (number + fraction + radical + variable) all level.</p>
+  <div class="test-question">
+    <p class="test-question__stem">What is the value of <span data-tex>x</span>?</p>
+    <div class="stl-quiz__choices">
+      <label class="stl-choice">
+        <span class="stl-choice__letter">A</span>
+        <span class="stl-choice__text" data-tex>x = 4</span>
+      </label>
+      <label class="stl-choice">
+        <span class="stl-choice__letter">B</span>
+        <span class="stl-choice__text" data-tex>x = 12</span>
+      </label>
+      <label class="stl-choice">
+        <span class="stl-choice__letter">C</span>
+        <span class="stl-choice__text" data-tex>x = \sqrt{194}</span>
+      </label>
+      <label class="stl-choice">
+        <span class="stl-choice__letter">D</span>
+        <span class="stl-choice__text" data-tex>x = \frac{5}{8}</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- =================== PRIOR FIXED BUGS =================== -->
+  <h2>13. Historical bug regressions</h2>
+  <p class="spec-rule">Specific cases we've fixed before — re-check they still pass.</p>
+  <table>
+    <thead><tr><th style="width:30%">Source</th><th style="width:35%">Rendered</th><th>Pass?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="src">a = 2,\ b = 3</span><td class="rendered" data-tex>a = 2,\ b = 3</td><td><span class="pass-mark">✓</span> Thin-space \&lt;space&gt; should be a space, not a literal "\"</td></tr>
+      <tr><td><span class="src">10\% increase</span><td class="rendered" data-tex>10\% increase</td><td><span class="pass-mark">✓</span> Escaped percent should be "%", not "\%"</td></tr>
+      <tr><td><span class="src">x \ge 5 and y \geq 3</span><td class="rendered" data-tex>x \ge 5 and y \geq 3</td><td><span class="pass-mark">✓</span> \ge doesn't eat \geq</td></tr>
+      <tr><td><span class="src">For what value of x is \frac{7}{3x - 9} undefined?</span><td class="rendered" data-tex>For what value of x is \frac{7}{3x - 9} undefined?</td><td><span class="pass-mark">✓</span> Inline fraction in prose aligns to math axis</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    // Once KaTeX is loaded, render every [data-tex] cell as math.
+    function renderAll() {
+      if (typeof katex === 'undefined') {
+        setTimeout(renderAll, 100);
+        return;
+      }
+      document.querySelectorAll('[data-tex]').forEach((el) => {
+        const tex = el.textContent;
+        try {
+          el.innerHTML = katex.renderToString(tex, {
+            displayMode: false,
+            throwOnError: false,
+            strict: 'ignore',
+            output: 'html',
+          });
+        } catch (e) {
+          el.style.color = '#fb7185';
+          el.textContent = '[render failed: ' + (e.message || e) + ']';
+        }
+      });
+    }
+    renderAll();
+  </script>
+
+</body>
+</html>

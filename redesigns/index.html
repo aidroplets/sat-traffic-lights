@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SAT Traffic Lights — redesigns · pick one</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <style>
+      :root {
+        --bg: #0a0b10;
+        --panel: #14151c;
+        --panel-2: #1a1c25;
+        --br: rgba(255, 255, 255, 0.08);
+        --txt: #f0f2f7;
+        --txt-2: #a8b0c4;
+        --txt-3: #6b7288;
+        --accent: #8b86ff;
+      }
+      * { box-sizing: border-box; }
+      html { scrollbar-gutter: stable; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--txt);
+        font-family: "Geist", -apple-system, system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.55;
+        letter-spacing: -0.01em;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: inherit; }
+      .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+      header { padding-bottom: 24px; border-bottom: 1px solid var(--br); margin-bottom: 32px; }
+      h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        margin: 0 0 8px;
+      }
+      .sub { color: var(--txt-2); margin: 0; max-width: 64ch; }
+      .crumb {
+        font-family: "Geist Mono", monospace;
+        font-size: 11px;
+        color: var(--txt-3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 14px;
+      }
+      .crumb a { color: var(--txt-3); border-bottom: 1px solid var(--br); }
+      .crumb a:hover { color: var(--txt); }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--br);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .card__head {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--br);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .card__label {
+        font-family: "Geist Mono", monospace;
+        font-size: 11px;
+        color: var(--txt-3);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 2px;
+      }
+      .card__title { font-size: 16px; font-weight: 600; margin: 0; }
+      .card__title em { font-style: italic; color: var(--accent); font-weight: 600; }
+      .card__desc {
+        color: var(--txt-2);
+        font-size: 13px;
+        margin: 6px 0 0;
+        max-width: 64ch;
+      }
+      .open-btn {
+        background: var(--panel-2);
+        border: 1px solid var(--br);
+        color: var(--txt);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 7px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background 150ms ease;
+        white-space: nowrap;
+      }
+      .open-btn:hover { background: rgba(255, 255, 255, 0.06); }
+      .frame-wrap {
+        position: relative;
+        background: #fff;
+        height: 600px;
+        overflow: hidden;
+      }
+      iframe {
+        border: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      footer {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px solid var(--br);
+        font-family: "Geist Mono", monospace;
+        font-size: 11px;
+        color: var(--txt-3);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <p class="crumb"><a href="../web/index.html">← back to live app</a></p>
+        <h1>SAT Traffic Lights — 3 directions</h1>
+        <p class="sub">
+          Same approach as the homepage roundup. Each frame stacks the three key
+          screens (score → quiz → results) so you can read the full aesthetic in
+          one scroll. The original is preserved for reference.
+        </p>
+      </header>
+
+      <div class="grid">
+        <article class="card">
+          <div class="card__head">
+            <div>
+              <p class="card__label">v1 · editorial / warm</p>
+              <h2 class="card__title">Editorial &mdash; <em>Instrument Serif on cream</em></h2>
+              <p class="card__desc">
+                Direct port of the homepage v3-soft language: cream canvas, double-bezel cards,
+                terracotta accent, JetBrains Mono labels, fluid-island nav. The traffic-light
+                signal becomes a dot-and-italic-label pairing. Reads like a paperback workbook.
+              </p>
+            </div>
+            <a class="open-btn" href="v1-editorial/index.html" target="_blank" rel="noopener">Open ↗</a>
+          </div>
+          <div class="frame-wrap"><iframe src="v1-editorial/index.html" loading="lazy" title="v1 editorial"></iframe></div>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <div>
+              <p class="card__label">v2 · aligned / dark</p>
+              <h2 class="card__title">Aligned &mdash; <em>Geist + lavender</em></h2>
+              <p class="card__desc">
+                Mirrors the shipping homepage (v4-refined). Same dark canvas, same single
+                calibrated lavender accent, same Geist + Geist Mono pairing, same card chrome.
+                Picking this means SAT Traffic Lights and aidroplets.com share a visual system.
+              </p>
+            </div>
+            <a class="open-btn" href="v2-aligned/index.html" target="_blank" rel="noopener">Open ↗</a>
+          </div>
+          <div class="frame-wrap"><iframe src="v2-aligned/index.html" loading="lazy" title="v2 aligned"></iframe></div>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <div>
+              <p class="card__label">v3 · booklet</p>
+              <h2 class="card__title">Booklet &mdash; <em>printed test-prep</em></h2>
+              <p class="card__desc">
+                A deliberately different direction. Warm paper canvas, Source Serif display, ruled
+                margins, printer's-red accent, sharp 0&nbsp;px-radius corners, dashed teacher-stamp
+                signal buttons. Looks like a Princeton Review workbook rather than a SaaS app.
+              </p>
+            </div>
+            <a class="open-btn" href="v3-booklet/index.html" target="_blank" rel="noopener">Open ↗</a>
+          </div>
+          <div class="frame-wrap"><iframe src="v3-booklet/index.html" loading="lazy" title="v3 booklet"></iframe></div>
+        </article>
+
+        <article class="card">
+          <div class="card__head">
+            <div>
+              <p class="card__label">v0 · current production</p>
+              <h2 class="card__title">Original &mdash; <em>Inter on near-black with cyan</em></h2>
+              <p class="card__desc">
+                What's at <code>web/index.html</code> today. Inter, dark canvas, single cyan accent.
+                Kept here as the baseline you're choosing to keep, refine, or replace.
+              </p>
+            </div>
+            <a class="open-btn" href="v0-original/index.html" target="_blank" rel="noopener">Open ↗</a>
+          </div>
+          <div class="frame-wrap"><iframe src="v0-original/index.html" loading="lazy" title="v0 original"></iframe></div>
+        </article>
+      </div>
+
+      <footer>
+        droplets/sat-traffic-lights/redesigns · 3 directions + original · open any in a new tab to interact
+      </footer>
+    </div>
+  </body>
+</html>
